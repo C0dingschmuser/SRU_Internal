@@ -226,6 +226,7 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 									g_paintSelectedComboCountry = i;
 								}
 							}
+							ImGui::EndCombo();
 						}
 
 						if (paintTargetCountry)
@@ -261,9 +262,48 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 									g_paintSelectedComboLoyalty = i;
 								}
 							}
+							ImGui::EndCombo();
 						}
 
 						if (!customLoyalty)
+						{
+							ImGui::EndDisabled();
+						}
+
+						static bool customGround = false;
+						std::string groundText = "Unchanged";
+
+						ImGui::Checkbox("Custom Ground", &customGround);
+
+						if (!customGround)
+						{
+							ImGui::BeginDisabled();
+							g_paintSelectedComboGround = -1;
+						}
+						else
+						{
+							if (g_paintSelectedComboGround == -1)
+							{
+								g_paintSelectedComboGround = 0;
+							}
+
+							groundText = g_groundTypeList[g_paintSelectedComboGround].name;
+						}
+
+						if (ImGui::BeginCombo("##groundcombo", groundText.c_str()))
+						{
+							for (int i = 0; i < g_groundTypeList.size(); i++)
+							{
+								const bool isSelected = (g_paintSelectedComboGround == i);
+								if (ImGui::Selectable(g_groundTypeList[i].name.c_str(), isSelected))
+								{
+									g_paintSelectedComboGround = i;
+								}
+							}
+							ImGui::EndCombo();
+						}
+						
+						if (!customGround)
 						{
 							ImGui::EndDisabled();
 						}

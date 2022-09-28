@@ -197,6 +197,7 @@ namespace Base
 		extern int g_ownOtherCountryId;
 		extern int g_paintSelectedComboCountry;
 		extern int g_paintSelectedComboLoyalty;
+		extern int g_paintSelectedComboGround;
 		extern int g_surrenderEventCount;
 		
 		extern bool g_addOk;

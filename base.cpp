@@ -57,6 +57,7 @@ int Base::SRU_Data::g_ownOtherCountryId = -1;
 int Base::SRU_Data::g_surrenderEventCount = 0;
 int Base::SRU_Data::g_paintSelectedComboCountry = 0;
 int Base::SRU_Data::g_paintSelectedComboLoyalty = 0;
+int Base::SRU_Data::g_paintSelectedComboGround = -1;
 
 byte Base::SRU_Data::Asm::g_currentHexSupply = 0;
 byte Base::SRU_Data::Asm::g_lowestHexSupply = 0x1A;
