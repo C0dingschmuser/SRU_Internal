@@ -1,0 +1,59 @@
+#include "base.h"
+
+HWND GetProcessWindow();
+BOOL CALLBACK EnumWindowsCallback(HWND hwnd, LPARAM lParam);
+
+void Base::Hooks::Init(bool full = false)
+{
+    kiero::Status::Enum res = kiero::init(kiero::RenderType::D3D9);
+
+    if (res == kiero::Status::Success)
+    {
+        kiero::bind(42, (void**)&Base::Data::oEndScene, Hooks::hkEndScene);
+        kiero::bind(16, (void**)&Base::Data::oReset, Hooks::hkReset);
+    }
+
+    if (full)
+    {
+        GetProcessWindow();
+        Data::oWndProc = (WndProc_t)SetWindowLongPtr(Base::Data::window, WNDPROC_INDEX, (LONG_PTR)Base::Hooks::WndProc);
+    }
+}
+
+BOOL CALLBACK EnumWindowsCallback(HWND handle, LPARAM lParam)
+{
+    DWORD wndProcId = 0;
+    GetWindowThreadProcessId(handle, &wndProcId);
+
+    if (GetCurrentProcessId() != wndProcId)
+        return TRUE;
+
+    Base::Data::window = handle;
+    return FALSE;
+}
+
+HWND GetProcessWindow()
+{
+    Base::Data::window = (HWND)NULL;
+    EnumWindows(EnumWindowsCallback, NULL);
+	
+    return Base::Data::window;
+}
+
+bool Base::Hooks::FunctionHook(void* toHook, void* targetFunc, int len)
+{
+	DWORD curProtection;
+	VirtualProtect(toHook, len, PAGE_EXECUTE_READWRITE, &curProtection);
+
+	memset(toHook, 0x90, len);
+
+	uintptr_t relativeAddress = (uintptr_t)targetFunc - (uintptr_t)toHook - 5;
+
+	*(BYTE*)toHook = 0xE9;
+	*(DWORD*)((DWORD)toHook + 0x1) = relativeAddress;
+
+	DWORD temp;
+	VirtualProtect(toHook, len, curProtection, &temp);
+
+	return true;
+}
