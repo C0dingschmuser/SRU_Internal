@@ -205,6 +205,7 @@ namespace Base
 		extern bool g_uiHexSupplySet;
 		extern bool g_mouseClicked;
 		extern bool g_paintActive;
+		extern bool g_paintEnabled;
 
 		extern uint8_t g_currentHexSupply;
 

@@ -26,6 +26,11 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 
 	if (Data::ShowMenu)
 	{
+		if (g_paintEnabled && !g_paintActive)
+		{
+			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 255, 0, 255));
+		}
+		
 		if (g_paintActive)
 		{
 			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
@@ -33,7 +38,7 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 
 		ImGui::Begin("SRU Internal", 0, ImGuiWindowFlags_NoResize);
 
-		if (g_paintActive)
+		if (g_paintActive || g_paintEnabled)
 		{
 			ImGui::PopStyleColor();
 		}
@@ -203,7 +208,9 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 					ImGui::SameLine();
 					ImGui::BeginChild("##MapPainting");
 					{
-						ImGui::Text("Painting - Hold ctrl to paint");
+						ImGui::Text("Painting");
+						ImGui::Text("- Capslock to enable");
+						ImGui::Text("- Hold ctrl to paint");
 
 						static bool paintTargetCountry = true;
 

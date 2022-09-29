@@ -347,6 +347,24 @@ int FindNewCountryOwner(uint8_t oldOwner, bool weak)
     else return 0;
 }
 
+void PaintMap(uintptr_t* mouseHoverHex)
+{
+    if (mouseHoverHex == nullptr) return;
+    if (*mouseHoverHex == 0) return;
+	
+    uint8_t* ownerPtr = (uint8_t*)(uintptr_t*)(*mouseHoverHex);
+    uint8_t* loyaltyPtr = (uint8_t*)(uintptr_t*)(*mouseHoverHex + Offsets::hexLoyalty);
+    uint8_t* groundPtr = (uint8_t*)(uintptr_t*)(*mouseHoverHex + Offsets::hexGround);
+
+    *ownerPtr = (uint8_t)g_countryList[g_paintSelectedComboCountry].oId;
+    *loyaltyPtr = (uint8_t)g_countryList[g_paintSelectedComboLoyalty].oId;
+
+    if (g_paintSelectedComboGround > -1)
+    {
+        *groundPtr = (uint8_t)g_groundTypeList[g_paintSelectedComboGround].id;
+    }
+}
+
 DWORD WINAPI dllThread(HMODULE hModule) {
     DWORD dwExit = 0;
 
@@ -373,7 +391,7 @@ DWORD WINAPI dllThread(HMODULE hModule) {
     uintptr_t* gameStatePtr = (uintptr_t*)(g_base + Offsets::gameState);
     uintptr_t* clickedCountryPtr = (uintptr_t*)(g_base + Offsets::clickedCountry);
     uintptr_t* selectedUnitsCounterPtr = (uintptr_t*)(g_base + Offsets::selectedUnitsCounter);
-    uintptr_t* mouseHoverHexPtr = (uintptr_t*)(g_base + Offsets::mouseHoverHex);
+    uintptr_t* mouseHoverHex = (uintptr_t*)(g_base + Offsets::mouseHoverHex);
 
     int currentClickedCountry = 0;
 
@@ -398,11 +416,25 @@ DWORD WINAPI dllThread(HMODULE hModule) {
             }
             else g_shift = false;
 
-            if (GetAsyncKeyState(VK_LCONTROL) & 0x8000)
+            if ((GetKeyState(VK_CAPITAL) & 0x0001) != 0)
             {
-                g_paintActive = true;
+                g_paintEnabled = true;
             }
-            else g_paintActive = false;
+            else g_paintEnabled = false;
+
+            if (g_paintEnabled)
+            {
+                if (GetAsyncKeyState(VK_LCONTROL) & 0x8000)
+                {
+                    g_paintActive = true;
+                }
+                else g_paintActive = false;
+
+                if (g_paintActive)
+                {
+                    PaintMap(mouseHoverHex);
+                }
+            }
 
             CheckCurrentCountry(currentClickedCountry, clickedCountryPtr);
             Base::SRU_Data::HandleFreezes();

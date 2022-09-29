@@ -67,6 +67,7 @@ bool Base::SRU_Data::g_shift = false;
 bool Base::SRU_Data::g_uiHexSupplySet = false;
 bool Base::SRU_Data::g_mouseClicked = false;
 bool Base::SRU_Data::g_paintActive = false;
+bool Base::SRU_Data::g_paintEnabled = false;
 
 uint8_t Base::SRU_Data::g_currentHexSupply = 0;
 
