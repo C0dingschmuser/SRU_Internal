@@ -7,6 +7,7 @@ void Base::Execute::SetupFunctions()
 	using namespace Base::Execute;
 
 	diplFunc = (_DiplFunc)(Base::SRU_Data::g_base + Offsets::diplFunc);
+	spawnUnitFunc = (_SpawnUnitFunc)(Base::SRU_Data::g_base + Offsets::unitFunc);
 }
 
 void Base::Execute::AnnexCountry(int from, int to)
@@ -48,6 +49,47 @@ void Base::Execute::SetRelations(int relationType, uintptr_t country, uintptr_t 
 	}
 
 	std::cout << std::hex << relationAddr << " " << relationType << std::endl;
+}
+
+void Base::Execute::SpawnUnit(int unitDesign, int amount, uintptr_t country, bool reserve, uint16_t xPos, uint16_t yPos)
+{
+	if (reserve)
+	{
+		int* buffer = (int*)malloc(512 * sizeof(int));
+		buffer[0] = 0x20300;
+		buffer[1] = 14;
+		buffer[2] = 0;
+		buffer[3] = 0x70000;
+		buffer[4] = 0x20300;
+		buffer[5] = 14;
+
+		for (int i = 6; i < 511; i++)
+		{
+			buffer[i] = 0;
+		}
+
+		int* buffer2 = (int*)malloc(512 * sizeof(int));
+
+		for (int i = 0; i < 511; i++)
+		{
+			buffer2[i] = 0;
+		}
+
+		spawnUnitFunc((int)country, (int)buffer, unitDesign, amount, 0x590070, 1, 0, buffer2, 0);
+	}
+	else
+	{
+		int* buffer2 = (int*)malloc(512 * sizeof(int));
+
+		for (int i = 0; i < 511; i++)
+		{
+			buffer2[i] = 0;
+		}
+
+		const uint32_t posData = ((yPos << 16) | ((xPos) & 0xffff));
+
+		spawnUnitFunc((int)country, (int)xPos, unitDesign, amount, posData, 0, 0, buffer2, 1);
+	}
 }
 
 int Base::Execute::ExecuteTreaty(int diplTreatyIndex)

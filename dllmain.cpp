@@ -111,11 +111,10 @@ void SetupSessionPtr(uintptr_t base = NULL)
 
     Base::Execute::SetupFunctions();
 
-    //Base::SRU_Data::LoadDefaultUnits();
+    Base::SRU_Data::LoadDefaultUnits();
     Base::SRU_Data::LoadUnits();
     Base::SRU_Data::LoadDiplTreaties();
-    Base::SRU_Data::LoadGroundTypes();
-	
+    Base::SRU_Data::LoadGroundTypes();	
 }
 
 void CheckGameState(uintptr_t* gameStatePtr)
@@ -399,7 +398,7 @@ DWORD WINAPI dllThread(HMODULE hModule) {
 
     Base::Execute::SetupFunctions();
     Base::SRU_Data::Hooks::SetupFunctionHooks();
-
+    
     bool finish = false;
     while (!finish) {
         if (GetAsyncKeyState(VK_END) & 1) {

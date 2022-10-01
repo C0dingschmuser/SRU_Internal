@@ -199,118 +199,41 @@ void Base::SRU_Data::LoadDefaultUnits()
 {
 	g_defaultUnitList.clear();
 
-	uintptr_t offset = g_base + Offsets::allDefaultUnitsMiddle[0];
-	std::vector<unsigned int> mlp = Offsets::allDefaultUnitsMiddleMLP;
-
-	if (!Base::Utils::CanReadPtr((uintptr_t*)offset))
-	{
-		offset = g_base + Offsets::allDefaultUnitsMiddle[1];
-		mlp = Offsets::allDefaultUnitsMiddleMLP1;
-
-		if (!Base::Utils::CanReadPtr((uintptr_t*)offset))
-		{
-			offset = g_base + Offsets::allDefaultUnitsMiddle[2];
-			mlp = Offsets::allDefaultUnitsMiddleMLP2;
-
-			if (!Base::Utils::CanReadPtr((uintptr_t*)offset))
-			{
-				return;
-			}
-		}
-	}
-
-	uintptr_t start = Base::Utils::PointerChain(offset, mlp);
+	uintptr_t start = *(uintptr_t*)(g_base + Offsets::allDefaultUnitStart);
 	uintptr_t main = start;
 
-	int threshold = 0;
-	int maxThreshold = 25;
+	MEMORY_BASIC_INFORMATION mBI, mBINext;
+	
+	VirtualQuery((LPVOID)start, &mBI, sizeof(MEMORY_BASIC_INFORMATION));
 
-	bool ok = true;
-	while (ok)
+	DWORD firstOldProtect = NULL;
+	VirtualProtect((LPVOID)start, mBI.RegionSize, PAGE_EXECUTE_READWRITE, &firstOldProtect);
+
+	uintptr_t regionBase = (uintptr_t)mBI.BaseAddress;
+	uintptr_t regionMax = (uintptr_t)mBI.BaseAddress + mBI.RegionSize;
+
+	int count = 0;
+	for (uintptr_t i = start; i < regionMax; i += Offsets::unitDefaultNext)
 	{
-		uintptr_t* currentAddr = (uintptr_t*)main;
+		uintptr_t* check1 = (uintptr_t*)i;
+		uintptr_t* check2 = (uintptr_t*)(i + Offsets::unitDefaultCheck1);
+		uintptr_t* check3 = (uintptr_t*)(i + Offsets::unitDefaultCheck2);
 
-		bool fail = false;
-
-		if (Base::Utils::CanReadPtr(currentAddr))
+		if (Base::Utils::CanReadPtr(check1) &&
+			Base::Utils::CanReadPtr(check2) &&
+			Base::Utils::CanReadPtr(check3))
 		{
-			uintptr_t* check1 = (uintptr_t*)((uintptr_t)currentAddr + 0xB8);
-			uintptr_t* check2 = (uintptr_t*)((uintptr_t)currentAddr + 0x68);
-
-			if (Base::Utils::CanReadPtr(check1) && Base::Utils::CanReadPtr(check2))
+			if (*check1 > 0 && *check2 == 0 && *check3 > 0)
 			{
-				if (*check1 > 0 && *check2 > 0)
-				{
-					threshold = 0;
 
-					std::shared_ptr<UnitDefault> newDefaultUnit(new UnitDefault);
-					newDefaultUnit->Init((uintptr_t)currentAddr);
+				std::shared_ptr<UnitDefault> newDefaultUnit(new UnitDefault);
+				newDefaultUnit->spawnId = count;
+				newDefaultUnit->Init(i);
 
-					g_defaultUnitList.push_back(newDefaultUnit);
-				}
-				else fail = true;
-			}
-			else fail = true;
-		}
-		else fail = true;
-
-		if (fail)
-		{
-			threshold++;
-			if (threshold > maxThreshold)
-			{
-				ok = false;
+				g_defaultUnitList.push_back(newDefaultUnit);
 			}
 		}
-
-		main -= 0x100;
-	}
-
-	threshold = 0;
-	main = start + 0x100;
-
-	ok = true;
-	while (ok)
-	{
-		uintptr_t* currentAddr = (uintptr_t*)main;
-
-		bool fail = false;
-
-		if (Base::Utils::CanReadPtr(currentAddr))
-		{
-			uintptr_t* check1 = (uintptr_t*)((uintptr_t)currentAddr + 0xB8);
-			uintptr_t* check2 = (uintptr_t*)((uintptr_t)currentAddr + 0x68);
-
-			if (Base::Utils::CanReadPtr(check1) && Base::Utils::CanReadPtr(check2))
-			{
-				if (*check1 > 0 && *check2 > 0)
-				{
-					threshold = 0;
-
-					char* namePtr = (char*)*currentAddr;
-					std::cout << std::hex << currentAddr << " " << namePtr << std::endl;
-
-					std::shared_ptr<UnitDefault> newDefaultUnit(new UnitDefault);
-					newDefaultUnit->Init((uintptr_t)currentAddr);
-
-					g_defaultUnitList.push_back(newDefaultUnit);
-				}
-				else fail = true;
-			}
-			else fail = true;
-		}
-		else fail = true;
-
-		if (fail)
-		{
-			threshold++;
-			if (threshold > maxThreshold)
-			{
-				ok = false;
-			}
-		}
-
-		main += 0x100;
+		count++;
 	}
 
 	//auto clockEnd = std::chrono::high_resolution_clock::now();

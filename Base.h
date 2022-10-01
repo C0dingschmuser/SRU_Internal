@@ -126,6 +126,7 @@ namespace Base
 
 			uintptr_t base = 0;
 			int countryId;
+			int spawnId = -1;
 
 			std::shared_ptr<IntValue> moveSpeed;
 			std::shared_ptr<IntValue> spotting;
@@ -229,12 +230,16 @@ namespace Base
 	namespace Execute
 	{
 		typedef void(__thiscall* _DiplFunc)(void*, char);
+		typedef int(__fastcall* _SpawnUnitFunc)(int, int, int, int, int, int, int, int*, int);
+		
 		extern _DiplFunc diplFunc;
+		extern _SpawnUnitFunc spawnUnitFunc;
 
 		void SetupFunctions();
 		void AnnexCountry(int from, int to);
 		void RespawnCountry(int from, int to, int type);
 		void SetRelations(int relationType, uintptr_t country, uintptr_t oCountry, int add);
+		void SpawnUnit(int unitDesign, int amount, uintptr_t country, bool reserve = true, uint16_t xPos = 0, uint16_t yPos = 0);
 		int ExecuteTreaty(int diplTreatyIndex);
 	}
 
@@ -243,6 +248,7 @@ namespace Base
 		void DrawSelectedCountryText(Base::SRU_Data::Country* cc, const char* text);
 		void DrawCountry(Base::SRU_Data::Country* cc);
 		void DrawCountryDiplo(Base::SRU_Data::Country* cc, int& treatyMsg);
+		void DrawMap(Base::SRU_Data::Country* cc);
 	}
 
 	namespace Hooks

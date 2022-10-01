@@ -11,6 +11,12 @@ void Base::SRU_Data::UnitDefault::Init(uintptr_t base)
 		return;
 	}
 
+	if (this->spawnId == -1)
+	{
+		uintptr_t start = *(uintptr_t*)(g_base + Offsets::allDefaultUnitStart);
+		this->spawnId = (base - start) / Offsets::unitDefaultNext;
+	}
+
 	std::shared_ptr<IntValue> moveSpeed(new IntValue);
 	moveSpeed->valPtr = (uintptr_t*)(base + Offsets::unitDefaultMoveSpeed);
 	this->moveSpeed = moveSpeed;
