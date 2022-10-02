@@ -17,6 +17,9 @@ void Base::SRU_Data::UnitDefault::Init(uintptr_t base)
 		this->spawnId = (base - start) / Offsets::unitDefaultNext;
 	}
 
+	char* namePtr = (char*)*(uintptr_t*)base;
+	this->name = std::string(namePtr);
+
 	std::shared_ptr<IntValue> moveSpeed(new IntValue);
 	moveSpeed->valPtr = (uintptr_t*)(base + Offsets::unitDefaultMoveSpeed);
 	this->moveSpeed = moveSpeed;
@@ -78,6 +81,32 @@ void Base::SRU_Data::UnitDefault::Init(uintptr_t base)
 	this->buildTime = buildTime;
 }
 
+bool Base::SRU_Data::UnitDefault::HasUser(int countryId)
+{
+	bool contains = false;
+
+	for (int i = 0; i < this->countryIds.size(); i++)
+	{
+		if (this->countryIds[i] == countryId)
+		{
+			contains = true;
+			break;
+		}
+	}
+
+	return contains;
+}
+
+void Base::SRU_Data::UnitDefault::AddUserCountry(int countryId)
+{
+	bool contains = Base::SRU_Data::UnitDefault::HasUser(countryId);
+
+	if (!contains)
+	{
+		this->countryIds.push_back(countryId);
+	}
+}
+
 void Base::SRU_Data::Unit::Init(uintptr_t base)
 {
 	this->base = base;
@@ -87,6 +116,6 @@ void Base::SRU_Data::Unit::Init(uintptr_t base)
 	this->countryID = *country;
 
 	uintptr_t defaultBase = (uintptr_t) * (uintptr_t*)(base + Offsets::unitDefaultValues);
-	this->defaultStats = Base::SRU_Data::FindUnitDefault(defaultBase);
-	this->defaultStats->countryId = *country;
+	this->defaultStats = Base::SRU_Data::FindUnitDefault(defaultBase, this->countryID);
+	this->defaultStats->AddUserCountry(this->countryID);
 }

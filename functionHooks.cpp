@@ -258,6 +258,16 @@ void AddSurrenderEvent(int from, int to)
     }
 }
 
+void __declspec(naked) HandleNewPos()
+{
+    __asm {
+		mov [esp + 0xBC4], ecx
+		mov [g_xPos], eax
+		mov [g_yPos], ecx
+		jmp [g_posChangedJmpBackAddr]
+    }
+}
+
 void Base::SRU_Data::Hooks::SetupFunctionHooks()
 {
     //Hook selected units
@@ -286,4 +296,11 @@ void Base::SRU_Data::Hooks::SetupFunctionHooks()
     hookAddress = g_base + Offsets::mouseClickHook;
     Base::SRU_Data::Hooks::g_mouseClickedJmpBackAddr = hookAddress + hookLength;
     Base::Hooks::FunctionHook((void*)hookAddress, HandleMouseClick, hookLength);
+
+	//Hook position
+
+    hookLength = 7;
+    hookAddress = g_base + Offsets::posHook;
+	Base::SRU_Data::Hooks::g_posChangedJmpBackAddr = hookAddress + hookLength;
+	Base::Hooks::FunctionHook((void*)hookAddress, HandleNewPos, hookLength);
 }

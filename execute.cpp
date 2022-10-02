@@ -1,6 +1,7 @@
 #include "base.h"
 
 Base::Execute::_DiplFunc Base::Execute::diplFunc = 0;
+Base::Execute::_SpawnUnitFunc Base::Execute::spawnUnitFunc = 0;
 
 void Base::Execute::SetupFunctions()
 {
@@ -53,9 +54,16 @@ void Base::Execute::SetRelations(int relationType, uintptr_t country, uintptr_t 
 
 void Base::Execute::SpawnUnit(int unitDesign, int amount, uintptr_t country, bool reserve, uint16_t xPos, uint16_t yPos)
 {
+	int minAm = 512;
+
+	if (amount >= minAm)
+	{
+		minAm += 4 * amount;
+	}
+
 	if (reserve)
 	{
-		int* buffer = (int*)malloc(512 * sizeof(int));
+		int* buffer = (int*)malloc(minAm * sizeof(int));
 		buffer[0] = 0x20300;
 		buffer[1] = 14;
 		buffer[2] = 0;
@@ -63,14 +71,14 @@ void Base::Execute::SpawnUnit(int unitDesign, int amount, uintptr_t country, boo
 		buffer[4] = 0x20300;
 		buffer[5] = 14;
 
-		for (int i = 6; i < 511; i++)
+		for (int i = 6; i < minAm; i++)
 		{
 			buffer[i] = 0;
 		}
 
-		int* buffer2 = (int*)malloc(512 * sizeof(int));
+		int* buffer2 = (int*)malloc(minAm * sizeof(int));
 
-		for (int i = 0; i < 511; i++)
+		for (int i = 0; i < minAm; i++)
 		{
 			buffer2[i] = 0;
 		}
@@ -79,9 +87,9 @@ void Base::Execute::SpawnUnit(int unitDesign, int amount, uintptr_t country, boo
 	}
 	else
 	{
-		int* buffer2 = (int*)malloc(512 * sizeof(int));
+		int* buffer2 = (int*)malloc(minAm * sizeof(int));
 
-		for (int i = 0; i < 511; i++)
+		for (int i = 0; i < minAm; i++)
 		{
 			buffer2[i] = 0;
 		}

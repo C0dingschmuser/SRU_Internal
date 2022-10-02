@@ -51,6 +51,9 @@ void SetupSessionPtr(uintptr_t base = NULL)
 
     g_ownCountryBase = *(uintptr_t*)(base + Offsets::ownCountry);
 
+	//reset so re-initialized for new country
+    Base::SRU_Data::g_unitSpawnSelectedUnitDesign = -1;
+
     Base::SRU_Data::g_countryList.clear();
 
     bool end = false;
@@ -115,6 +118,8 @@ void SetupSessionPtr(uintptr_t base = NULL)
     Base::SRU_Data::LoadUnits();
     Base::SRU_Data::LoadDiplTreaties();
     Base::SRU_Data::LoadGroundTypes();	
+
+    //Base::Execute::SpawnUnit(2304, 256, g_ownCountryBase, false, 875, 151);
 }
 
 void CheckGameState(uintptr_t* gameStatePtr)
@@ -135,7 +140,7 @@ void CheckGameState(uintptr_t* gameStatePtr)
     g_ingame = ok;
 }
 
-void CheckCurrentCountry(int &currentClickedCountry, uintptr_t* clickedCountryPtr)
+void CheckCurrentCountry(uintptr_t* clickedCountryPtr)
 {
     if (g_mouseClicked && g_ingame && g_countryList.size() > 0)
     {
@@ -150,12 +155,13 @@ void CheckCurrentCountry(int &currentClickedCountry, uintptr_t* clickedCountryPt
 
                 //if (*clickedCountryPtr == g_lastClickedTargetCountry) return;
 
-                currentClickedCountry = *clickedCountryPtr;
+                g_clickedCountry = *clickedCountryPtr;
 
                 for (int i = 0; i < g_countryList.size(); i++)
                 {
-                    if (currentClickedCountry == g_countryList[i].id)
+                    if (g_clickedCountry == g_countryList[i].id)
                     {
+                        g_clickedCountryRaw = i;
                         clickedCountry = &g_countryList[i];
                         break;
                     }
@@ -163,6 +169,7 @@ void CheckCurrentCountry(int &currentClickedCountry, uintptr_t* clickedCountryPt
 
                 if (!clickedCountry)
                 {
+                    g_clickedCountryRaw = 0;
                     clickedCountry = &g_countryList[0];
                 }
             }
@@ -392,8 +399,6 @@ DWORD WINAPI dllThread(HMODULE hModule) {
     uintptr_t* selectedUnitsCounterPtr = (uintptr_t*)(g_base + Offsets::selectedUnitsCounter);
     uintptr_t* mouseHoverHex = (uintptr_t*)(g_base + Offsets::mouseHoverHex);
 
-    int currentClickedCountry = 0;
-
     //Main loop
 
     Base::Execute::SetupFunctions();
@@ -435,7 +440,7 @@ DWORD WINAPI dllThread(HMODULE hModule) {
                 }
             }
 
-            CheckCurrentCountry(currentClickedCountry, clickedCountryPtr);
+            CheckCurrentCountry(clickedCountryPtr);
             Base::SRU_Data::HandleFreezes();
             Base::SRU_Data::CheckSelectedUnits(selectedUnitsCounterPtr);
             ProcessAiSurrenders();

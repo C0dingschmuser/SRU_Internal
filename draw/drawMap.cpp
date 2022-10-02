@@ -129,7 +129,7 @@ void Base::Draw::DrawMap(Base::SRU_Data::Country* cc)
 
 		static bool paintTargetCountry = true;
 
-		ImGui::Checkbox("Paint Target Country", &paintTargetCountry);
+		ImGui::Checkbox("Paint target country", &paintTargetCountry);
 
 		if (paintTargetCountry)
 		{

@@ -28,6 +28,9 @@ int Base::SRU_Data::Asm::g_aiSurrSize;
 int Base::SRU_Data::Asm::g_aiSurrFrom;
 int Base::SRU_Data::Asm::g_aiSurrTo;
 
+int Base::SRU_Data::Asm::g_xPos = 0;
+int Base::SRU_Data::Asm::g_yPos = 0;
+
 uintptr_t Base::SRU_Data::Asm::g_aiSurrBase;
 
 //SRU Vars
@@ -45,19 +48,26 @@ uintptr_t Base::SRU_Data::Hooks::g_selectedJmpBackAddr = 0;
 uintptr_t Base::SRU_Data::Hooks::g_hexSupplyJmpBackAddr = 0;
 uintptr_t Base::SRU_Data::Hooks::g_aiSurrenderJmpBackAddr = 0;
 uintptr_t Base::SRU_Data::Hooks::g_mouseClickedJmpBackAddr = 0;
+uintptr_t Base::SRU_Data::Hooks::g_posChangedJmpBackAddr = 0;
 
 uintptr_t Base::SRU_Data::g_nextUnitEntity = 0;
 
 int Base::SRU_Data::g_unitEntityCountSelected = 0;
+int Base::SRU_Data::g_clickedCountry = 0;
+int Base::SRU_Data::g_clickedCountryRaw = 0;
 int Base::SRU_Data::g_selectedTargetCountry = 1;
 int Base::SRU_Data::g_lastClickedCountry = 0;
 int Base::SRU_Data::g_lastClickedTargetCountry = 0;
 int Base::SRU_Data::g_ownCountryId = -1;
 int Base::SRU_Data::g_ownOtherCountryId = -1;
 int Base::SRU_Data::g_surrenderEventCount = 0;
+
 int Base::SRU_Data::g_paintSelectedComboCountry = 0;
 int Base::SRU_Data::g_paintSelectedComboLoyalty = 0;
 int Base::SRU_Data::g_paintSelectedComboGround = -1;
+
+int Base::SRU_Data::g_unitSpawnSelectedCountry = 0;
+int Base::SRU_Data::g_unitSpawnSelectedUnitDesign = -1;
 
 byte Base::SRU_Data::Asm::g_currentHexSupply = 0;
 byte Base::SRU_Data::Asm::g_lowestHexSupply = 0x1A;
@@ -84,7 +94,7 @@ uintptr_t* g_currentCountryNamePtr = 0;
 
 //Functions
 
-std::shared_ptr<Base::SRU_Data::UnitDefault> Base::SRU_Data::FindUnitDefault(uintptr_t base)
+std::shared_ptr<Base::SRU_Data::UnitDefault> Base::SRU_Data::FindUnitDefault(uintptr_t base, int countryId)
 {
 	for (int i = 0; i < g_defaultUnitList.size(); i++)
 	{
@@ -184,6 +194,20 @@ void Base::SRU_Data::LoadUnits()
 			else ok = false;
 		}
 		else ok = false;
+	}
+
+	//Sort by name (insertion sort)
+	for (int i = 1; i < g_defaultUnitList.size(); i++)
+	{
+		std::shared_ptr<UnitDefault> tmp = g_defaultUnitList[i];
+		int n = i - 1;
+
+		while (n >= 0 && g_defaultUnitList[n]->name > tmp->name)
+		{
+			g_defaultUnitList[n + 1] = g_defaultUnitList[n];
+			n--;
+		}
+		g_defaultUnitList[n + 1] = tmp;
 	}
 
 	auto clockEnd = std::chrono::high_resolution_clock::now();

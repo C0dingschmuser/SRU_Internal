@@ -33,6 +33,7 @@ namespace Base
 			extern uintptr_t g_hexSupplyJmpBackAddr;
 			extern uintptr_t g_aiSurrenderJmpBackAddr;
 			extern uintptr_t g_mouseClickedJmpBackAddr;
+			extern uintptr_t g_posChangedJmpBackAddr;
 
 			void SetupFunctionHooks();
 		}
@@ -43,6 +44,7 @@ namespace Base
 			extern byte g_lowestHexSupply, g_currentHexSupply;
 			extern unsigned int g_aiSurrReg0, g_aiSurrReg1, g_aiSurrReg2, g_aiSurrReg3, g_aiSurrReg4, g_aiSurrReg5;
 			extern int g_aiSurrSize, g_aiSurrFrom, g_aiSurrTo;
+			extern int g_xPos, g_yPos;
 			extern uintptr_t g_aiSurrBase;
 		}
 
@@ -123,10 +125,15 @@ namespace Base
 		struct UnitDefault
 		{
 			void Init(uintptr_t base);
+			void AddUserCountry(int countryId);
+			bool HasUser(int countryId);
 
+			std::string name;
 			uintptr_t base = 0;
-			int countryId;
+			std::vector<int> countryIds;
 			int spawnId = -1;
+
+			bool flag = false; //internal use
 
 			std::shared_ptr<IntValue> moveSpeed;
 			std::shared_ptr<IntValue> spotting;
@@ -191,14 +198,21 @@ namespace Base
 		extern uintptr_t g_nextUnitEntity;
 		
 		extern int g_unitEntityCountSelected;
+		extern int g_clickedCountry;
+		extern int g_clickedCountryRaw;
 		extern int g_selectedTargetCountry;
 		extern int g_lastClickedCountry;
 		extern int g_lastClickedTargetCountry;
 		extern int g_ownCountryId;
 		extern int g_ownOtherCountryId;
+		
 		extern int g_paintSelectedComboCountry;
 		extern int g_paintSelectedComboLoyalty;
 		extern int g_paintSelectedComboGround;
+		
+		extern int g_unitSpawnSelectedCountry; 
+		extern int g_unitSpawnSelectedUnitDesign;
+
 		extern int g_surrenderEventCount;
 		
 		extern bool g_addOk;
@@ -217,7 +231,7 @@ namespace Base
 		extern bool g_ingame;
 		extern uintptr_t g_base;
 
-		std::shared_ptr<UnitDefault> FindUnitDefault(uintptr_t base);
+		std::shared_ptr<UnitDefault> FindUnitDefault(uintptr_t base, int countryId);
 		uint32_t ResolveUnitCountry(uint32_t country, int dir = 0);
 		void HandleFreezes();
 		void CheckSelectedUnits(uintptr_t* selectedUnitsCounter);
