@@ -155,6 +155,11 @@ void CheckCurrentCountry(uintptr_t* clickedCountryPtr)
 
                 //if (*clickedCountryPtr == g_lastClickedTargetCountry) return;
 
+                if (g_clickedCountry != *clickedCountryPtr)
+                {
+                    g_unitSpawnSelectedUnitDesign = -1;
+                }
+
                 g_clickedCountry = *clickedCountryPtr;
 
                 for (int i = 0; i < g_countryList.size(); i++)
@@ -172,6 +177,7 @@ void CheckCurrentCountry(uintptr_t* clickedCountryPtr)
                     g_clickedCountryRaw = 0;
                     clickedCountry = &g_countryList[0];
                 }
+
             }
             else
             {
@@ -448,171 +454,6 @@ DWORD WINAPI dllThread(HMODULE hModule) {
 
         Sleep(25);
     }
-
-    /*
-    SuspendThreads(true);
-
-    procMin = 0x15000000;
-	
-    if (procMax > 0x50000000) {
-        procMax = 0x50000000;
-    }
-
-    int start = 0;
-    int unitsFound = 0;
-
-    std::vector<Unit> unitList;
-
-    auto clockStart = std::chrono::high_resolution_clock::now();
-
-    DWORD firstOldProtect = NULL;
-
-    while (procMin < procMax) {
-        VirtualQuery((LPVOID)procMin, &mBI, sizeof(MEMORY_BASIC_INFORMATION));
-
-        if (!(mBI.Protect & PAGE_GUARD) && mBI.Protect != PAGE_NOACCESS && mBI.State == MEM_COMMIT &&
-            mBI.Protect & (PAGE_READONLY | PAGE_EXECUTE_READ | PAGE_READWRITE | PAGE_EXECUTE_READWRITE)) {
-			
-            VirtualProtect((LPVOID)procMin, mBI.RegionSize, PAGE_EXECUTE_READWRITE, &firstOldProtect);  // Set page to read/write/execute
-
-            uintptr_t regionBase = (uintptr_t)mBI.BaseAddress;
-            uintptr_t regionMax = (uintptr_t)mBI.BaseAddress + mBI.RegionSize;
-
-            int incr = 0x04;
-            bool unitFound = false;
-
-            for (uintptr_t n = regionBase; n < regionMax; n += incr) {
-                uintptr_t* addressPtr = (uintptr_t*)n;
-                uint32_t val = 0;
-				
-                if (n > regionMax) {
-                    break;
-                }
-
-                bool no = false;
-
-                if (addressPtr != nullptr) {
-					
-                    //std::cout << "trying read: " << std::hex << addressPtr << std::endl;
-
-                    val = *addressPtr;
-					
-                    if (val) {
-                        if (val == 0x16BC580) {
-
-                            uintptr_t* testValidPtr = (uintptr_t*)(n + 0x14);
-                            //std::cout << "trying read country: " << std::hex << addressPtr << " " << testValidPtr << " ";
-                            if (testValidPtr != nullptr) {
-                                //std::cout << "ok1 ";
-                                if (*testValidPtr < 0x80000000 && *testValidPtr > 0) {
-                                    unitsFound++;
-
-                                    //std::cout << " ok2";
-
-                                    Unit unit{};
-                                    unit.base = n;
-                                    unit.country = testValidPtr;
-                                    unit.countryID = resolveUnitCountry(*unit.country);
-                                    unitList.push_back(unit);
-                                }
-                            }
-                            //std::cout << std::endl;
-
-                            if (!unitFound) {
-                                //Erste Einheit im Block gefunden, von jetzt an in 0x1C8 steps
-                                unitFound = true;
-                                incr = 0x1C8;
-                            }
-                        }
-                        else {
-                            no = true;
-                        }
-                    }
-                }
-                else {
-                    no = true;
-                }
-
-                if (no) {
-                    if (unitFound) {
-                        n -= 0x1C8;
-                        incr = 0x04;
-                        unitFound = false;
-                    }
-                }
-            }
-
-            VirtualProtect((LPVOID)procMin, mBI.RegionSize, firstOldProtect, NULL);
-        }
-        procMin += mBI.RegionSize;
-    }
-
-    SuspendThreads(false);
-
-	auto clockEnd = std::chrono::high_resolution_clock::now();
-
-	std::cout << "Total units found: " << std::dec << unitList.size() << std::endl;
-	
-    std::chrono::duration<double, std::milli> fp_ms = clockEnd - clockStart;
-
-    std::cout << "Elapsed Time: " << fp_ms.count() << std::endl;
-
-    bool finish = false;
-    bool malen = false;
-
-    int malValue = 0xF38585;
-
-    /*while (!finish) {
-        if (GetAsyncKeyState(VK_END) & 1) {
-            finish = true;
-        }
-		
-        if (GetAsyncKeyState(VK_CONTROL) & 1) {
-            if (!malen) {
-                malen = true;
-            }
-            else {
-                malen = false;
-            }
-
-            std::cout << "Malen: " << malen << std::endl;
-        }
-
-		uintptr_t* hoverKachel = (uintptr_t*)(base + 0x1033C88);
-
-        //std::cout << std::hex << hoverKachel << std::endl;
-
-        if (malen) {
-            if (CanReadPtr(hoverKachel)) {
-                uintptr_t* hoverKachelValue = (uintptr_t*)*hoverKachel;
-				if (hoverKachelValue != nullptr) {
-                    if (*hoverKachelValue != malValue) {
-                        std::cout << std::hex << *hoverKachel << " " << *hoverKachelValue << std::endl;
-
-                        *hoverKachelValue = malValue;
-                    }
-                }
-            }
-        }
-
-        Sleep(5);
-    }*/
-	
-
-    /*Sleep(2500);
-
-    for (int i = 0; i < unitList.size(); i++) {
-        if (unitList[i].countryID == 133) {
-            uintptr_t* countryValue = (uintptr_t*)unitList[i].country;
-			
-            if (CanReadPtr(countryValue)) {
-                if (*countryValue < 0x80000000 && *countryValue > 0) {
-                    *countryValue = resolveUnitCountry(28, 1);
-                }
-                //std::cout << std::hex << countryValue << " " <<  *countryValue << std::endl;
-            }
-        }
-    }*/
 
     fclose(f);
     fclose(stdout);

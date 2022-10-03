@@ -210,7 +210,7 @@ int FindOldCountryOwner2(uint8_t newOwner, bool weak)
 
 void AddSurrenderEvent(int from, int to)
 {
-    if (!g_ingame || from > 255 || to > 255) return;
+    if (!g_ingame || from > 255 || to > 255 || !g_aiColony) return;
 
     int last = g_surrenderEventCount - 1;
     if (last < 0)
@@ -222,6 +222,7 @@ void AddSurrenderEvent(int from, int to)
 
     if (from == 0)
     {
+		//Causes crashing (prob. takes too long)
         //from = FindOldCountryOwner2(to, false);
     }
 
@@ -303,4 +304,32 @@ void Base::SRU_Data::Hooks::SetupFunctionHooks()
     hookAddress = g_base + Offsets::posHook;
 	Base::SRU_Data::Hooks::g_posChangedJmpBackAddr = hookAddress + hookLength;
 	Base::Hooks::FunctionHook((void*)hookAddress, HandleNewPos, hookLength);
+}
+
+void Base::SRU_Data::Hooks::SetProductionAdjustment(bool enabled)
+{
+	uintptr_t addr = g_base + Offsets::productionAdjustmentHook;
+
+    DWORD curProtection;
+    VirtualProtect((void*)addr, 7, PAGE_EXECUTE_READWRITE, &curProtection);
+
+    std::vector<unsigned char> buffer;
+
+    std::copy(Offsets::productionAdjustmentDefault.begin(),
+        Offsets::productionAdjustmentDefault.end(), std::back_inserter(buffer));
+
+    if (enabled)
+    {
+        buffer.clear();
+        std::copy(Offsets::productionAdjustmentNew.begin(),
+            Offsets::productionAdjustmentNew.end(), std::back_inserter(buffer));
+    }
+
+    for (int i = 0; i < buffer.size(); i++)
+    {
+        *(BYTE*)(addr + i) = buffer[i];
+    }
+
+    DWORD temp;
+    VirtualProtect((void*)addr, 7, curProtection, &temp);
 }

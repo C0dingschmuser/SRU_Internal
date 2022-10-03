@@ -36,6 +36,7 @@ namespace Base
 			extern uintptr_t g_posChangedJmpBackAddr;
 
 			void SetupFunctionHooks();
+			void SetProductionAdjustment(bool enabled);
 		}
 
 		namespace Asm
@@ -210,11 +211,11 @@ namespace Base
 		extern int g_paintSelectedComboLoyalty;
 		extern int g_paintSelectedComboGround;
 		
-		extern int g_unitSpawnSelectedCountry; 
 		extern int g_unitSpawnSelectedUnitDesign;
 
 		extern int g_surrenderEventCount;
 		
+		extern bool g_ingame;
 		extern bool g_addOk;
 		extern bool g_shift;
 		extern bool g_uiHexSupplySet;
@@ -222,13 +223,17 @@ namespace Base
 		extern bool g_paintActive;
 		extern bool g_paintEnabled;
 
+		extern bool g_productionAdjustment;
+		extern bool g_aiColony;
+
 		extern uint8_t g_currentHexSupply;
 
 		extern Country* clickedCountry;
 		extern Country* clickedTargetCountry;
-		extern uintptr_t* g_clickedHexPtr;
+		extern Country* unitSpawnCountry;
 
-		extern bool g_ingame;
+		extern uintptr_t* g_clickedHexPtr;
+		
 		extern uintptr_t g_base;
 
 		std::shared_ptr<UnitDefault> FindUnitDefault(uintptr_t base, int countryId);
@@ -253,7 +258,7 @@ namespace Base
 		void AnnexCountry(int from, int to);
 		void RespawnCountry(int from, int to, int type);
 		void SetRelations(int relationType, uintptr_t country, uintptr_t oCountry, int add);
-		void SpawnUnit(int unitDesign, int amount, uintptr_t country, bool reserve = true, uint16_t xPos = 0, uint16_t yPos = 0);
+		void SpawnUnit(int unitDesign, int amount, uintptr_t country, int spread = 1, bool reserve = true, uint16_t xPos = 0, uint16_t yPos = 0);
 		int ExecuteTreaty(int diplTreatyIndex);
 	}
 
@@ -263,6 +268,7 @@ namespace Base
 		void DrawCountry(Base::SRU_Data::Country* cc);
 		void DrawCountryDiplo(Base::SRU_Data::Country* cc, int& treatyMsg);
 		void DrawMap(Base::SRU_Data::Country* cc);
+		void DrawUnit(Base::SRU_Data::Country* cc);
 	}
 
 	namespace Hooks

@@ -52,7 +52,7 @@ void Base::Execute::SetRelations(int relationType, uintptr_t country, uintptr_t 
 	std::cout << std::hex << relationAddr << " " << relationType << std::endl;
 }
 
-void Base::Execute::SpawnUnit(int unitDesign, int amount, uintptr_t country, bool reserve, uint16_t xPos, uint16_t yPos)
+void Base::Execute::SpawnUnit(int unitDesign, int amount, uintptr_t country, int spread, bool reserve, uint16_t xPos, uint16_t yPos)
 {
 	int minAm = 512;
 
@@ -94,9 +94,27 @@ void Base::Execute::SpawnUnit(int unitDesign, int amount, uintptr_t country, boo
 			buffer2[i] = 0;
 		}
 
-		const uint32_t posData = ((yPos << 16) | ((xPos) & 0xffff));
+		if (spread > amount)
+		{
+			spread = amount;
+		}
 
-		spawnUnitFunc((int)country, (int)xPos, unitDesign, amount, posData, 0, 0, buffer2, 1);
+		//force disable
+		spread = 1;
+		std::cout << std::hex << country << " " << unitDesign << std::endl;
+
+		if (spread == 1)
+		{
+			const uint32_t posData = ((yPos << 16) | ((xPos) & 0xffff));
+
+			spawnUnitFunc((int)country, (int)xPos, unitDesign, amount, posData, 0, 0, buffer2, 1);
+		}
+		else
+		{
+			//Spread units evenly around center point
+
+			
+		}
 	}
 }
 

@@ -66,7 +66,6 @@ int Base::SRU_Data::g_paintSelectedComboCountry = 0;
 int Base::SRU_Data::g_paintSelectedComboLoyalty = 0;
 int Base::SRU_Data::g_paintSelectedComboGround = -1;
 
-int Base::SRU_Data::g_unitSpawnSelectedCountry = 0;
 int Base::SRU_Data::g_unitSpawnSelectedUnitDesign = -1;
 
 byte Base::SRU_Data::Asm::g_currentHexSupply = 0;
@@ -79,10 +78,15 @@ bool Base::SRU_Data::g_mouseClicked = false;
 bool Base::SRU_Data::g_paintActive = false;
 bool Base::SRU_Data::g_paintEnabled = false;
 
+bool Base::SRU_Data::g_productionAdjustment = false;
+bool Base::SRU_Data::g_aiColony = true;
+
 uint8_t Base::SRU_Data::g_currentHexSupply = 0;
 
 Base::SRU_Data::Country* Base::SRU_Data::clickedCountry = nullptr;
 Base::SRU_Data::Country* Base::SRU_Data::clickedTargetCountry = nullptr;
+Base::SRU_Data::Country* Base::SRU_Data::unitSpawnCountry = nullptr;
+
 uintptr_t* Base::SRU_Data::g_clickedHexPtr = nullptr;
 
 //SRU Game Vars
