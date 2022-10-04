@@ -72,6 +72,16 @@ namespace Base
 
 		extern uintptr_t g_ownCountryBase;
 
+		struct Resource
+		{
+			std::string name;
+
+			std::shared_ptr<FloatValue> stock;
+			std::shared_ptr<FloatValue> production;
+			std::shared_ptr<FloatValue> productionCost;
+			std::shared_ptr<FloatValue> marketPrice; //shared between countries
+		};
+
 		struct Country
 		{
 			void Init(uintptr_t base);
@@ -96,16 +106,7 @@ namespace Base
 			std::shared_ptr<FloatValue> worldMarketOpinion;
 			std::shared_ptr<FloatValue> treatyIntegrity;
 
-			std::shared_ptr<FloatValue> agricultureStock;
-			std::shared_ptr<FloatValue> rubberStock;
-			std::shared_ptr<FloatValue> timberStock;
-			std::shared_ptr<FloatValue> petroleumStock;
-			std::shared_ptr<FloatValue> coalStock;
-			std::shared_ptr<FloatValue> metalStock;
-			std::shared_ptr<FloatValue> uranStock;
-			std::shared_ptr<FloatValue> consumerStock;
-			std::shared_ptr<FloatValue> industryStock;
-			std::shared_ptr<FloatValue> militaryStock;
+			std::vector<Resource> resources;
 
 			std::shared_ptr<FloatValue> healthcareState;
 			std::shared_ptr<FloatValue> educationState;

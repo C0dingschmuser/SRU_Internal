@@ -74,55 +74,87 @@ void Base::SRU_Data::Country::Init(uintptr_t base)
 	//--- Goods -------------------------------------------------------------------------
 	//-----------------------------------------------------------------------------------
 
-	std::shared_ptr<FloatValue> agricultureStock(new FloatValue);
-	agricultureStock->valPtr = (float*)(base + Offsets::countryAgricultureStock);
-	this->agricultureStock = agricultureStock;
-	this->allFloatValues.push_back(agricultureStock);
+	bool copy = true;
+	if (g_countryList.size() == 0)
+	{
+		copy = false;
+	}
 
-	std::shared_ptr<FloatValue> rubberStock(new FloatValue);
-	rubberStock->valPtr = (float*)(base + Offsets::countryRubberStock);
-	this->rubberStock = rubberStock;
-	this->allFloatValues.push_back(rubberStock);
+	for (int i = 0; i < 11; i++)
+	{
+		std::string name;
 
-	std::shared_ptr<FloatValue> timberStock(new FloatValue);
-	timberStock->valPtr = (float*)(base + Offsets::countryTimberStock);
-	this->timberStock = timberStock;
-	this->allFloatValues.push_back(timberStock);
+		switch (i)
+		{
+		default:
+		case 0:
+			name = "Agriculture";
+			break;
+		case 1:
+			name = "Rubber";
+			break;
+		case 2:
+			name = "Timber";
+			break;
+		case 3:
+			name = "Petroleum";
+			break;
+		case 4:
+			name = "Coal";
+			break;
+		case 5:
+			name = "Metal";
+			break;
+		case 6:
+			name = "Uran";
+			break;
+		case 7:
+			name = "Electricity";
+			break;
+		case 8:
+			name = "Consumer";
+			break;
+		case 9:
+			name = "Industry";
+			break;
+		case 10:
+			name = "Military";
+			break;
+		}
+		
+		Resource res;
+		res.name = name;
+		
+		std::shared_ptr<FloatValue> stock(new FloatValue);
+		stock->valPtr = (float*)(base + Offsets::countryGoodsStart + (Offsets::countryGoodsDiff * i));
+		res.stock = stock;
 
-	std::shared_ptr<FloatValue> petroleumStock(new FloatValue);
-	petroleumStock->valPtr = (float*)(base + Offsets::countryPetroleumStock);
-	this->petroleumStock = petroleumStock;
-	this->allFloatValues.push_back(petroleumStock);
+		std::shared_ptr<FloatValue> production(new FloatValue);
+		production->valPtr = (float*)(base + Offsets::countryGoodsStart + (Offsets::countryGoodsDiff * i) + Offsets::goodsProduction);
+		res.production = production;
 
-	std::shared_ptr<FloatValue> coalStock(new FloatValue);
-	coalStock->valPtr = (float*)(base + Offsets::countryCoalStock);
-	this->coalStock = coalStock;
-	this->allFloatValues.push_back(coalStock);
+		std::shared_ptr<FloatValue> productionCost(new FloatValue);
+		productionCost->valPtr = (float*)(base + Offsets::countryGoodsStart + (Offsets::countryGoodsDiff * i) + Offsets::goodsProductionCost);
+		res.productionCost = productionCost;
 
-	std::shared_ptr<FloatValue> metalStock(new FloatValue);
-	metalStock->valPtr = (float*)(base + Offsets::countryMetalStock);
-	this->metalStock = metalStock;
-	this->allFloatValues.push_back(metalStock);
+		if (copy)
+		{
+			//copy market price obj from first country in list
+			res.marketPrice = g_countryList[0].resources[i].marketPrice;
+		}
+		else
+		{
+			//create new market price obj
+			std::shared_ptr<FloatValue> marketPrice(new FloatValue);
+			
+			uintptr_t priceBase = *(uintptr_t*)(g_base + Offsets::goodsMarketBase);
+			
+			marketPrice->valPtr = (float*)(priceBase + Offsets::goodsMarketStart + (Offsets::goodsMarketDiff * i));
+			res.marketPrice = marketPrice;
+		}
 
-	std::shared_ptr<FloatValue> uranStock(new FloatValue);
-	uranStock->valPtr = (float*)(base + Offsets::countryUranStock);
-	this->uranStock = uranStock;
-	this->allFloatValues.push_back(uranStock);
-
-	std::shared_ptr<FloatValue> consumerStock(new FloatValue);
-	consumerStock->valPtr = (float*)(base + Offsets::countryConsumerStock);
-	this->consumerStock = consumerStock;
-	this->allFloatValues.push_back(consumerStock);
-
-	std::shared_ptr<FloatValue> industryStock(new FloatValue);
-	industryStock->valPtr = (float*)(base + Offsets::countryIndustryStock);
-	this->industryStock = industryStock;
-	this->allFloatValues.push_back(industryStock);
-
-	std::shared_ptr<FloatValue> militaryStock(new FloatValue);
-	militaryStock->valPtr = (float*)(base + Offsets::countryMilitaryStock);
-	this->militaryStock = militaryStock;
-	this->allFloatValues.push_back(militaryStock);
+		this->resources.push_back(res);
+	}
 
 	//-----------------------------------------------------------------------------------
 	//--- State -------------------------------------------------------------------------

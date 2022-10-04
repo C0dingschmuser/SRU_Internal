@@ -125,144 +125,65 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 	ImGui::Separator();
 	ImGui::Text("Goods");
 
-	//Agriculture
+	for (int i = 0; i < cc->resources.size(); i++)
+	{
+		std::string name = cc->resources[i].name;
+		if (ImGui::TreeNode(name.c_str()))
+		{
+			//Stock
+			if (ImGui::Checkbox(std::string("###cb" + name + "stock").c_str(), &cc->resources[i].stock->freeze))
+			{
+				cc->resources[i].stock->freezeVal = *cc->resources[i].stock->valPtr;
+			}
+			ImGui::SameLine();
+			if (ImGui::InputFloat("Stock", cc->resources[i].stock->valPtr, 10000.0f, 0.0f, "%.1f"))
+			{
+				float val = *cc->resources[i].stock->valPtr;
+				*cc->resources[i].stock->valPtr = std::clamp(val, 0.0f, FLT_MAX);
+				cc->resources[i].stock->freezeVal = *cc->resources[i].stock->valPtr;
+			}
+			
+			//Production
+			if (ImGui::Checkbox(std::string("###cb" + name + "production").c_str(), &cc->resources[i].production->freeze))
+			{
+				cc->resources[i].production->freezeVal = *cc->resources[i].production->valPtr;
+			}
+			ImGui::SameLine();
+			if (ImGui::InputFloat("Production", cc->resources[i].production->valPtr, 100000.0f, 0.0f, "%.1f"))
+			{
+				float val = *cc->resources[i].production->valPtr;
+				*cc->resources[i].production->valPtr = std::clamp(val, 0.0f, FLT_MAX);
+				cc->resources[i].production->freezeVal = *cc->resources[i].production->valPtr;
+			}
 
-	if (ImGui::Checkbox("###cb_agriculture", &cc->agricultureStock->freeze))
-	{
-		cc->agricultureStock->freezeVal = *cc->agricultureStock->valPtr;
-	}
-	ImGui::SameLine();
-	if (ImGui::InputFloat("Agriculture stock", cc->agricultureStock->valPtr, 10000.0f, 0.0f, "%.1f"))
-	{
-		float val = *cc->agricultureStock->valPtr;
-		*cc->agricultureStock->valPtr = std::clamp(val, 0.0f, 999999999.0f);
-		cc->agricultureStock->freezeVal = *cc->agricultureStock->valPtr;
-	}
+			//Production cost
+			if (ImGui::Checkbox(std::string("###cb" + name + "productioncost").c_str(), &cc->resources[i].productionCost->freeze))
+			{
+				cc->resources[i].productionCost->freezeVal = *cc->resources[i].productionCost->valPtr;
+			}
+			ImGui::SameLine();
+			if (ImGui::InputFloat("Production cost", cc->resources[i].productionCost->valPtr, 10000.0f, 0.0f, "%.1f"))
+			{
+				float val = *cc->resources[i].productionCost->valPtr;
+				*cc->resources[i].productionCost->valPtr = std::clamp(val, 0.0f, FLT_MAX);
+				cc->resources[i].productionCost->freezeVal = *cc->resources[i].productionCost->valPtr;
+			}
 
-	//Rubber
+			//Market price
+			if (ImGui::Checkbox(std::string("###cb" + name + "marketprice").c_str(), &cc->resources[i].marketPrice->freeze))
+			{
+				cc->resources[i].marketPrice->freezeVal = *cc->resources[i].marketPrice->valPtr;
+			}
+			ImGui::SameLine();
+			if (ImGui::InputFloat("Market price", cc->resources[i].marketPrice->valPtr, 10000.0f, 0.0f, "%.1f"))
+			{
+				float val = *cc->resources[i].marketPrice->valPtr;
+				*cc->resources[i].marketPrice->valPtr = std::clamp(val, 0.0f, FLT_MAX);
+				cc->resources[i].marketPrice->freezeVal = *cc->resources[i].marketPrice->valPtr;
+			}
 
-	if (ImGui::Checkbox("###cb_rubber", &cc->rubberStock->freeze))
-	{
-		cc->rubberStock->freezeVal = *cc->rubberStock->valPtr;
-	}
-	ImGui::SameLine();
-	if (ImGui::InputFloat("Rubber stock", cc->rubberStock->valPtr, 10000.0f, 0.0f, "%.1f"))
-	{
-		float val = *cc->rubberStock->valPtr;
-		*cc->rubberStock->valPtr = std::clamp(val, 0.0f, 999999999.0f);
-		cc->rubberStock->freezeVal = *cc->rubberStock->valPtr;
-	}
-
-	//Timber
-
-	if (ImGui::Checkbox("###cb_timber", &cc->timberStock->freeze))
-	{
-		cc->timberStock->freezeVal = *cc->timberStock->valPtr;
-	}
-	ImGui::SameLine();
-	if (ImGui::InputFloat("Timber stock", cc->timberStock->valPtr, 10000.0f, 0.0f, "%.1f"))
-	{
-		float val = *cc->timberStock->valPtr;
-		*cc->timberStock->valPtr = std::clamp(val, 0.0f, 999999999.0f);
-		cc->timberStock->freezeVal = *cc->timberStock->valPtr;
-	}
-
-	//Petroleum
-
-	if (ImGui::Checkbox("###cb_petroleum", &cc->petroleumStock->freeze))
-	{
-		cc->petroleumStock->freezeVal = *cc->petroleumStock->valPtr;
-	}
-	ImGui::SameLine();
-	if (ImGui::InputFloat("Petroleum stock", cc->petroleumStock->valPtr, 10000.0f, 0.0f, "%.1f"))
-	{
-		float val = *cc->petroleumStock->valPtr;
-		*cc->petroleumStock->valPtr = std::clamp(val, 0.0f, 999999999.0f);
-		cc->petroleumStock->freezeVal = *cc->petroleumStock->valPtr;
-	}
-
-	//Coal
-
-	if (ImGui::Checkbox("###cb_coal", &cc->coalStock->freeze))
-	{
-		cc->coalStock->freezeVal = *cc->coalStock->valPtr;
-	}
-	ImGui::SameLine();
-	if (ImGui::InputFloat("Coal stock", cc->coalStock->valPtr, 10000.0f, 0.0f, "%.1f"))
-	{
-		float val = *cc->coalStock->valPtr;
-		*cc->coalStock->valPtr = std::clamp(val, 0.0f, 999999999.0f);
-		cc->coalStock->freezeVal = *cc->coalStock->valPtr;
-	}
-
-	//Metal
-
-	if (ImGui::Checkbox("###cb_metal", &cc->metalStock->freeze))
-	{
-		cc->metalStock->freezeVal = *cc->metalStock->valPtr;
-	}
-	ImGui::SameLine();
-	if (ImGui::InputFloat("Metal stock", cc->metalStock->valPtr, 10000.0f, 0.0f, "%.1f"))
-	{
-		float val = *cc->metalStock->valPtr;
-		*cc->metalStock->valPtr = std::clamp(val, 0.0f, 999999999.0f);
-		cc->metalStock->freezeVal = *cc->metalStock->valPtr;
-	}
-
-	//Uran
-
-	if (ImGui::Checkbox("###cb_uran", &cc->uranStock->freeze))
-	{
-		cc->uranStock->freezeVal = *cc->uranStock->valPtr;
-	}
-	ImGui::SameLine();
-	if (ImGui::InputFloat("Uran stock", cc->uranStock->valPtr, 10000.0f, 0.0f, "%.1f"))
-	{
-		float val = *cc->uranStock->valPtr;
-		*cc->uranStock->valPtr = std::clamp(val, 0.0f, 999999999.0f);
-		cc->uranStock->freezeVal = *cc->uranStock->valPtr;
-	}
-
-	//Consumer
-
-	if (ImGui::Checkbox("###cb_consumer", &cc->consumerStock->freeze))
-	{
-		cc->consumerStock->freezeVal = *cc->consumerStock->valPtr;
-	}
-	ImGui::SameLine();
-	if (ImGui::InputFloat("Consumer stock", cc->consumerStock->valPtr, 10000.0f, 0.0f, "%.1f"))
-	{
-		float val = *cc->consumerStock->valPtr;
-		*cc->consumerStock->valPtr = std::clamp(val, 0.0f, 999999999.0f);
-		cc->consumerStock->freezeVal = *cc->consumerStock->valPtr;
-	}
-
-	//Industry
-
-	if (ImGui::Checkbox("###cb_industry", &cc->industryStock->freeze))
-	{
-		cc->industryStock->freezeVal = *cc->industryStock->valPtr;
-	}
-	ImGui::SameLine();
-	if (ImGui::InputFloat("Industry stock", cc->industryStock->valPtr, 10000.0f, 0.0f, "%.1f"))
-	{
-		float val = *cc->industryStock->valPtr;
-		*cc->industryStock->valPtr = std::clamp(val, 0.0f, 999999999.0f);
-		cc->industryStock->freezeVal = *cc->industryStock->valPtr;
-	}
-
-	//Military
-
-	if (ImGui::Checkbox("###cb_military", &cc->militaryStock->freeze))
-	{
-		cc->militaryStock->freezeVal = *cc->militaryStock->valPtr;
-	}
-	ImGui::SameLine();
-	if (ImGui::InputFloat("Military stock", cc->militaryStock->valPtr, 10000.0f, 0.0f, "%.1f"))
-	{
-		float val = *cc->militaryStock->valPtr;
-		*cc->militaryStock->valPtr = std::clamp(val, 0.0f, 999999999.0f);
-		cc->militaryStock->freezeVal = *cc->militaryStock->valPtr;
+			ImGui::TreePop();
+		}
 	}
 
 	//-----------------------------------------------------------------------------------

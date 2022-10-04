@@ -7,39 +7,6 @@ using namespace Base::SRU_Data::Asm;
 
 int FindNewCountryOwner(uint8_t oldOwner, bool weak = false);
 
-/*void __declspec(naked) CheckAISurrender()
-{
-    __asm {
-        mov esi, [edx + 0x0000A2B4]
-        mov [g_aiSurrBase], eax
-        mov [g_aiSurrReg0], eax
-        mov [g_aiSurrReg1], ecx
-        mov [g_aiSurrReg2], edx
-        mov [g_aiSurrReg3], ebp
-        mov ecx, [ebp + 0x8]
-        mov edx, [ebp + 0x10]
-        mov eax, [ebp + 0x1C]
-        mov [g_aiSurrSize], ecx
-        mov [g_aiSurrFrom], edx
-        mov [g_aiSurrTo], eax
-    }
-
-    DebugLog();
-    if (g_aiSurrSize == Offsets::surrenderDiplo)
-    {
-        CheckSurrender();
-    }
-
-    __asm {
-        mov eax, g_aiSurrReg0
-        mov ecx, g_aiSurrReg1
-        mov edx, g_aiSurrReg2
-        mov ebp, g_aiSurrReg3
-        jmp [g_aiSurrenderJmpBackAddr]
-    }
-}*/
-
-
 void SetupSessionPtr(uintptr_t base = NULL)
 {
     if (base == NULL)
@@ -118,8 +85,6 @@ void SetupSessionPtr(uintptr_t base = NULL)
     Base::SRU_Data::LoadUnits();
     Base::SRU_Data::LoadDiplTreaties();
     Base::SRU_Data::LoadGroundTypes();	
-
-    //Base::Execute::SpawnUnit(2304, 256, g_ownCountryBase, false, 875, 151);
 }
 
 void CheckGameState(uintptr_t* gameStatePtr)
@@ -281,9 +246,6 @@ void ProcessAiSurrenders()
 
 int FindNewCountryOwner(uint8_t oldOwner, bool weak)
 {
-    //Could propably be improved by checking for loyalty
-    //changes before and after event and comparing instead of getting largest non-loyal region
-
     MEMORY_BASIC_INFORMATION mBI;
 
     uintptr_t startAddr = *(uintptr_t*)(g_base + Offsets::mouseHoverHex);
@@ -386,14 +348,6 @@ DWORD WINAPI dllThread(HMODULE hModule) {
     FILE* f;
 	freopen_s(&f, "CONOUT$", "w", stdout);
     freopen_s(&f, "CONIN$", "r", stdin);
-
-    SYSTEM_INFO si;
-    GetSystemInfo(&si);
-
-    uintptr_t procMin = (uintptr_t)si.lpMinimumApplicationAddress;
-    uintptr_t procMax = (uintptr_t)si.lpMaximumApplicationAddress;
-
-    MEMORY_BASIC_INFORMATION mBI, mBINext;
 
     //Ptr setup
 
