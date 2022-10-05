@@ -161,13 +161,12 @@ void Base::SRU_Data::CheckSelectedUnits(uintptr_t* selectedUnitsCounter)
 	}
 }
 
-void Base::SRU_Data::LoadUnits()
+bool LoadUnitsIntern(bool refresh, bool dir, uintptr_t start, uintptr_t middle, int istart, int iend)
 {
-	g_unitList.clear();
+	using namespace Base::SRU_Data;
+	uintptr_t main = start;
 
-	uintptr_t main = *(uintptr_t*)(g_base + Offsets::allUnitStart);
-
-	auto clockStart = std::chrono::high_resolution_clock::now();
+	std::vector<Base::SRU_Data::Unit> tmpUnits;
 
 	bool ok = true;
 	while (ok)
@@ -176,29 +175,105 @@ void Base::SRU_Data::LoadUnits()
 		uintptr_t unitDef = unitMain + Offsets::unitDefaultValues;
 		uintptr_t unitId = unitMain + Offsets::unitId;
 
-		if (*(uintptr_t*)unitId > 0)
-		{
-			if (Base::Utils::CanReadPtr((uintptr_t*)*(uintptr_t*)unitDef))
-			{
-				Unit newUnit{};
-				newUnit.Init(main);
+		bool addOk = true;
 
-				g_unitList.push_back(newUnit);
+		if (refresh)
+		{
+			for (int i = istart; i < iend; i++)
+			{
+				if (g_unitList[i].base == main)
+				{
+					addOk = false;
+					break;
+				}
 			}
 		}
 
-		uintptr_t* next = (uintptr_t*)(main + Offsets::unitNext);
-
-		if (Base::Utils::CanReadPtr(next))
+		if (addOk)
 		{
-			if (*next > 0)
+			if (*(uintptr_t*)unitId > 0)
 			{
-				main = *next;
+				if (Base::Utils::CanReadPtr((uintptr_t*)*(uintptr_t*)unitDef))
+				{
+					Unit newUnit{};
+					newUnit.Init(main);
+
+					tmpUnits.push_back(newUnit);
+				}
 			}
-			else ok = false;
+		}
+
+		uintptr_t* next = nullptr;
+		if (dir)
+		{
+			next = (uintptr_t*)(main + Offsets::unitNext);
+		}
+		else
+		{
+			next = (uintptr_t*)(main + Offsets::unitPrev);
+		}
+
+		if (next != nullptr && ok)
+		{
+			//if (Base::Utils::CanReadPtr(next))
+			{
+				if (*next > 0)
+				{
+					main = *next;
+				}
+				else ok = false;
+			}
+			//else ok = false;
 		}
 		else ok = false;
+
+		if (main == middle) ok = false;
 	}
+
+	for (int i = 0; i < tmpUnits.size(); i++)
+	{
+		g_unitList.push_back(tmpUnits[i]);
+	}
+
+	return true;
+}
+
+void Base::SRU_Data::LoadUnits(bool refresh)
+{
+	if (!refresh)
+	{ //Complete reload
+		g_unitList.clear();
+	}
+
+	uintptr_t main = *(uintptr_t*)(g_base + Offsets::allUnitStart);
+	
+	if (refresh)
+	{
+		//main = g_unitList[g_unitList.size() - 1].base;
+	}
+
+	auto clockStart = std::chrono::high_resolution_clock::now();
+
+	if (refresh && g_unitList.size() > 96)
+	{
+		int imiddle = g_unitList.size() / 2;
+		uintptr_t middle = g_unitList[imiddle].base;
+		uintptr_t end = g_unitList[g_unitList.size() - 1].base;
+
+		std::future<bool> fut1 = std::async(std::launch::async, LoadUnitsIntern, refresh, true, main, middle, 0, imiddle); //forwards
+		std::future<bool> fut2 = std::async(std::launch::async, LoadUnitsIntern, refresh, false, end, middle, imiddle, g_unitList.size()); //backwards
+
+		fut1.get();
+		fut2.get();
+	}
+	else
+	{
+		LoadUnitsIntern(refresh, true, main, 0xFFFFFFFF, 0, g_unitList.size());
+	}
+
+	auto clockEnd = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double, std::milli> fp_ms = clockEnd - clockStart;
+	std::cout << "Elapsed Time: " << fp_ms.count() << std::endl;
 
 	//Sort by name (insertion sort)
 	for (int i = 1; i < g_defaultUnitList.size(); i++)
@@ -213,11 +288,6 @@ void Base::SRU_Data::LoadUnits()
 		}
 		g_defaultUnitList[n + 1] = tmp;
 	}
-
-	auto clockEnd = std::chrono::high_resolution_clock::now();
-	std::chrono::duration<double, std::milli> fp_ms = clockEnd - clockStart;
-	std::cout << "Elapsed Time: " << fp_ms.count() << std::endl;
-
 
 	std::cout << "Total default units found: " << std::dec << g_defaultUnitList.size() << std::endl;
 	std::cout << "Total units found: " << std::dec << g_unitList.size() << std::endl;	

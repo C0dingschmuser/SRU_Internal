@@ -141,16 +141,21 @@ void Base::SRU_Data::Country::Init(uintptr_t base)
 		{
 			//copy market price obj from first country in list
 			res.marketPrice = g_countryList[0].resources[i].marketPrice;
+			res.margin = g_countryList[0].resources[i].margin;
 		}
 		else
 		{
-			//create new market price obj
+			//create new market price + margin obj
 			std::shared_ptr<FloatValue> marketPrice(new FloatValue);
-			
+			std::shared_ptr<FloatValue> margin(new FloatValue);
+
 			uintptr_t priceBase = *(uintptr_t*)(g_base + Offsets::goodsMarketBase);
 			
 			marketPrice->valPtr = (float*)(priceBase + Offsets::goodsMarketStart + (Offsets::goodsMarketDiff * i));
+			margin->valPtr = (float*)(priceBase + Offsets::goodsMarketMarginStart + (Offsets::goodsMarketDiff * i));
+
 			res.marketPrice = marketPrice;
+			res.margin = margin;
 		}
 
 		this->resources.push_back(res);
@@ -211,6 +216,43 @@ void Base::SRU_Data::Country::HandleFreeze()
 		{
 			*this->allFloatValues[i]->valPtr = 
 				this->allFloatValues[i]->freezeVal;
+		}
+	}
+
+	for (int i = 0; i < this->resources.size(); i++)
+	{
+		if (this->id < 2)
+		{ //shared between countries
+			if (this->resources[i].marketPrice->freeze)
+			{
+				*this->resources[i].marketPrice->valPtr =
+					this->resources[i].marketPrice->freezeVal;
+			}
+
+			if (this->resources[i].margin->freeze)
+			{
+				*this->resources[i].margin->valPtr =
+					this->resources[i].margin->freezeVal;		 {
+				}
+			}
+		}
+
+		if (this->resources[i].stock->freeze)
+		{
+			*this->resources[i].stock->valPtr =
+				this->resources[i].stock->freezeVal;
+		}
+
+		if (this->resources[i].production->freeze)
+		{
+			*this->resources[i].production->valPtr =
+				this->resources[i].production->freezeVal;
+		}
+
+		if (this->resources[i].productionCost->freeze)
+		{
+			*this->resources[i].productionCost->valPtr =
+				this->resources[i].productionCost->freezeVal;
 		}
 	}
 }

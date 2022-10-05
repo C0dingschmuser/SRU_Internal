@@ -182,6 +182,19 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 				cc->resources[i].marketPrice->freezeVal = *cc->resources[i].marketPrice->valPtr;
 			}
 
+			//Margin
+			if (ImGui::Checkbox(std::string("###cb" + name + "margin").c_str(), &cc->resources[i].margin->freeze))
+			{
+				cc->resources[i].margin->freezeVal = *cc->resources[i].margin->valPtr;
+			}
+			ImGui::SameLine();
+			if (ImGui::InputFloat("Margin", cc->resources[i].margin->valPtr, 10000.0f, 0.0f, "%.1f"))
+			{
+				float val = *cc->resources[i].margin->valPtr;
+				*cc->resources[i].margin->valPtr = std::clamp(val, 0.0f, FLT_MAX);
+				cc->resources[i].margin->freezeVal = *cc->resources[i].margin->valPtr;
+			}
+
 			ImGui::TreePop();
 		}
 	}

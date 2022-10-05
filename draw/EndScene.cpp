@@ -104,13 +104,91 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 				
 				if (ImGui::BeginTabItem("Settings"))
 				{
-					ImGui::Text("Minimum global hex supply");
-					ImGui::SliderByte("##hexsupplyslider", &Asm::g_lowestHexSupply, 0, 255);
-					ImGui::Checkbox("Let AI create colonies", &g_aiColony);
-					if (ImGui::Checkbox("[EXPERIMENTAL] Disable automatic production adjustment", &g_productionAdjustment))
+					ImGui::BeginChild("##settingscheats", ImVec2(225, 250));
 					{
-						Base::SRU_Data::Hooks::SetProductionAdjustment(g_productionAdjustment);
+						static bool allunit = false;
+						static bool onedaybuild = false;
+						static bool breakground = false;
+						static bool moreoffers = false;
+
+						{
+							uint8_t* ptr = (uint8_t*)(uintptr_t*)(g_base + Offsets::cheatAddr);
+							uint8_t val = *ptr;
+							uint8_t oldVal = val;
+
+							val = ~val & Offsets::allunit[0] | val & Offsets::allunit[1];
+							if (val < oldVal)
+							{ //was enabled
+								allunit = true;
+							}
+							else allunit = false;
+							val = oldVal;
+
+							val = ~val & Offsets::onedaybuild[0] | val & Offsets::onedaybuild[1];
+							if (val < oldVal)
+							{
+								//was enabled
+								onedaybuild = true;
+							}
+							else onedaybuild = false;
+							val = oldVal;
+
+							val = ~val & Offsets::breakground[0] | val & Offsets::breakground[1];
+							if (val < oldVal)
+							{
+								//was enabled
+								breakground = true;
+							}
+							else breakground = false;
+							val = oldVal;
+
+							val = ~val & Offsets::moreoffers[0] | val & Offsets::moreoffers[1];
+							if (val < oldVal)
+							{
+								//was enabled
+								moreoffers = true;
+							}
+							else moreoffers = false;
+						}
+
+						ImGui::Text("Cheats");
+						if (ImGui::Checkbox("All Units", &allunit))
+						{
+							allunit = !allunit;
+							Base::Execute::SetCheat(Offsets::allunit[0]);
+						}
+						if (ImGui::Checkbox("One day build", &onedaybuild))
+						{
+							onedaybuild = !onedaybuild;
+							Base::Execute::SetCheat(Offsets::onedaybuild[0]);
+						}
+						if (ImGui::Checkbox("One day facilities", &breakground))
+						{
+							breakground = !breakground;
+							Base::Execute::SetCheat(Offsets::breakground[0]);						 
+						}
+						if (ImGui::Checkbox("More offers", &moreoffers))
+						{
+							moreoffers = !moreoffers;
+							Base::Execute::SetCheat(Offsets::moreoffers[0]);						 
+						}
+						
+						ImGui::EndChild();
 					}
+					ImGui::SameLine();
+					ImGui::BeginChild("##settings");
+					{
+						ImGui::Text("Settings");	
+						ImGui::Text("Minimum global hex supply");
+						ImGui::SliderByte("##hexsupplyslider", &Asm::g_lowestHexSupply, 0, 255);
+						ImGui::Checkbox("Let AI create colonies", &g_aiColony);
+						if (ImGui::Checkbox("[EXPERIMENTAL]\nNo automatic production adjustment", &g_productionAdjustment))
+						{
+							Base::SRU_Data::Hooks::SetProductionAdjustment(g_productionAdjustment);
+						}
+						ImGui::EndChild();
+					}
+
 					ImGui::EndTabItem();
 				}
 

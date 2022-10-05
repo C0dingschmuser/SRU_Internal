@@ -20,6 +20,10 @@
 #include <stdint.h>
 #include <TlHelp32.h>
 #include <shellapi.h>
+#include <numeric>
+#include <future>
+#include <string>
+#include <mutex>
 
 inline void SuspendThreads(bool suspend) {
 	HANDLE hThreadSnap = INVALID_HANDLE_VALUE;

@@ -118,4 +118,24 @@ void Base::SRU_Data::Unit::Init(uintptr_t base)
 	uintptr_t defaultBase = (uintptr_t) * (uintptr_t*)(base + Offsets::unitDefaultValues);
 	this->defaultStats = Base::SRU_Data::FindUnitDefault(defaultBase, this->countryID);
 	this->defaultStats->AddUserCountry(this->countryID);
+
+	std::shared_ptr<FloatValue> fuel(new FloatValue);
+	fuel->valPtr = (float*)(base + Offsets::unitFuel);
+	this->fuel = fuel;
+
+	std::shared_ptr<FloatValue> supply(new FloatValue);
+	supply->valPtr = (float*)(base + Offsets::unitSupply);
+	this->supply = supply;
+
+	std::shared_ptr<FloatValue> health(new FloatValue);
+	health->valPtr = (float*)(base + Offsets::unitHealth);
+	this->health = health;
+
+	std::shared_ptr<FloatValue> maxHealth(new FloatValue);
+	maxHealth->valPtr = (float*)(base + Offsets::unitHealthMax);
+	this->maxHealth = maxHealth;
+
+	std::shared_ptr<FloatValue> morale(new FloatValue);
+	morale->valPtr = (float*)(base + Offsets::unitMorale);
+	this->morale = morale;
 }

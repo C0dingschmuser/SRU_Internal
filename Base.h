@@ -80,6 +80,7 @@ namespace Base
 			std::shared_ptr<FloatValue> production;
 			std::shared_ptr<FloatValue> productionCost;
 			std::shared_ptr<FloatValue> marketPrice; //shared between countries
+			std::shared_ptr<FloatValue> margin; //shared between countries
 		};
 
 		struct Country
@@ -165,6 +166,7 @@ namespace Base
 
 			std::shared_ptr<UnitDefault> defaultStats;
 			std::shared_ptr<FloatValue> fuel;
+			std::shared_ptr<FloatValue> supply;
 			std::shared_ptr<FloatValue> health;
 			std::shared_ptr<FloatValue> maxHealth;
 			std::shared_ptr<FloatValue> morale;
@@ -224,6 +226,8 @@ namespace Base
 		extern bool g_paintActive;
 		extern bool g_paintEnabled;
 
+		//extern bool 
+
 		extern bool g_productionAdjustment;
 		extern bool g_aiColony;
 
@@ -241,7 +245,7 @@ namespace Base
 		uint32_t ResolveUnitCountry(uint32_t country, int dir = 0);
 		void HandleFreezes();
 		void CheckSelectedUnits(uintptr_t* selectedUnitsCounter);
-		void LoadUnits();
+		void LoadUnits(bool refresh = false);
 		void LoadDefaultUnits();
 		void LoadDiplTreaties();
 		void LoadGroundTypes();
@@ -260,6 +264,7 @@ namespace Base
 		void RespawnCountry(int from, int to, int type);
 		void SetRelations(int relationType, uintptr_t country, uintptr_t oCountry, int add);
 		void SpawnUnit(int unitDesign, int amount, uintptr_t country, int spread = 1, bool reserve = true, uint16_t xPos = 0, uint16_t yPos = 0);
+		void SetCheat(uint8_t cheat);
 		int ExecuteTreaty(int diplTreatyIndex);
 	}
 

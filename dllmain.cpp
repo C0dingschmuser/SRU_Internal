@@ -7,6 +7,8 @@ using namespace Base::SRU_Data::Asm;
 
 int FindNewCountryOwner(uint8_t oldOwner, bool weak = false);
 
+int unitTimer = 0, unitTimerMax = 100;
+
 void SetupSessionPtr(uintptr_t base = NULL)
 {
     if (base == NULL)
@@ -85,6 +87,8 @@ void SetupSessionPtr(uintptr_t base = NULL)
     Base::SRU_Data::LoadUnits();
     Base::SRU_Data::LoadDiplTreaties();
     Base::SRU_Data::LoadGroundTypes();	
+
+    unitTimer = 0;
 }
 
 void CheckGameState(uintptr_t* gameStatePtr)
@@ -363,7 +367,7 @@ DWORD WINAPI dllThread(HMODULE hModule) {
 
     Base::Execute::SetupFunctions();
     Base::SRU_Data::Hooks::SetupFunctionHooks();
-    
+
     bool finish = false;
     while (!finish) {
         if (GetAsyncKeyState(VK_END) & 1) {
@@ -404,6 +408,13 @@ DWORD WINAPI dllThread(HMODULE hModule) {
             Base::SRU_Data::HandleFreezes();
             Base::SRU_Data::CheckSelectedUnits(selectedUnitsCounterPtr);
             ProcessAiSurrenders();
+
+            unitTimer++;
+            if (unitTimer > unitTimerMax)
+            {
+                unitTimer = 0;
+                Base::SRU_Data::LoadUnits(true);
+            }
         }
 
         Sleep(25);

@@ -118,6 +118,30 @@ void Base::Execute::SpawnUnit(int unitDesign, int amount, uintptr_t country, int
 	}
 }
 
+void Base::Execute::SetCheat(uint8_t cheat)
+{
+	using namespace Base::SRU_Data;
+
+	uint8_t* cheatBase = (uint8_t*)(uintptr_t*)(g_base + Offsets::cheatAddr);
+
+	if (cheat == Offsets::allunit[0])
+	{
+		*cheatBase = ~*cheatBase & Offsets::allunit[0] | *cheatBase & Offsets::allunit[1];
+	}
+	else if (cheat == Offsets::onedaybuild[0])
+	{
+		*cheatBase = ~*cheatBase & Offsets::onedaybuild[0] | *cheatBase & Offsets::onedaybuild[1];
+	}
+	else if (cheat == Offsets::breakground[0])
+	{
+		*cheatBase = ~*cheatBase & Offsets::breakground[0] | *cheatBase & Offsets::breakground[1];
+	}
+	else if (cheat == Offsets::moreoffers[0])
+	{
+		*cheatBase = ~*cheatBase & Offsets::moreoffers[0] | *cheatBase & Offsets::moreoffers[1];
+	}
+}
+
 int Base::Execute::ExecuteTreaty(int diplTreatyIndex)
 {
 	using namespace Base::SRU_Data;
