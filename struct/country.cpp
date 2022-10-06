@@ -122,7 +122,7 @@ void Base::SRU_Data::Country::Init(uintptr_t base)
 			break;
 		}
 		
-		Resource res;
+		Resource res{};
 		res.name = name;
 		
 		std::shared_ptr<FloatValue> stock(new FloatValue);
@@ -208,6 +208,29 @@ void Base::SRU_Data::Country::Init(uintptr_t base)
 	return;
 }
 
+void Base::SRU_Data::Country::HandleUnits()
+{
+	if (!this->invincibleUnits && !this->maxFuelUnits && !this->maxSupplyUnits && !this->maxMoraleUnits &&
+		!this->maxMoveSpeedUnitsT && !this->maxSpottingUnitsT && !this->maxMoveRangeUnitsT &&
+		!this->maxGroundAttackRangeUnitsT && !this->maxAirAttackRangeUnitsT && !this->minBuildTimeUnitsT)
+	{
+		return;
+	}
+
+	for (int i = 0; i < this->allUnits.size(); i++)
+	{
+		if (this->invincibleUnits)
+		{
+			//*allUnits[i].maxHealth->valPtr =
+			//	allUnits[i].maxHealth->origVal * 5;
+
+			*allUnits[i].health->valPtr = 
+				*allUnits[i].maxHealth->valPtr;
+			//*allUnits[i].supply->valPtr = 5000.0f;
+		}
+	}
+}
+
 void Base::SRU_Data::Country::HandleFreeze()
 {
 	for (int i = 0; i < this->allFloatValues.size(); i++)
@@ -232,8 +255,7 @@ void Base::SRU_Data::Country::HandleFreeze()
 			if (this->resources[i].margin->freeze)
 			{
 				*this->resources[i].margin->valPtr =
-					this->resources[i].margin->freezeVal;		 {
-				}
+					this->resources[i].margin->freezeVal;
 			}
 		}
 
@@ -255,4 +277,6 @@ void Base::SRU_Data::Country::HandleFreeze()
 				this->resources[i].productionCost->freezeVal;
 		}
 	}
+
+	HandleUnits();
 }

@@ -73,9 +73,32 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 						{
 							treatyMsg = 0;
 						}
-						if (ImGui::BeginTabItem("Units"))
+						if (ImGui::BeginTabItem("Unit modifiers"))
 						{
 							Draw::DrawSelectedCountryText(cc, "Selected country: %s");
+
+							if (ImGui::Checkbox("Invincible Units", &cc->invincibleUnits))
+							{
+								if (!cc->invincibleUnits)
+								{
+									//restore normal values
+									for (int i = 0; i < cc->allUnits.size(); i++)
+									{
+										*cc->allUnits[i].health->valPtr =
+											cc->allUnits[i].health->origVal;
+									}
+								}
+								else
+								{
+									//save normal values
+									for (int i = 0; i < cc->allUnits.size(); i++)
+									{
+										cc->allUnits[i].health->origVal =
+											*cc->allUnits[i].health->valPtr;
+									}
+								}
+							}
+
 							ImGui::EndTabItem();
 						}
 

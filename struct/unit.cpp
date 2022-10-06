@@ -112,12 +112,12 @@ void Base::SRU_Data::Unit::Init(uintptr_t base)
 	this->base = base;
 	this->currentHex = (uintptr_t*)(base + Offsets::unitCurrentHex);
 
-	uint8_t* country = (uint8_t*)(base + Offsets::unitCountry);
-	this->countryID = *country;
+	this->countryId = (uint8_t*)(base + Offsets::unitCountry);
+	this->oldCountry = *countryId;
 
 	uintptr_t defaultBase = (uintptr_t) * (uintptr_t*)(base + Offsets::unitDefaultValues);
-	this->defaultStats = Base::SRU_Data::FindUnitDefault(defaultBase, this->countryID);
-	this->defaultStats->AddUserCountry(this->countryID);
+	this->defaultStats = Base::SRU_Data::FindUnitDefault(defaultBase, *this->countryId);
+	this->defaultStats->AddUserCountry(*this->countryId);
 
 	std::shared_ptr<FloatValue> fuel(new FloatValue);
 	fuel->valPtr = (float*)(base + Offsets::unitFuel);

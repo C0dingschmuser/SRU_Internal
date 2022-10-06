@@ -276,7 +276,7 @@ void Base::SRU_Data::Hooks::SetupFunctionHooks()
     int hookLength = 6;
     uintptr_t hookAddress = g_base + Offsets::selectedUnitsHook;
     Base::SRU_Data::Hooks::g_selectedJmpBackAddr = hookAddress + hookLength;
-    Base::Hooks::FunctionHook((void*)hookAddress, GetSelectedUnits, hookLength);
+    //Base::Hooks::FunctionHook((void*)hookAddress, GetSelectedUnits, hookLength);
 
     //Hook hex supply
 

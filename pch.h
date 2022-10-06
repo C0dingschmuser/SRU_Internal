@@ -21,6 +21,7 @@
 #include <TlHelp32.h>
 #include <shellapi.h>
 #include <numeric>
+#include <thread>
 #include <future>
 #include <string>
 #include <mutex>

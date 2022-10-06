@@ -68,6 +68,8 @@ int Base::SRU_Data::g_paintSelectedComboGround = -1;
 
 int Base::SRU_Data::g_unitSpawnSelectedUnitDesign = -1;
 
+int Base::SRU_Data::g_unitRefreshMaxTime = 50;
+
 byte Base::SRU_Data::Asm::g_currentHexSupply = 0;
 byte Base::SRU_Data::Asm::g_lowestHexSupply = 0x1A;
 
@@ -95,6 +97,8 @@ uintptr_t Base::SRU_Data::g_base = 0;
 uintptr_t Base::SRU_Data::g_ownCountryBase = 0;
 uintptr_t g_currentCountryBase = 0;
 uintptr_t* g_currentCountryNamePtr = 0;
+
+unsigned int ntthreads = std::thread::hardware_concurrency();
 
 //Functions
 
@@ -161,12 +165,14 @@ void Base::SRU_Data::CheckSelectedUnits(uintptr_t* selectedUnitsCounter)
 	}
 }
 
-bool LoadUnitsIntern(bool refresh, bool dir, uintptr_t start, uintptr_t middle, int istart, int iend)
+std::vector<Base::SRU_Data::Unit> LoadUnitsIntern(bool refresh, bool dir, uintptr_t start, uintptr_t end, int istart, int iend)
 {
 	using namespace Base::SRU_Data;
 	uintptr_t main = start;
 
 	std::vector<Base::SRU_Data::Unit> tmpUnits;
+
+	bool lastadd = false;
 
 	bool ok = true;
 	while (ok)
@@ -174,19 +180,54 @@ bool LoadUnitsIntern(bool refresh, bool dir, uintptr_t start, uintptr_t middle, 
 		uintptr_t unitMain = main;
 		uintptr_t unitDef = unitMain + Offsets::unitDefaultValues;
 		uintptr_t unitId = unitMain + Offsets::unitId;
+		uintptr_t* unitCountry = (uintptr_t*)(unitMain + Offsets::unitCountry);
 
 		bool addOk = true;
 
 		if (refresh)
 		{
-			for (int i = istart; i < iend; i++)
+			bool inCountryList = false;
+
+			if (unitCountry != nullptr)
 			{
-				if (g_unitList[i].base == main)
+				Country* tmpCountry = nullptr;
+				for (int i = 0; i < g_countryList.size(); i++)
 				{
-					addOk = false;
-					break;
+					tmpCountry = &g_countryList[i];
+					if (tmpCountry->oId == *unitCountry)
+					{
+						break;
+					}
+				}
+
+				if (tmpCountry != nullptr)
+				{
+					int size = tmpCountry->allUnits.size();
+					for (int i = 0; i < size; i++)
+					{
+						if (tmpCountry->allUnits[i].base == unitMain)
+						{
+							inCountryList = true;
+							break;
+						}
+					}
 				}
 			}
+
+			if (!inCountryList)
+			{
+				//Not in country list -> do full check
+
+				for (int i = istart; i < iend; i++)
+				{
+					if (g_unitList[i].base == main)
+					{
+						addOk = false;
+						break;
+					}
+				}
+			}
+			else addOk = false;
 		}
 
 		if (addOk)
@@ -199,7 +240,7 @@ bool LoadUnitsIntern(bool refresh, bool dir, uintptr_t start, uintptr_t middle, 
 					newUnit.Init(main);
 
 					tmpUnits.push_back(newUnit);
-				}
+				} 
 			}
 		}
 
@@ -227,15 +268,10 @@ bool LoadUnitsIntern(bool refresh, bool dir, uintptr_t start, uintptr_t middle, 
 		}
 		else ok = false;
 
-		if (main == middle) ok = false;
+		if (main == end) ok = false;
 	}
 
-	for (int i = 0; i < tmpUnits.size(); i++)
-	{
-		g_unitList.push_back(tmpUnits[i]);
-	}
-
-	return true;
+	return tmpUnits;
 }
 
 void Base::SRU_Data::LoadUnits(bool refresh)
@@ -245,48 +281,148 @@ void Base::SRU_Data::LoadUnits(bool refresh)
 		g_unitList.clear();
 	}
 
-	uintptr_t main = *(uintptr_t*)(g_base + Offsets::allUnitStart);
-	
-	if (refresh)
+	uintptr_t main = 0;
+
+	bool mainOk = Base::Utils::CanReadPtr((uintptr_t*)(g_base + Offsets::allUnitStart));
+
+	if (mainOk)
 	{
-		//main = g_unitList[g_unitList.size() - 1].base;
+		main = *(uintptr_t*)(g_base + Offsets::allUnitStart);
 	}
 
 	auto clockStart = std::chrono::high_resolution_clock::now();
 
-	if (refresh && g_unitList.size() > 96)
+	if (refresh && g_unitList.size() > 196)
 	{
-		int imiddle = g_unitList.size() / 2;
-		uintptr_t middle = g_unitList[imiddle].base;
-		uintptr_t end = g_unitList[g_unitList.size() - 1].base;
+		std::vector<std::future<std::vector<Unit>>> futures;
 
-		std::future<bool> fut1 = std::async(std::launch::async, LoadUnitsIntern, refresh, true, main, middle, 0, imiddle); //forwards
-		std::future<bool> fut2 = std::async(std::launch::async, LoadUnitsIntern, refresh, false, end, middle, imiddle, g_unitList.size()); //backwards
+		int threads = 6;
 
-		fut1.get();
-		fut2.get();
+		if (ntthreads <= 6)
+		{
+			threads = 3;
+		}
+
+		for (int i = 0; i < threads; i++)
+		{
+			int istart = (g_unitList.size() / threads) * i;
+			int iend = (g_unitList.size() / threads) * (i + 1);
+
+			uintptr_t tmpStart = g_unitList[istart].base;
+			uintptr_t tmpEnd = 0xFFFFFFFF;
+			
+			if (i == threads - 1)
+			{
+				iend = g_unitList.size();
+			}
+			else
+			{
+				tmpEnd = g_unitList[iend].base;
+			}
+
+			futures.push_back(std::async(std::launch::async, LoadUnitsIntern, refresh, true, tmpStart, tmpEnd, istart, iend));
+		}
+
+		for (int i = 0; i < futures.size(); i++)
+		{
+			std::vector<Unit> tmp = futures[i].get();
+			for (int j = 0; j < tmp.size(); j++)
+			{
+				g_unitList.push_back(tmp[j]);
+			}
+		}
 	}
 	else
 	{
-		LoadUnitsIntern(refresh, true, main, 0xFFFFFFFF, 0, g_unitList.size());
+		if (mainOk)
+		{
+			std::vector<Unit> tmp = LoadUnitsIntern(refresh, true, main, 0xFFFFFFFF, 0, g_unitList.size());
+
+			for (int i = 0; i < tmp.size(); i++)
+			{
+				g_unitList.push_back(tmp[i]);
+			}
+		}
 	}
 
 	auto clockEnd = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double, std::milli> fp_ms = clockEnd - clockStart;
-	std::cout << "Elapsed Time: " << fp_ms.count() << std::endl;
 
-	//Sort by name (insertion sort)
-	for (int i = 1; i < g_defaultUnitList.size(); i++)
+	static int benchmarked = 0;
+	static double benchmarkResults[3] = { 0, 0, 0 };
+	double elapsedTime = fp_ms.count();
+
+	std::cout << "Elapsed U Time: " << fp_ms.count() << "ms" << std::endl;
+
+	if (refresh && g_unitList.size() > 1000 && benchmarked < 3)
 	{
-		std::shared_ptr<UnitDefault> tmp = g_defaultUnitList[i];
-		int n = i - 1;
-
-		while (n >= 0 && g_defaultUnitList[n]->name > tmp->name)
+		if (benchmarked < 3)
 		{
-			g_defaultUnitList[n + 1] = g_defaultUnitList[n];
-			n--;
+			benchmarkResults[benchmarked] = elapsedTime;
+			benchmarked++;
 		}
-		g_defaultUnitList[n + 1] = tmp;
+		if(benchmarked == 3)
+		{
+			double avg = benchmarkResults[0] + benchmarkResults[1] + benchmarkResults[2];
+			avg /= 3;
+
+			//now calc avg per 100 units
+
+			double factor = 100.0 / g_unitList.size();
+			avg *= factor;
+
+			avg *= 1000;
+			//Simulate 100k units
+
+			if (avg + 1500 > 2500)
+			{
+				//adjust refresh rate so there are at least 1.5s of breathing room
+				g_unitRefreshMaxTime = g_unitRefreshMaxTime + (((avg + 1500) - 2500) / g_unitRefreshMaxTime);
+			}
+		}
+	}
+
+	clockStart = std::chrono::high_resolution_clock::now();
+
+	Country* tmpCountry = nullptr;
+	int size = g_unitList.size();
+	
+	for (int n = 0; n < g_countryList.size(); n++)
+	{
+		tmpCountry = &g_countryList[n];
+		tmpCountry->allUnits.clear();
+
+		for (int i = 0; i < size; i++)
+		{
+			if (*g_unitList[i].countryId == tmpCountry->oId)
+			{
+				tmpCountry->allUnits.push_back(g_unitList[i]);
+			}
+		}
+
+		//std::cout << "Country " << tmpCountry->name << " has " << tmpCountry->allUnits.size() << " units" << std::endl;
+	}
+
+	clockEnd = std::chrono::high_resolution_clock::now();
+	fp_ms = clockEnd - clockStart;
+
+	std::cout << "Elapsed C Time: " << fp_ms.count() << "ms" << std::endl;
+
+	if (g_defaultUnitList.size() > 2)
+	{
+		//Sort by name (insertion sort)
+		for (int i = 1; i < g_defaultUnitList.size(); i++)
+		{
+			std::shared_ptr<UnitDefault> tmp = g_defaultUnitList[i];
+			int n = i - 1;
+
+			while (n >= 0 && g_defaultUnitList[n]->name > tmp->name)
+			{
+				g_defaultUnitList[n + 1] = g_defaultUnitList[n];
+				n--;
+			}
+			g_defaultUnitList[n + 1] = tmp;
+		}
 	}
 
 	std::cout << "Total default units found: " << std::dec << g_defaultUnitList.size() << std::endl;

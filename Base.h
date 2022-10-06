@@ -83,48 +83,6 @@ namespace Base
 			std::shared_ptr<FloatValue> margin; //shared between countries
 		};
 
-		struct Country
-		{
-			void Init(uintptr_t base);
-			void HandleFreeze();
-
-			uintptr_t base;
-			bool real;
-			int id;
-			int oId;
-			int alive;
-			std::string name;
-
-			uintptr_t* populationPtr;
-			unsigned int lastSurrenderTime = -1;
-
-			std::shared_ptr<FloatValue> treasury;
-			std::shared_ptr<FloatValue> domApproval;
-			std::shared_ptr<FloatValue> milApproval;
-			std::shared_ptr<FloatValue> milReserve;
-			std::shared_ptr<FloatValue> researchEff;
-			std::shared_ptr<FloatValue> financeCreditRating;
-			std::shared_ptr<FloatValue> worldMarketOpinion;
-			std::shared_ptr<FloatValue> treatyIntegrity;
-
-			std::vector<Resource> resources;
-
-			std::shared_ptr<FloatValue> healthcareState;
-			std::shared_ptr<FloatValue> educationState;
-			std::shared_ptr<FloatValue> infrastructureState;
-			std::shared_ptr<FloatValue> environmentState;
-			std::shared_ptr<FloatValue> familyState;
-			std::shared_ptr<FloatValue> lawEnforcementState;
-			std::shared_ptr<FloatValue> culturalSubState;
-			std::shared_ptr<FloatValue> socialAssistanceState;
-
-			std::vector<std::shared_ptr<FloatValue>> allFloatValues;
-
-			bool operator< (const Country& other) const {
-				return name < other.name;
-			}
-		};
-
 		struct UnitDefault
 		{
 			void Init(uintptr_t base);
@@ -162,7 +120,8 @@ namespace Base
 
 			uintptr_t base = 0;
 			uintptr_t* currentHex;
-			int countryID;
+			uint8_t* countryId;
+			int oldCountry = -1;
 
 			std::shared_ptr<UnitDefault> defaultStats;
 			std::shared_ptr<FloatValue> fuel;
@@ -170,6 +129,62 @@ namespace Base
 			std::shared_ptr<FloatValue> health;
 			std::shared_ptr<FloatValue> maxHealth;
 			std::shared_ptr<FloatValue> morale;
+		};
+
+		struct Country
+		{
+			void Init(uintptr_t base);
+			void HandleFreeze();
+			void HandleUnits();
+
+			uintptr_t base;
+			bool real;
+			int id;
+			int oId;
+			int alive;
+			std::string name;
+
+			uintptr_t* populationPtr;
+			unsigned int lastSurrenderTime = -1;
+
+			std::shared_ptr<FloatValue> treasury;
+			std::shared_ptr<FloatValue> domApproval;
+			std::shared_ptr<FloatValue> milApproval;
+			std::shared_ptr<FloatValue> milReserve;
+			std::shared_ptr<FloatValue> researchEff;
+			std::shared_ptr<FloatValue> financeCreditRating;
+			std::shared_ptr<FloatValue> worldMarketOpinion;
+			std::shared_ptr<FloatValue> treatyIntegrity;
+
+			std::vector<Resource> resources;
+
+			std::shared_ptr<FloatValue> healthcareState;
+			std::shared_ptr<FloatValue> educationState;
+			std::shared_ptr<FloatValue> infrastructureState;
+			std::shared_ptr<FloatValue> environmentState;
+			std::shared_ptr<FloatValue> familyState;
+			std::shared_ptr<FloatValue> lawEnforcementState;
+			std::shared_ptr<FloatValue> culturalSubState;
+			std::shared_ptr<FloatValue> socialAssistanceState;
+
+			bool invincibleUnits = false;
+			bool maxFuelUnits = false;
+			bool maxSupplyUnits = false;
+			bool maxMoraleUnits = false;
+
+			bool maxMoveSpeedUnitsT = false;
+			bool maxSpottingUnitsT = false;
+			bool maxMoveRangeUnitsT = false;
+			bool maxGroundAttackRangeUnitsT = false;
+			bool maxAirAttackRangeUnitsT = false;
+			bool minBuildTimeUnitsT = false;
+
+			std::vector<std::shared_ptr<FloatValue>> allFloatValues;
+			std::vector<Base::SRU_Data::Unit> allUnits;
+
+			bool operator< (const Country& other) const {
+				return name < other.name;
+			}
 		};
 
 		struct DiplTreaty
@@ -217,6 +232,8 @@ namespace Base
 		extern int g_unitSpawnSelectedUnitDesign;
 
 		extern int g_surrenderEventCount;
+
+		extern int g_unitRefreshMaxTime;
 		
 		extern bool g_ingame;
 		extern bool g_addOk;

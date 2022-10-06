@@ -7,7 +7,7 @@ using namespace Base::SRU_Data::Asm;
 
 int FindNewCountryOwner(uint8_t oldOwner, bool weak = false);
 
-int unitTimer = 0, unitTimerMax = 100;
+int unitTimer = 0;
 
 void SetupSessionPtr(uintptr_t base = NULL)
 {
@@ -36,7 +36,12 @@ void SetupSessionPtr(uintptr_t base = NULL)
             Country c{};
             c.Init(*address);
             c.id = g_countryList.size();
-            Base::SRU_Data::g_countryList.push_back(c);
+
+            if (c.real)
+            {
+                Base::SRU_Data::g_countryList.push_back(c);
+            }
+
         }
         else
         {
@@ -410,14 +415,14 @@ DWORD WINAPI dllThread(HMODULE hModule) {
             ProcessAiSurrenders();
 
             unitTimer++;
-            if (unitTimer > unitTimerMax)
+            if (unitTimer > g_unitRefreshMaxTime)
             {
                 unitTimer = 0;
                 Base::SRU_Data::LoadUnits(true);
             }
         }
 
-        Sleep(25);
+        Sleep(50);
     }
 
     fclose(f);
