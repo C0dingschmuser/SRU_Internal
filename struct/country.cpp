@@ -219,14 +219,41 @@ void Base::SRU_Data::Country::HandleUnits()
 
 	for (int i = 0; i < this->allUnits.size(); i++)
 	{
-		if (this->invincibleUnits)
+		if (*allUnits[i].deployedState == 0)
 		{
-			//*allUnits[i].maxHealth->valPtr =
-			//	allUnits[i].maxHealth->origVal * 5;
+			if (this->invincibleUnits)
+			{
+				//*allUnits[i].maxHealth->valPtr =
+				//	allUnits[i].maxHealth->origVal * 5;
 
-			*allUnits[i].health->valPtr = 
-				*allUnits[i].maxHealth->valPtr;
-			//*allUnits[i].supply->valPtr = 5000.0f;
+				*allUnits[i].health->valPtr =
+					*allUnits[i].maxHealth->valPtr;
+				//*allUnits[i].supply->valPtr = 5000.0f;
+			}
+
+			if (this->maxFuelUnits)
+			{
+				*allUnits[i].fuel->valPtr =
+					allUnits[i].fuel->origVal;
+			}
+
+			if (this->maxSupplyUnits)
+			{
+				*allUnits[i].supply->valPtr =
+					allUnits[i].supply->origVal;
+			}
+			
+			if (this->maxExperienceUnits)
+			{
+				*allUnits[i].experience->valPtr =
+					allUnits[i].experience->origVal;
+			}
+
+			if (this->maxMoraleUnits)
+			{
+				*allUnits[i].morale->valPtr =
+					allUnits[i].morale->origVal;
+			}
 		}
 	}
 }

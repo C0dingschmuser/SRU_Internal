@@ -373,56 +373,70 @@ DWORD WINAPI dllThread(HMODULE hModule) {
     Base::Execute::SetupFunctions();
     Base::SRU_Data::Hooks::SetupFunctionHooks();
 
+    int mainTimer = 0;
+
     bool finish = false;
     while (!finish) {
-        if (GetAsyncKeyState(VK_END) & 1) {
-            finish = true;
+        mainTimer++;
+        if (mainTimer == 2)
+        {
+			//only exec every 2nd loop
+            mainTimer = 0;
+			
+            if (GetAsyncKeyState(VK_END) & 1)
+            {
+                finish = true;
+            }
+
+            CheckGameState(gameStatePtr);
+
+            if (g_ingame)
+            {
+                if (GetAsyncKeyState(VK_LSHIFT) & 0x8000)
+                {
+                    g_shift = true;
+                }
+                else g_shift = false;
+
+                if ((GetKeyState(VK_CAPITAL) & 0x0001) != 0)
+                {
+                    g_paintEnabled = true;
+                }
+                else g_paintEnabled = false;
+
+                if (g_paintEnabled)
+                {
+                    if (GetAsyncKeyState(VK_LCONTROL) & 0x8000)
+                    {
+                        g_paintActive = true;
+                    }
+                    else g_paintActive = false;
+
+                    if (g_paintActive)
+                    {
+                        PaintMap(mouseHoverHex);
+                    }
+                }
+
+                CheckCurrentCountry(clickedCountryPtr);
+                Base::SRU_Data::CheckSelectedUnits(selectedUnitsCounterPtr);
+                ProcessAiSurrenders();
+
+                unitTimer++;
+                if (unitTimer > g_unitRefreshMaxTime)
+                {
+                    unitTimer = 0;
+                    Base::SRU_Data::LoadUnits(true);
+                }
+            }
         }
-
-        CheckGameState(gameStatePtr);
-
+        
         if (g_ingame)
         {
-            if (GetAsyncKeyState(VK_LSHIFT) & 0x8000)
-            {
-                g_shift = true;
-            }
-            else g_shift = false;
-
-            if ((GetKeyState(VK_CAPITAL) & 0x0001) != 0)
-            {
-                g_paintEnabled = true;
-            }
-            else g_paintEnabled = false;
-
-            if (g_paintEnabled)
-            {
-                if (GetAsyncKeyState(VK_LCONTROL) & 0x8000)
-                {
-                    g_paintActive = true;
-                }
-                else g_paintActive = false;
-
-                if (g_paintActive)
-                {
-                    PaintMap(mouseHoverHex);
-                }
-            }
-
-            CheckCurrentCountry(clickedCountryPtr);
             Base::SRU_Data::HandleFreezes();
-            Base::SRU_Data::CheckSelectedUnits(selectedUnitsCounterPtr);
-            ProcessAiSurrenders();
-
-            unitTimer++;
-            if (unitTimer > g_unitRefreshMaxTime)
-            {
-                unitTimer = 0;
-                Base::SRU_Data::LoadUnits(true);
-            }
         }
 
-        Sleep(50);
+        Sleep(g_mainRefreshTime);
     }
 
     fclose(f);

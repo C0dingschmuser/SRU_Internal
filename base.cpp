@@ -69,6 +69,7 @@ int Base::SRU_Data::g_paintSelectedComboGround = -1;
 int Base::SRU_Data::g_unitSpawnSelectedUnitDesign = -1;
 
 int Base::SRU_Data::g_unitRefreshMaxTime = 50;
+int Base::SRU_Data::g_mainRefreshTime = 25;
 
 byte Base::SRU_Data::Asm::g_currentHexSupply = 0;
 byte Base::SRU_Data::Asm::g_lowestHexSupply = 0x1A;

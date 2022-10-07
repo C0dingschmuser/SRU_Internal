@@ -115,17 +115,11 @@ void Base::SRU_Data::Unit::Init(uintptr_t base)
 	this->countryId = (uint8_t*)(base + Offsets::unitCountry);
 	this->oldCountry = *countryId;
 
+	this->deployedState = (uintptr_t*)(base + Offsets::unitDeployedState);
+
 	uintptr_t defaultBase = (uintptr_t) * (uintptr_t*)(base + Offsets::unitDefaultValues);
 	this->defaultStats = Base::SRU_Data::FindUnitDefault(defaultBase, *this->countryId);
 	this->defaultStats->AddUserCountry(*this->countryId);
-
-	std::shared_ptr<FloatValue> fuel(new FloatValue);
-	fuel->valPtr = (float*)(base + Offsets::unitFuel);
-	this->fuel = fuel;
-
-	std::shared_ptr<FloatValue> supply(new FloatValue);
-	supply->valPtr = (float*)(base + Offsets::unitSupply);
-	this->supply = supply;
 
 	std::shared_ptr<FloatValue> health(new FloatValue);
 	health->valPtr = (float*)(base + Offsets::unitHealth);
@@ -135,7 +129,127 @@ void Base::SRU_Data::Unit::Init(uintptr_t base)
 	maxHealth->valPtr = (float*)(base + Offsets::unitHealthMax);
 	this->maxHealth = maxHealth;
 
+	std::shared_ptr<FloatValue> fuel(new FloatValue);
+	fuel->valPtr = (float*)(base + Offsets::unitFuel);
+	fuel->origVal = 
+		*this->maxHealth->valPtr * *this->defaultStats->fuelCapacity->valPtr;
+	this->fuel = fuel;
+
+	std::shared_ptr<FloatValue> supply(new FloatValue);
+	supply->valPtr = (float*)(base + Offsets::unitSupply);
+	supply->origVal = 
+		*this->maxHealth->valPtr * *this->defaultStats->supplyCapacity->valPtr;
+	this->supply = supply;
+
+	std::shared_ptr<FloatValue> experience(new FloatValue);
+	experience->valPtr = (float*)(base + Offsets::unitExperience);
+	this->experience = experience;
+
 	std::shared_ptr<FloatValue> morale(new FloatValue);
 	morale->valPtr = (float*)(base + Offsets::unitMorale);
 	this->morale = morale;
+}
+
+void Base::SRU_Data::Unit::SetDesignProperty(UnitDefault::Property p, uint16_t v)
+{
+	switch (p)
+	{
+	case UnitDefault::Property::MoveSpeed:
+		this->defaultStats->moveSpeed->OverrideVal(v);
+		break;
+	case UnitDefault::Property::Spotting:
+		this->defaultStats->spotting->OverrideVal(v);
+		break;
+	case UnitDefault::Property::MoveRange:
+		this->defaultStats->moveRange->OverrideVal(v);
+		break;
+	case UnitDefault::Property::SoftGroundAttack:
+		this->defaultStats->softGroundAttack->OverrideVal(v);
+		break;
+	case UnitDefault::Property::HardGroundAttack:
+		this->defaultStats->hardGroundAttack->OverrideVal(v);
+		break;
+	case UnitDefault::Property::CloseGroundAttack:
+		this->defaultStats->closeGroundAttack->OverrideVal(v);
+		break;
+	case UnitDefault::Property::CloseAirAttack:
+		this->defaultStats->closeAirAttack->OverrideVal(v);
+		break;
+	case UnitDefault::Property::MidAirAttack:
+		this->defaultStats->midAirAttack->OverrideVal(v);
+		break;
+	case UnitDefault::Property::HighAirAttack:
+		this->defaultStats->highAirAttack->OverrideVal(v);
+		break;
+	case UnitDefault::Property::GroundRange:
+		this->defaultStats->groundRange->OverrideVal(v);
+		break;
+	case UnitDefault::Property::NavalRange:
+		this->defaultStats->navalRange->OverrideVal(v);
+		break;
+	case UnitDefault::Property::AirRange:
+		this->defaultStats->airRange->OverrideVal(v);
+		break;
+	case UnitDefault::Property::FuelCapacity:
+		this->defaultStats->fuelCapacity->OverrideVal(v);
+		break;
+	case UnitDefault::Property::SupplyCapacity:
+		this->defaultStats->supplyCapacity->OverrideVal(v);
+		break;
+	case UnitDefault::Property::BuildTime:
+		this->defaultStats->buildTime->OverrideVal(v);
+		break;
+	}
+}
+
+void Base::SRU_Data::Unit::RestoreDesignProperty(UnitDefault::Property p)
+{
+	switch (p)
+	{
+	case UnitDefault::Property::MoveSpeed:
+		this->defaultStats->moveSpeed->RestoreVal();
+		break;
+	case UnitDefault::Property::Spotting:
+		this->defaultStats->spotting->RestoreVal();
+		break;
+	case UnitDefault::Property::MoveRange:
+		this->defaultStats->moveRange->RestoreVal();
+		break;
+	case UnitDefault::Property::SoftGroundAttack:
+		this->defaultStats->softGroundAttack->RestoreVal();
+		break;
+	case UnitDefault::Property::HardGroundAttack:
+		this->defaultStats->hardGroundAttack->RestoreVal();
+		break;
+	case UnitDefault::Property::CloseGroundAttack:
+		this->defaultStats->closeGroundAttack->RestoreVal();
+		break;
+	case UnitDefault::Property::CloseAirAttack:
+		this->defaultStats->closeAirAttack->RestoreVal();
+		break;
+	case UnitDefault::Property::MidAirAttack:
+		this->defaultStats->midAirAttack->RestoreVal();
+		break;
+	case UnitDefault::Property::HighAirAttack:
+		this->defaultStats->highAirAttack->RestoreVal();
+		break;
+	case UnitDefault::Property::GroundRange:
+		this->defaultStats->groundRange->RestoreVal();
+		break;
+	case UnitDefault::Property::NavalRange:
+		this->defaultStats->navalRange->RestoreVal();
+		break;
+	case UnitDefault::Property::AirRange:
+		this->defaultStats->airRange->RestoreVal();
+		break;
+	case UnitDefault::Property::FuelCapacity:
+		this->defaultStats->fuelCapacity->RestoreVal();
+		break;
+	case UnitDefault::Property::SupplyCapacity:
+		this->defaultStats->supplyCapacity->RestoreVal();
+		break;
+	case UnitDefault::Property::BuildTime:
+		this->defaultStats->buildTime->RestoreVal();
+		break;
+	}
 }

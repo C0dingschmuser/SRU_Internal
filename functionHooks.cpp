@@ -242,15 +242,12 @@ void AddSurrenderEvent(int from, int to)
     }
 
     if (exists) return;
-    std::cout << std::dec << " " << from << " " << to << std::endl;
+    //std::cout << std::dec << " " << from << " " << to << std::endl;
 
     SurrenderEvent* s = &surrenderEvents[g_surrenderEventCount];
     s->lastTime = *(uintptr_t*)(g_base + Offsets::currentDayTime) + 500;
     s->from = from;
     s->to = to;
-
-    //int state = *(uintptr_t*)(0x199ED3B0);
-    //std::cout << state << std::endl;
 
     g_surrenderEventCount++;
     if (g_surrenderEventCount >= 32)

@@ -77,28 +77,145 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 						{
 							Draw::DrawSelectedCountryText(cc, "Selected country: %s");
 
-							if (ImGui::Checkbox("Invincible Units", &cc->invincibleUnits))
+							ImGui::BeginChild("##unitmodifierschild", ImVec2(200, 130), true);
 							{
-								if (!cc->invincibleUnits)
+								if (ImGui::Checkbox("Invincible Units", &cc->invincibleUnits))
 								{
-									//restore normal values
+									if (!cc->invincibleUnits)
+									{
+										//restore normal values
+										for (int i = 0; i < cc->allUnits.size(); i++)
+										{
+											*cc->allUnits[i].health->valPtr =
+												cc->allUnits[i].health->freezeVal;
+										}
+									}
+									else
+									{
+										//save normal values
+										for (int i = 0; i < cc->allUnits.size(); i++)
+										{
+											cc->allUnits[i].health->freezeVal =
+												*cc->allUnits[i].health->valPtr;
+										}
+									}
+								}
+
+								if (ImGui::Checkbox("Max Supply", &cc->maxSupplyUnits))
+								{
+									if (!cc->maxSupplyUnits)
+									{
+										//restore orig values
+
+										for (int i = 0; i < cc->allUnits.size(); i++)
+										{
+											*cc->allUnits[i].supply->valPtr =
+												cc->allUnits[i].supply->freezeVal;
+										}
+									}
+									else
+									{
+										//save orig values
+
+										for (int i = 0; i < cc->allUnits.size(); i++)
+										{
+											cc->allUnits[i].supply->freezeVal =
+												*cc->allUnits[i].supply->valPtr;
+										}
+									}
+								}
+
+								if (ImGui::Checkbox("Max Fuel", &cc->maxFuelUnits))
+								{
+									if (!cc->maxFuelUnits)
+									{
+										//restore orig values
+
+										for (int i = 0; i < cc->allUnits.size(); i++)
+										{
+											*cc->allUnits[i].fuel->valPtr =
+												cc->allUnits[i].fuel->freezeVal;
+										}
+									}
+									else
+									{
+										for (int i = 0; i < cc->allUnits.size(); i++)
+										{
+											cc->allUnits[i].fuel->freezeVal =
+												*cc->allUnits[i].fuel->valPtr;
+										}
+									}
+
+								}
+
+								if (ImGui::Checkbox("Max Experience", &cc->maxExperienceUnits))
+								{
+									if (!cc->maxExperienceUnits)
+									{
+										//restore orig values
+
+										for (int i = 0; i < cc->allUnits.size(); i++)
+										{
+											*cc->allUnits[i].experience->valPtr =
+												cc->allUnits[i].experience->freezeVal;
+										}
+									}
+									else
+									{
+										for (int i = 0; i < cc->allUnits.size(); i++)
+										{
+											cc->allUnits[i].experience->freezeVal =
+												*cc->allUnits[i].experience->valPtr;
+										}
+									}
+								}
+
+								if (ImGui::Checkbox("Max Morale", &cc->maxMoraleUnits))
+								{
+									if (!cc->maxMoraleUnits)
+									{
+										//restore orig values
+
+										for (int i = 0; i < cc->allUnits.size(); i++)
+										{
+											*cc->allUnits[i].morale->valPtr =
+												cc->allUnits[i].morale->freezeVal;
+										}
+									}
+									else
+									{
+										for (int i = 0; i < cc->allUnits.size(); i++)
+										{
+											cc->allUnits[i].morale->freezeVal =
+												*cc->allUnits[i].morale->valPtr;
+										}
+									}
+								}
+							}
+							ImGui::EndChild();
+							
+							static int speed = 1000;
+							ImGui::InputInt("##unitspeededit", &speed, 0, 0);
+
+							if (ImGui::Checkbox("Lightspeed", &cc->maxMoveSpeedUnitsT))
+							{
+								if (!cc->maxMoveSpeedUnitsT)
+								{
 									for (int i = 0; i < cc->allUnits.size(); i++)
 									{
-										*cc->allUnits[i].health->valPtr =
-											cc->allUnits[i].health->origVal;
+										cc->allUnits[i].RestoreDesignProperty(UnitDefault::Property::MoveSpeed);
 									}
 								}
 								else
 								{
-									//save normal values
 									for (int i = 0; i < cc->allUnits.size(); i++)
 									{
-										cc->allUnits[i].health->origVal =
-											*cc->allUnits[i].health->valPtr;
+										cc->allUnits[i].SetDesignProperty(UnitDefault::Property::MoveSpeed, (uint16_t)speed);
 									}
 								}
 							}
 
+							ImGui::Text("Non-highlighted options affect the unit design");
 							ImGui::EndTabItem();
 						}
 

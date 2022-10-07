@@ -54,6 +54,16 @@ namespace Base
 			float* valPtr;
 			float freezeVal, origVal;
 			bool freeze = false;
+
+			inline void OverrideVal(float val)
+			{
+				origVal = *valPtr;
+				*valPtr = val;
+			}
+			inline void RestoreVal()
+			{
+				*valPtr = origVal;
+			}
 		};
 
 		struct IntValue
@@ -61,6 +71,16 @@ namespace Base
 			uintptr_t* valPtr;
 			int freezeVal, origVal;
 			bool freeze = false;
+
+			inline void OverrideVal(int val)
+			{
+				origVal = *valPtr;
+				*valPtr = val;
+			}
+			inline void RestoreVal()
+			{
+				*valPtr = origVal;
+			}
 		};
 
 		struct Int8Value
@@ -85,6 +105,25 @@ namespace Base
 
 		struct UnitDefault
 		{
+			enum Property
+			{
+				MoveSpeed = 1,
+				Spotting,
+				MoveRange,
+				SoftGroundAttack,
+				HardGroundAttack,
+				CloseGroundAttack,
+				CloseAirAttack,
+				MidAirAttack,
+				HighAirAttack,
+				GroundRange,
+				NavalRange,
+				AirRange,
+				FuelCapacity,
+				SupplyCapacity,
+				BuildTime
+			};
+
 			void Init(uintptr_t base);
 			void AddUserCountry(int countryId);
 			bool HasUser(int countryId);
@@ -117,9 +156,12 @@ namespace Base
 		struct Unit
 		{
 			void Init(uintptr_t base);
+			void SetDesignProperty(UnitDefault::Property p, uint16_t v);
+			void RestoreDesignProperty(UnitDefault::Property p);
 
 			uintptr_t base = 0;
 			uintptr_t* currentHex;
+			uintptr_t* deployedState;
 			uint8_t* countryId;
 			int oldCountry = -1;
 
@@ -128,6 +170,7 @@ namespace Base
 			std::shared_ptr<FloatValue> supply;
 			std::shared_ptr<FloatValue> health;
 			std::shared_ptr<FloatValue> maxHealth;
+			std::shared_ptr<FloatValue> experience;
 			std::shared_ptr<FloatValue> morale;
 		};
 
@@ -170,6 +213,7 @@ namespace Base
 			bool invincibleUnits = false;
 			bool maxFuelUnits = false;
 			bool maxSupplyUnits = false;
+			bool maxExperienceUnits = false;
 			bool maxMoraleUnits = false;
 
 			bool maxMoveSpeedUnitsT = false;
@@ -234,6 +278,7 @@ namespace Base
 		extern int g_surrenderEventCount;
 
 		extern int g_unitRefreshMaxTime;
+		extern int g_mainRefreshTime;
 		
 		extern bool g_ingame;
 		extern bool g_addOk;
@@ -242,8 +287,6 @@ namespace Base
 		extern bool g_mouseClicked;
 		extern bool g_paintActive;
 		extern bool g_paintEnabled;
-
-		//extern bool 
 
 		extern bool g_productionAdjustment;
 		extern bool g_aiColony;
