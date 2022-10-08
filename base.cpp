@@ -235,13 +235,13 @@ std::vector<Base::SRU_Data::Unit> LoadUnitsIntern(bool refresh, bool dir, uintpt
 		{
 			if (*(uintptr_t*)unitId > 0)
 			{
-				if (Base::Utils::CanReadPtr((uintptr_t*)*(uintptr_t*)unitDef))
+				if (IsValidUnit(main))
 				{
 					Unit newUnit{};
 					newUnit.Init(main);
 
 					tmpUnits.push_back(newUnit);
-				} 
+				}
 			}
 		}
 
@@ -460,12 +460,14 @@ void Base::SRU_Data::LoadDefaultUnits()
 		{
 			if (*check1 > 0 && *check2 == 0 && *check3 > 0)
 			{
+				if (IsValidDefaultUnit(i))
+				{
+					std::shared_ptr<UnitDefault> newDefaultUnit(new UnitDefault);
+					newDefaultUnit->spawnId = count;
+					newDefaultUnit->Init(i);
 
-				std::shared_ptr<UnitDefault> newDefaultUnit(new UnitDefault);
-				newDefaultUnit->spawnId = count;
-				newDefaultUnit->Init(i);
-
-				g_defaultUnitList.push_back(newDefaultUnit);
+					g_defaultUnitList.push_back(newDefaultUnit);
+				}
 			}
 		}
 		count++;

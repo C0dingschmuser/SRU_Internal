@@ -103,11 +103,13 @@ namespace Base
 			std::shared_ptr<FloatValue> margin; //shared between countries
 		};
 
+		struct Country; //fwd declare
+
 		struct UnitDefault
 		{
 			enum Property
 			{
-				MoveSpeed = 1,
+				MoveSpeed,
 				Spotting,
 				MoveRange,
 				SoftGroundAttack,
@@ -121,7 +123,15 @@ namespace Base
 				AirRange,
 				FuelCapacity,
 				SupplyCapacity,
-				BuildTime
+				BuildTime,
+				MAX
+			};
+
+			struct ChangeHolder
+			{
+				Property p;
+				uint32_t change = 0;
+				int val = -1;
 			};
 
 			void Init(uintptr_t base);
@@ -132,8 +142,13 @@ namespace Base
 			uintptr_t base = 0;
 			std::vector<int> countryIds;
 			int spawnId = -1;
+			int unitClass = 0;
+			
+			uintptr_t* customDefault = nullptr;
 
 			bool flag = false; //internal use
+
+			std::vector<std::shared_ptr<ChangeHolder>> propertyChanges;
 
 			std::shared_ptr<IntValue> moveSpeed;
 			std::shared_ptr<IntValue> spotting;
@@ -156,8 +171,8 @@ namespace Base
 		struct Unit
 		{
 			void Init(uintptr_t base);
-			void SetDesignProperty(UnitDefault::Property p, uint16_t v);
-			void RestoreDesignProperty(UnitDefault::Property p);
+			void SetDesignProperty(Country* c, UnitDefault::Property p, uint16_t v);
+			void RestoreDesignProperty(Country* c, UnitDefault::Property p);
 
 			uintptr_t base = 0;
 			uintptr_t* currentHex;
@@ -305,6 +320,8 @@ namespace Base
 		uint32_t ResolveUnitCountry(uint32_t country, int dir = 0);
 		void HandleFreezes();
 		void CheckSelectedUnits(uintptr_t* selectedUnitsCounter);
+		bool IsValidUnit(uintptr_t base);
+		bool IsValidDefaultUnit(uintptr_t base);
 		void LoadUnits(bool refresh = false);
 		void LoadDefaultUnits();
 		void LoadDiplTreaties();

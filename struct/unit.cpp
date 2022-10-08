@@ -79,6 +79,14 @@ void Base::SRU_Data::UnitDefault::Init(uintptr_t base)
 	std::shared_ptr<FloatValue> buildTime(new FloatValue);
 	buildTime->valPtr = (float*)(base + Offsets::unitDefaultBuildTime);
 	this->buildTime = buildTime;
+
+	int max = (int)UnitDefault::Property::MAX;
+	for (int i = 0; i < max; i++)
+	{
+		std::shared_ptr<ChangeHolder> change(new ChangeHolder);
+		change->p = (Property)i;
+		propertyChanges.push_back(change);
+	}
 }
 
 bool Base::SRU_Data::UnitDefault::HasUser(int countryId)
@@ -148,14 +156,58 @@ void Base::SRU_Data::Unit::Init(uintptr_t base)
 	std::shared_ptr<FloatValue> morale(new FloatValue);
 	morale->valPtr = (float*)(base + Offsets::unitMorale);
 	this->morale = morale;
+
+	int id = *(uintptr_t*)(base + Offsets::unitId);
+	uint8_t id2 = *(uint8_t*)(defaultStats->base + 0x4);
+
+	//std::cout << std::dec << id << std::hex << " " << (int)id2 << " " << defaultStats->base << " " << defaultStats->name << std::endl;
 }
 
-void Base::SRU_Data::Unit::SetDesignProperty(UnitDefault::Property p, uint16_t v)
+void Base::SRU_Data::Unit::SetDesignProperty(Country* c, UnitDefault::Property p, uint16_t v)
 {
+	std::shared_ptr<UnitDefault::ChangeHolder> change = 
+		this->defaultStats->propertyChanges[(int)p];
+
+	if (change->change > 0)
+	{
+		//already changed, check if new value
+		if (change->val == v)
+		{
+			return;
+		}
+	}
+
+	change->change++;
+	change->val = v;
+
+	if (this->defaultStats->customDefault == nullptr)
+	{
+		//Create new fake default unit and override
+
+		uintptr_t* buffer = (uintptr_t*)malloc(sizeof(int) * 256);
+
+		memcpy((void*)buffer, (void*)this->defaultStats->base, sizeof(int) * 256);
+
+		this->defaultStats->customDefault = buffer;
+
+		for (int i = 0; i < c->allUnits.size(); i++)
+		{
+			if (c->allUnits[i].defaultStats->base == this->defaultStats->base)
+			{
+				*(int*)(c->allUnits[i].base + Offsets::unitDefaultValues) =
+					(int)buffer;
+			}
+		}
+
+		//*(int*)(base + Offsets::unitDefaultValues) = (int)buffer;
+	}
+
+	uintptr_t dBase = (uintptr_t)this->defaultStats->customDefault;
+
 	switch (p)
 	{
 	case UnitDefault::Property::MoveSpeed:
-		this->defaultStats->moveSpeed->OverrideVal(v);
+		*(uint16_t*)(dBase + Offsets::unitDefaultMoveSpeed) = v;
 		break;
 	case UnitDefault::Property::Spotting:
 		this->defaultStats->spotting->OverrideVal(v);
@@ -202,12 +254,61 @@ void Base::SRU_Data::Unit::SetDesignProperty(UnitDefault::Property p, uint16_t v
 	}
 }
 
-void Base::SRU_Data::Unit::RestoreDesignProperty(UnitDefault::Property p)
+void Base::SRU_Data::Unit::RestoreDesignProperty(Country* c, UnitDefault::Property p)
 {
+	//check if already applied
+	//-> if yes, return
+	//Check if any other default stat is modified
+	//-> if yes, reset only named one to default values
+	//-> if no, restore orig pointer and set ptr to null
+
+	std::shared_ptr<UnitDefault::ChangeHolder> change =
+		this->defaultStats->propertyChanges[(int)p];
+
+	if (change->change == 0)
+	{
+		//already reset
+		return;
+	}
+
+	change->change = 0;
+
+	bool full = true;
+	int max = (int)UnitDefault::Property::MAX;
+
+	for (int i = 0; i < max; i++)
+	{
+		if (this->defaultStats->propertyChanges[i]->change > 0)
+		{
+			//another variable is still changed -> no full reset
+			full = false;
+			break;
+		}
+	}
+
+	if (full)
+	{
+		for (int i = 0; i < c->allUnits.size(); i++)
+		{
+			if (c->allUnits[i].defaultStats->base ==
+				this->defaultStats->base)
+			{
+				*(int*)(c->allUnits[i].base + Offsets::unitDefaultValues) =
+					(int)this->defaultStats->base;
+			}
+		}
+
+
+		this->defaultStats->customDefault = nullptr;
+		//*(uintptr_t*)(base + Offsets::unitDefaultValues) = this->defaultStats->base;
+		return;
+	}
+
 	switch (p)
 	{
 	case UnitDefault::Property::MoveSpeed:
-		this->defaultStats->moveSpeed->RestoreVal();
+		*(uint16_t*)(this->defaultStats->customDefault + Offsets::unitDefaultMoveSpeed) =
+			*(uint16_t*)(this->defaultStats->base + Offsets::unitDefaultMoveSpeed);
 		break;
 	case UnitDefault::Property::Spotting:
 		this->defaultStats->spotting->RestoreVal();
@@ -252,4 +353,28 @@ void Base::SRU_Data::Unit::RestoreDesignProperty(UnitDefault::Property p)
 		this->defaultStats->buildTime->RestoreVal();
 		break;
 	}
+}
+
+bool Base::SRU_Data::IsValidUnit(uintptr_t base)
+{
+	uintptr_t unitDefault = *(uintptr_t*)(base + Offsets::unitDefaultValues);
+
+	if (Base::Utils::CanReadPtr((uintptr_t*)unitDefault))
+	{
+		return IsValidDefaultUnit(unitDefault);
+	}
+
+	return false;
+}
+
+bool Base::SRU_Data::IsValidDefaultUnit(uintptr_t base)
+{
+	uint8_t unitClass = *(uint8_t*)(base + Offsets::unitDefaultClass);
+
+	if (unitClass != 0x15)
+	{
+		return true;
+	}
+
+	return false;
 }

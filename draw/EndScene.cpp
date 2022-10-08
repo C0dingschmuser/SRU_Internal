@@ -203,15 +203,19 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 								{
 									for (int i = 0; i < cc->allUnits.size(); i++)
 									{
-										cc->allUnits[i].RestoreDesignProperty(UnitDefault::Property::MoveSpeed);
+										cc->allUnits[i].RestoreDesignProperty(cc, UnitDefault::Property::MoveSpeed);
 									}
+
+									*(uintptr_t*)(cc->base + Offsets::countryRailTransport) = (uint8_t)0;
 								}
 								else
 								{
 									for (int i = 0; i < cc->allUnits.size(); i++)
 									{
-										cc->allUnits[i].SetDesignProperty(UnitDefault::Property::MoveSpeed, (uint16_t)speed);
+										cc->allUnits[i].SetDesignProperty(cc, UnitDefault::Property::MoveSpeed, (uint16_t)speed);
 									}
+
+									*(uintptr_t*)(cc->base + Offsets::countryRailTransport) = (uint8_t)2;
 								}
 							}
 
