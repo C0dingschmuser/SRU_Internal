@@ -35,6 +35,11 @@ namespace Base
 			extern uintptr_t g_mouseClickedJmpBackAddr;
 			extern uintptr_t g_posChangedJmpBackAddr;
 
+			extern uintptr_t g_defconJmpBackAddr;
+			extern uintptr_t g_defconJmpBackAddr2;
+			extern uintptr_t g_defconJmpBackAddr3;
+			extern uintptr_t g_defconJmpBackAddr4;
+
 			void SetupFunctionHooks();
 			void SetProductionAdjustment(bool enabled);
 		}
@@ -46,6 +51,11 @@ namespace Base
 			extern unsigned int g_aiSurrReg0, g_aiSurrReg1, g_aiSurrReg2, g_aiSurrReg3, g_aiSurrReg4, g_aiSurrReg5;
 			extern int g_aiSurrSize, g_aiSurrFrom, g_aiSurrTo;
 			extern int g_xPos, g_yPos;
+			extern unsigned int g_defconReg0, g_defconReg1, g_defconReg2, g_defconReg3, g_defconReg4, g_defconReg5, g_defconReg6,
+				g_defconReg01, g_defconReg11, g_defconReg21, g_defconReg31, g_defconReg41, g_defconReg51, g_defconReg61,
+				g_defconReg12, g_defconReg22, g_defconReg32, g_defconReg42, g_defconReg52, g_defconReg62;
+			extern int g_defconReg02, g_defconNew;
+			extern unsigned int g_defconReg03, g_defconReg13, g_defconReg23, g_defconReg33, g_defconReg43, g_defconReg53, g_defconReg63;
 			extern uintptr_t g_aiSurrBase;
 		}
 
@@ -127,11 +137,17 @@ namespace Base
 				MAX
 			};
 
+			union HolderValue
+			{
+				float f;
+				uint16_t ui16;
+			};
+
 			struct ChangeHolder
 			{
 				Property p;
 				uint32_t change = 0;
-				int val = -1;
+				HolderValue val;
 			};
 
 			void Init(uintptr_t base);
@@ -170,8 +186,20 @@ namespace Base
 
 		struct Unit
 		{
+			enum Property
+			{
+				Health,
+				MaxHalth,
+				Fuel,
+				Supply,
+				Efficiency,
+				Experience,
+				Morale,
+				MAX
+			};
+
 			void Init(uintptr_t base);
-			void SetDesignProperty(Country* c, UnitDefault::Property p, uint16_t v);
+			void SetDesignProperty(Country* c, UnitDefault::Property p, UnitDefault::HolderValue v);
 			void RestoreDesignProperty(Country* c, UnitDefault::Property p);
 
 			uintptr_t base = 0;
@@ -181,12 +209,8 @@ namespace Base
 			int oldCountry = -1;
 
 			std::shared_ptr<UnitDefault> defaultStats;
-			std::shared_ptr<FloatValue> fuel;
-			std::shared_ptr<FloatValue> supply;
-			std::shared_ptr<FloatValue> health;
-			std::shared_ptr<FloatValue> maxHealth;
-			std::shared_ptr<FloatValue> experience;
-			std::shared_ptr<FloatValue> morale;
+
+			std::vector<std::shared_ptr<FloatValue>> properties;
 		};
 
 		struct Country
@@ -225,9 +249,15 @@ namespace Base
 			std::shared_ptr<FloatValue> culturalSubState;
 			std::shared_ptr<FloatValue> socialAssistanceState;
 
+			std::shared_ptr<IntValue> defcon;
+			int defconState = -1;
+
+			//could be upgraded to int to make options scalable
+
 			bool invincibleUnits = false;
 			bool maxFuelUnits = false;
 			bool maxSupplyUnits = false;
+			bool maxEfficiencyUnits = false;
 			bool maxExperienceUnits = false;
 			bool maxMoraleUnits = false;
 

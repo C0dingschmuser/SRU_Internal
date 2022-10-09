@@ -226,33 +226,39 @@ void Base::SRU_Data::Country::HandleUnits()
 				//*allUnits[i].maxHealth->valPtr =
 				//	allUnits[i].maxHealth->origVal * 5;
 
-				*allUnits[i].health->valPtr =
-					*allUnits[i].maxHealth->valPtr;
+				*allUnits[i].properties[(int)Unit::Property::Health]->valPtr =
+					*allUnits[i].properties[(int)Unit::Property::MaxHalth]->valPtr;
 				//*allUnits[i].supply->valPtr = 5000.0f;
 			}
 
 			if (this->maxFuelUnits)
 			{
-				*allUnits[i].fuel->valPtr =
-					allUnits[i].fuel->origVal;
+				*allUnits[i].properties[(int)Unit::Property::Fuel]->valPtr =
+					allUnits[i].properties[(int)Unit::Property::Fuel]->origVal;
 			}
 
 			if (this->maxSupplyUnits)
 			{
-				*allUnits[i].supply->valPtr =
-					allUnits[i].supply->origVal;
+				*allUnits[i].properties[(int)Unit::Property::Supply]->valPtr =
+					allUnits[i].properties[(int)Unit::Property::Supply]->origVal;
 			}
 			
+			if (this->maxEfficiencyUnits)
+			{
+				*allUnits[i].properties[(int)Unit::Property::Efficiency]->valPtr =
+					allUnits[i].properties[(int)Unit::Property::Efficiency]->origVal;
+			}
+
 			if (this->maxExperienceUnits)
 			{
-				*allUnits[i].experience->valPtr =
-					allUnits[i].experience->origVal;
+				*allUnits[i].properties[(int)Unit::Property::Experience]->valPtr =
+					allUnits[i].properties[(int)Unit::Property::Experience]->origVal;
 			}
 
 			if (this->maxMoraleUnits)
 			{
-				*allUnits[i].morale->valPtr =
-					allUnits[i].morale->origVal;
+				*allUnits[i].properties[(int)Unit::Property::Morale]->valPtr =
+					allUnits[i].properties[(int)Unit::Property::Morale]->origVal;
 			}
 		}
 	}

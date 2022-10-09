@@ -31,6 +31,36 @@ int Base::SRU_Data::Asm::g_aiSurrTo;
 int Base::SRU_Data::Asm::g_xPos = 0;
 int Base::SRU_Data::Asm::g_yPos = 0;
 
+unsigned int Base::SRU_Data::Asm::g_defconReg0;
+unsigned int Base::SRU_Data::Asm::g_defconReg1;
+unsigned int Base::SRU_Data::Asm::g_defconReg2;
+unsigned int Base::SRU_Data::Asm::g_defconReg3;
+unsigned int Base::SRU_Data::Asm::g_defconReg4;
+unsigned int Base::SRU_Data::Asm::g_defconReg5;
+unsigned int Base::SRU_Data::Asm::g_defconReg6;
+unsigned int Base::SRU_Data::Asm::g_defconReg01;
+unsigned int Base::SRU_Data::Asm::g_defconReg11;
+unsigned int Base::SRU_Data::Asm::g_defconReg21;
+unsigned int Base::SRU_Data::Asm::g_defconReg31;
+unsigned int Base::SRU_Data::Asm::g_defconReg41;
+unsigned int Base::SRU_Data::Asm::g_defconReg51;
+unsigned int Base::SRU_Data::Asm::g_defconReg61;
+int Base::SRU_Data::Asm::g_defconReg02;
+int Base::SRU_Data::Asm::g_defconNew;
+unsigned int Base::SRU_Data::Asm::g_defconReg12;
+unsigned int Base::SRU_Data::Asm::g_defconReg22;
+unsigned int Base::SRU_Data::Asm::g_defconReg32;
+unsigned int Base::SRU_Data::Asm::g_defconReg42;
+unsigned int Base::SRU_Data::Asm::g_defconReg52;
+unsigned int Base::SRU_Data::Asm::g_defconReg62;
+unsigned int Base::SRU_Data::Asm::g_defconReg03;
+unsigned int Base::SRU_Data::Asm::g_defconReg13;
+unsigned int Base::SRU_Data::Asm::g_defconReg23;
+unsigned int Base::SRU_Data::Asm::g_defconReg33;
+unsigned int Base::SRU_Data::Asm::g_defconReg43;
+unsigned int Base::SRU_Data::Asm::g_defconReg53;
+unsigned int Base::SRU_Data::Asm::g_defconReg63;
+
 uintptr_t Base::SRU_Data::Asm::g_aiSurrBase;
 
 //SRU Vars
@@ -49,6 +79,11 @@ uintptr_t Base::SRU_Data::Hooks::g_hexSupplyJmpBackAddr = 0;
 uintptr_t Base::SRU_Data::Hooks::g_aiSurrenderJmpBackAddr = 0;
 uintptr_t Base::SRU_Data::Hooks::g_mouseClickedJmpBackAddr = 0;
 uintptr_t Base::SRU_Data::Hooks::g_posChangedJmpBackAddr = 0;
+
+uintptr_t Base::SRU_Data::Hooks::g_defconJmpBackAddr = 0;
+uintptr_t Base::SRU_Data::Hooks::g_defconJmpBackAddr2 = 0;
+uintptr_t Base::SRU_Data::Hooks::g_defconJmpBackAddr3 = 0;
+uintptr_t Base::SRU_Data::Hooks::g_defconJmpBackAddr4 = 0;
 
 uintptr_t Base::SRU_Data::g_nextUnitEntity = 0;
 
@@ -166,12 +201,12 @@ void Base::SRU_Data::CheckSelectedUnits(uintptr_t* selectedUnitsCounter)
 	}
 }
 
-std::vector<Base::SRU_Data::Unit> LoadUnitsIntern(bool refresh, bool dir, uintptr_t start, uintptr_t end, int istart, int iend)
+std::vector<uintptr_t> LoadUnitsIntern(bool refresh, bool dir, uintptr_t start, uintptr_t end, int istart, int iend)
 {
 	using namespace Base::SRU_Data;
 	uintptr_t main = start;
 
-	std::vector<Base::SRU_Data::Unit> tmpUnits;
+	std::vector<uintptr_t> tmpUnits;
 
 	bool lastadd = false;
 
@@ -192,7 +227,8 @@ std::vector<Base::SRU_Data::Unit> LoadUnitsIntern(bool refresh, bool dir, uintpt
 			if (unitCountry != nullptr)
 			{
 				Country* tmpCountry = nullptr;
-				for (int i = 0; i < g_countryList.size(); i++)
+				int csize = g_countryList.size();
+				for (int i = 0; i < csize; i++)
 				{
 					tmpCountry = &g_countryList[i];
 					if (tmpCountry->oId == *unitCountry)
@@ -217,7 +253,7 @@ std::vector<Base::SRU_Data::Unit> LoadUnitsIntern(bool refresh, bool dir, uintpt
 
 			if (!inCountryList)
 			{
-				//Not in country list -> do full check
+				//Not in country list -> do partial check -> do full check
 
 				for (int i = istart; i < iend; i++)
 				{
@@ -225,6 +261,19 @@ std::vector<Base::SRU_Data::Unit> LoadUnitsIntern(bool refresh, bool dir, uintpt
 					{
 						addOk = false;
 						break;
+					}
+				}
+
+				if (addOk)
+				{
+					int end = g_unitList.size();
+					for (int i = 0; i < end; i++)
+					{
+						if (g_unitList[i].base == main)
+						{
+							addOk = false;
+							break;
+						}
 					}
 				}
 			}
@@ -237,10 +286,10 @@ std::vector<Base::SRU_Data::Unit> LoadUnitsIntern(bool refresh, bool dir, uintpt
 			{
 				if (IsValidUnit(main))
 				{
-					Unit newUnit{};
-					newUnit.Init(main);
+					//Unit newUnit{};
+					//newUnit.Init(main);
 
-					tmpUnits.push_back(newUnit);
+					tmpUnits.push_back(main);
 				}
 			}
 		}
@@ -295,9 +344,14 @@ void Base::SRU_Data::LoadUnits(bool refresh)
 
 	if (refresh && g_unitList.size() > 196)
 	{
-		std::vector<std::future<std::vector<Unit>>> futures;
+		std::vector<std::future<std::vector<uintptr_t>>> futures;
 
 		int threads = 6;
+
+		if (ntthreads >= 16)
+		{
+			threads = 8;
+		}
 
 		if (ntthreads <= 6)
 		{
@@ -324,12 +378,50 @@ void Base::SRU_Data::LoadUnits(bool refresh)
 			futures.push_back(std::async(std::launch::async, LoadUnitsIntern, refresh, true, tmpStart, tmpEnd, istart, iend));
 		}
 
+		//Combine into one vector and check for duplicates
+		int size = g_unitList.size();
+		std::vector<uintptr_t> possibleNewUnits;
 		for (int i = 0; i < futures.size(); i++)
 		{
-			std::vector<Unit> tmp = futures[i].get();
+			std::vector<uintptr_t> tmp = futures[i].get();
 			for (int j = 0; j < tmp.size(); j++)
 			{
-				g_unitList.push_back(tmp[j]);
+				bool found = false;
+				for (int a = 0; a < possibleNewUnits.size(); a++)
+				{
+					if (possibleNewUnits[a] == tmp[j])
+					{
+						found = true;
+						break;
+					}
+				}
+
+				if (!found)
+				{
+					possibleNewUnits.push_back(tmp[j]);
+				}
+			}
+		}
+
+		//Final check for duplicates
+		for (int i = 0; i < possibleNewUnits.size(); i++)
+		{
+			bool found = false;
+			for (int a = 0; a < size; a++)
+			{
+				if (g_unitList[a].base == possibleNewUnits[i])
+				{
+					found = true;
+					break;
+				}
+			}
+
+			if (!found)
+			{
+				Unit newUnit{};
+				newUnit.Init(possibleNewUnits[i]);
+
+				g_unitList.push_back(newUnit);
 			}
 		}
 	}
@@ -337,11 +429,29 @@ void Base::SRU_Data::LoadUnits(bool refresh)
 	{
 		if (mainOk)
 		{
-			std::vector<Unit> tmp = LoadUnitsIntern(refresh, true, main, 0xFFFFFFFF, 0, g_unitList.size());
+			std::vector<uintptr_t> possibleNewUnits = LoadUnitsIntern(refresh, true, main, 0xFFFFFFFF, 0, g_unitList.size());
 
-			for (int i = 0; i < tmp.size(); i++)
+			//Final check for duplicates
+			for (int i = 0; i < possibleNewUnits.size(); i++)
 			{
-				g_unitList.push_back(tmp[i]);
+				bool found = false;
+				int size = g_unitList.size();
+				for (int a = 0; a < size; a++)
+				{
+					if (g_unitList[a].base == possibleNewUnits[i])
+					{
+						found = true;
+						break;
+					}
+				}
+
+				if (!found)
+				{
+					Unit newUnit{};
+					newUnit.Init(possibleNewUnits[i]);
+
+					g_unitList.push_back(newUnit);
+				}
 			}
 		}
 	}

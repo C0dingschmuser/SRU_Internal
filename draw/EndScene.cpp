@@ -77,147 +77,96 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 						{
 							Draw::DrawSelectedCountryText(cc, "Selected country: %s");
 
-							ImGui::BeginChild("##unitmodifierschild", ImVec2(200, 130), true);
+							ImGui::BeginChild("##unitmodifierschild", ImVec2(225, 150), true);
 							{
-								if (ImGui::Checkbox("Invincible Units", &cc->invincibleUnits))
+								Unit::Property p;
+								int stateChange = -1;
+
+								if (ImGui::Checkbox("Invincible", &cc->invincibleUnits))
 								{
-									if (!cc->invincibleUnits)
-									{
-										//restore normal values
-										for (int i = 0; i < cc->allUnits.size(); i++)
-										{
-											*cc->allUnits[i].health->valPtr =
-												cc->allUnits[i].health->freezeVal;
-										}
-									}
-									else
-									{
-										//save normal values
-										for (int i = 0; i < cc->allUnits.size(); i++)
-										{
-											cc->allUnits[i].health->freezeVal =
-												*cc->allUnits[i].health->valPtr;
-										}
-									}
+									p = Unit::Property::Health;
+									stateChange = (int)cc->invincibleUnits;
 								}
 
 								if (ImGui::Checkbox("Max Supply", &cc->maxSupplyUnits))
 								{
-									if (!cc->maxSupplyUnits)
-									{
-										//restore orig values
-
-										for (int i = 0; i < cc->allUnits.size(); i++)
-										{
-											*cc->allUnits[i].supply->valPtr =
-												cc->allUnits[i].supply->freezeVal;
-										}
-									}
-									else
-									{
-										//save orig values
-
-										for (int i = 0; i < cc->allUnits.size(); i++)
-										{
-											cc->allUnits[i].supply->freezeVal =
-												*cc->allUnits[i].supply->valPtr;
-										}
-									}
+									p = Unit::Property::Supply;
+									stateChange = (int)cc->maxSupplyUnits;
 								}
 
 								if (ImGui::Checkbox("Max Fuel", &cc->maxFuelUnits))
 								{
-									if (!cc->maxFuelUnits)
-									{
-										//restore orig values
-
-										for (int i = 0; i < cc->allUnits.size(); i++)
-										{
-											*cc->allUnits[i].fuel->valPtr =
-												cc->allUnits[i].fuel->freezeVal;
-										}
-									}
-									else
-									{
-										for (int i = 0; i < cc->allUnits.size(); i++)
-										{
-											cc->allUnits[i].fuel->freezeVal =
-												*cc->allUnits[i].fuel->valPtr;
-										}
-									}
-
+									p = Unit::Property::Fuel;
+									stateChange = (int)cc->maxFuelUnits;
 								}
 
 								if (ImGui::Checkbox("Max Experience", &cc->maxExperienceUnits))
 								{
-									if (!cc->maxExperienceUnits)
-									{
-										//restore orig values
-
-										for (int i = 0; i < cc->allUnits.size(); i++)
-										{
-											*cc->allUnits[i].experience->valPtr =
-												cc->allUnits[i].experience->freezeVal;
-										}
-									}
-									else
-									{
-										for (int i = 0; i < cc->allUnits.size(); i++)
-										{
-											cc->allUnits[i].experience->freezeVal =
-												*cc->allUnits[i].experience->valPtr;
-										}
-									}
+									p = Unit::Property::Experience;
+									stateChange = (int)cc->maxExperienceUnits;
 								}
 
 								if (ImGui::Checkbox("Max Morale", &cc->maxMoraleUnits))
 								{
-									if (!cc->maxMoraleUnits)
-									{
-										//restore orig values
+									p = Unit::Property::Morale;
+									stateChange = (int)cc->maxMoraleUnits;
+								}
 
-										for (int i = 0; i < cc->allUnits.size(); i++)
-										{
-											*cc->allUnits[i].morale->valPtr =
-												cc->allUnits[i].morale->freezeVal;
-										}
-									}
-									else
+								if (ImGui::Checkbox("Max Efficiency", &cc->maxEfficiencyUnits))
+								{
+									p = Unit::Property::Efficiency;
+									stateChange = (int)cc->maxEfficiencyUnits;
+								}
+
+								if (stateChange == 0)
+								{
+									//restore
+									for (int i = 0; i < cc->allUnits.size(); i++)
 									{
-										for (int i = 0; i < cc->allUnits.size(); i++)
-										{
-											cc->allUnits[i].morale->freezeVal =
-												*cc->allUnits[i].morale->valPtr;
-										}
+										*cc->allUnits[i].properties[(int)p]->valPtr =
+											cc->allUnits[i].properties[(int)p]->freezeVal;
+									}
+								}
+								else if (stateChange == 1)
+								{
+									//save orig
+									for (int i = 0; i < cc->allUnits.size(); i++)
+									{
+										cc->allUnits[i].properties[(int)p]->freezeVal =
+											*cc->allUnits[i].properties[(int)p]->valPtr;
 									}
 								}
 							}
 							ImGui::EndChild();
-							
-							static int speed = 1000;
-							ImGui::InputInt("##unitspeededit", &speed, 0, 0);
-
-							if (ImGui::Checkbox("Lightspeed", &cc->maxMoveSpeedUnitsT))
+							ImGui::SameLine();
+							ImGui::BeginChild("##unitmodifierschild2");
 							{
-								if (!cc->maxMoveSpeedUnitsT)
+								if (ImGui::Checkbox("Lightspeed", &cc->maxMoveSpeedUnitsT))
 								{
-									for (int i = 0; i < cc->allUnits.size(); i++)
+									if (!cc->maxMoveSpeedUnitsT)
 									{
-										cc->allUnits[i].RestoreDesignProperty(cc, UnitDefault::Property::MoveSpeed);
-									}
+										for (int i = 0; i < cc->allUnits.size(); i++)
+										{
+											cc->allUnits[i].RestoreDesignProperty(cc, UnitDefault::Property::MoveSpeed);
+										}
 
-									*(uintptr_t*)(cc->base + Offsets::countryRailTransport) = (uint8_t)0;
-								}
-								else
-								{
-									for (int i = 0; i < cc->allUnits.size(); i++)
+										*(uintptr_t*)(cc->base + Offsets::countryRailTransport) = (uint8_t)0;
+									}
+									else
 									{
-										cc->allUnits[i].SetDesignProperty(cc, UnitDefault::Property::MoveSpeed, (uint16_t)speed);
-									}
+										UnitDefault::HolderValue v;
+										v.ui16 = (uint16_t)15000;
 
-									*(uintptr_t*)(cc->base + Offsets::countryRailTransport) = (uint8_t)2;
+										for (int i = 0; i < cc->allUnits.size(); i++)
+										{
+											cc->allUnits[i].SetDesignProperty(cc, UnitDefault::Property::MoveSpeed, v);
+										}
+
+										*(uintptr_t*)(cc->base + Offsets::countryRailTransport) = (uint8_t)2;
+									}
 								}
 							}
+							ImGui::EndChild();
 
 							ImGui::Text("Non-highlighted options affect the unit design");
 							ImGui::EndTabItem();

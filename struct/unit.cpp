@@ -131,39 +131,41 @@ void Base::SRU_Data::Unit::Init(uintptr_t base)
 
 	std::shared_ptr<FloatValue> health(new FloatValue);
 	health->valPtr = (float*)(base + Offsets::unitHealth);
-	this->health = health;
-
+	this->properties.push_back(health);
+	
 	std::shared_ptr<FloatValue> maxHealth(new FloatValue);
 	maxHealth->valPtr = (float*)(base + Offsets::unitHealthMax);
-	this->maxHealth = maxHealth;
+	this->properties.push_back(maxHealth);
 
 	std::shared_ptr<FloatValue> fuel(new FloatValue);
 	fuel->valPtr = (float*)(base + Offsets::unitFuel);
 	fuel->origVal = 
-		*this->maxHealth->valPtr * *this->defaultStats->fuelCapacity->valPtr;
-	this->fuel = fuel;
+		*this->properties[(int)Property::MaxHalth]->valPtr * *this->defaultStats->fuelCapacity->valPtr;
+	this->properties.push_back(fuel);
 
 	std::shared_ptr<FloatValue> supply(new FloatValue);
 	supply->valPtr = (float*)(base + Offsets::unitSupply);
 	supply->origVal = 
-		*this->maxHealth->valPtr * *this->defaultStats->supplyCapacity->valPtr;
-	this->supply = supply;
+		*this->properties[(int)Property::MaxHalth]->valPtr * *this->defaultStats->supplyCapacity->valPtr;
+	this->properties.push_back(supply);
+
+	std::shared_ptr<FloatValue> efficiency(new FloatValue);
+	efficiency->valPtr = (float*)(base + Offsets::unitEfficiency);
+	efficiency->origVal = 1.5f;
+	this->properties.push_back(efficiency);
 
 	std::shared_ptr<FloatValue> experience(new FloatValue);
 	experience->valPtr = (float*)(base + Offsets::unitExperience);
-	this->experience = experience;
+	experience->origVal = 5.0f;
+	this->properties.push_back(experience);
 
 	std::shared_ptr<FloatValue> morale(new FloatValue);
 	morale->valPtr = (float*)(base + Offsets::unitMorale);
-	this->morale = morale;
-
-	int id = *(uintptr_t*)(base + Offsets::unitId);
-	uint8_t id2 = *(uint8_t*)(defaultStats->base + 0x4);
-
-	//std::cout << std::dec << id << std::hex << " " << (int)id2 << " " << defaultStats->base << " " << defaultStats->name << std::endl;
+	morale->origVal = 1.0f;
+	this->properties.push_back(morale);
 }
 
-void Base::SRU_Data::Unit::SetDesignProperty(Country* c, UnitDefault::Property p, uint16_t v)
+void Base::SRU_Data::Unit::SetDesignProperty(Country* c, UnitDefault::Property p, UnitDefault::HolderValue v)
 {
 	std::shared_ptr<UnitDefault::ChangeHolder> change = 
 		this->defaultStats->propertyChanges[(int)p];
@@ -171,9 +173,26 @@ void Base::SRU_Data::Unit::SetDesignProperty(Country* c, UnitDefault::Property p
 	if (change->change > 0)
 	{
 		//already changed, check if new value
-		if (change->val == v)
+		
+		switch (p)
 		{
-			return;
+		default:
+			if (change->val.ui16 == v.ui16)
+			{
+				return;
+			}
+			break;
+		case UnitDefault::Property::FuelCapacity:
+		case UnitDefault::Property::SupplyCapacity:
+		case UnitDefault::Property::GroundRange:
+		case UnitDefault::Property::NavalRange:
+		case UnitDefault::Property::AirRange:
+		case UnitDefault::Property::BuildTime:
+			if (change->val.f == v.f)
+			{
+				return;
+			}
+			break;
 		}
 	}
 
@@ -198,8 +217,6 @@ void Base::SRU_Data::Unit::SetDesignProperty(Country* c, UnitDefault::Property p
 					(int)buffer;
 			}
 		}
-
-		//*(int*)(base + Offsets::unitDefaultValues) = (int)buffer;
 	}
 
 	uintptr_t dBase = (uintptr_t)this->defaultStats->customDefault;
@@ -207,49 +224,49 @@ void Base::SRU_Data::Unit::SetDesignProperty(Country* c, UnitDefault::Property p
 	switch (p)
 	{
 	case UnitDefault::Property::MoveSpeed:
-		*(uint16_t*)(dBase + Offsets::unitDefaultMoveSpeed) = v;
+		*(uint16_t*)(dBase + Offsets::unitDefaultMoveSpeed) = v.ui16;
 		break;
 	case UnitDefault::Property::Spotting:
-		this->defaultStats->spotting->OverrideVal(v);
+		*(uint16_t*)(dBase + Offsets::unitDefaultSpotting) = v.ui16;
 		break;
 	case UnitDefault::Property::MoveRange:
-		this->defaultStats->moveRange->OverrideVal(v);
+		*(uint16_t*)(dBase + Offsets::unitDefaultMoveRange) = v.ui16;
 		break;
 	case UnitDefault::Property::SoftGroundAttack:
-		this->defaultStats->softGroundAttack->OverrideVal(v);
+		*(uint16_t*)(dBase + Offsets::unitDefaultSoftGroundAttack) = v.ui16;
 		break;
 	case UnitDefault::Property::HardGroundAttack:
-		this->defaultStats->hardGroundAttack->OverrideVal(v);
+		*(uint16_t*)(dBase + Offsets::unitDefaultHardGroundAttack) = v.ui16;
 		break;
 	case UnitDefault::Property::CloseGroundAttack:
-		this->defaultStats->closeGroundAttack->OverrideVal(v);
+		*(uint16_t*)(dBase + Offsets::unitDefaultCloseGroundAttack) = v.ui16;
 		break;
 	case UnitDefault::Property::CloseAirAttack:
-		this->defaultStats->closeAirAttack->OverrideVal(v);
+		*(uint16_t*)(dBase + Offsets::unitDefaultCloseAirAttack) = v.ui16;
 		break;
 	case UnitDefault::Property::MidAirAttack:
-		this->defaultStats->midAirAttack->OverrideVal(v);
+		*(uint16_t*)(dBase + Offsets::unitDefaultMidAirAttack) = v.ui16;
 		break;
 	case UnitDefault::Property::HighAirAttack:
-		this->defaultStats->highAirAttack->OverrideVal(v);
+		*(uint16_t*)(dBase + Offsets::unitDefaultHighAirAttack) = v.ui16;
 		break;
 	case UnitDefault::Property::GroundRange:
-		this->defaultStats->groundRange->OverrideVal(v);
+		*(float*)(dBase + Offsets::unitDefaultGroundRange) = v.f;
 		break;
 	case UnitDefault::Property::NavalRange:
-		this->defaultStats->navalRange->OverrideVal(v);
+		*(float*)(dBase + Offsets::unitDefaultNavalRange) = v.f;
 		break;
 	case UnitDefault::Property::AirRange:
-		this->defaultStats->airRange->OverrideVal(v);
+		*(float*)(dBase + Offsets::unitDefaultAirRange) = v.f;
 		break;
 	case UnitDefault::Property::FuelCapacity:
-		this->defaultStats->fuelCapacity->OverrideVal(v);
+		*(float*)(dBase + Offsets::unitDefaultFuelCapacity) = v.f;
 		break;
 	case UnitDefault::Property::SupplyCapacity:
-		this->defaultStats->supplyCapacity->OverrideVal(v);
+		*(float*)(dBase + Offsets::unitDefaultSupplyCapacity) = v.f;
 		break;
 	case UnitDefault::Property::BuildTime:
-		this->defaultStats->buildTime->OverrideVal(v);
+		*(float*)(dBase + Offsets::unitDefaultBuildTime) = v.f;
 		break;
 	}
 }
@@ -298,9 +315,8 @@ void Base::SRU_Data::Unit::RestoreDesignProperty(Country* c, UnitDefault::Proper
 			}
 		}
 
-
+		free(this->defaultStats->customDefault);
 		this->defaultStats->customDefault = nullptr;
-		//*(uintptr_t*)(base + Offsets::unitDefaultValues) = this->defaultStats->base;
 		return;
 	}
 
@@ -311,46 +327,60 @@ void Base::SRU_Data::Unit::RestoreDesignProperty(Country* c, UnitDefault::Proper
 			*(uint16_t*)(this->defaultStats->base + Offsets::unitDefaultMoveSpeed);
 		break;
 	case UnitDefault::Property::Spotting:
-		this->defaultStats->spotting->RestoreVal();
+		*(uint16_t*)(this->defaultStats->customDefault + Offsets::unitDefaultSpotting) =
+			*(uint16_t*)(this->defaultStats->base + Offsets::unitDefaultSpotting);
 		break;
 	case UnitDefault::Property::MoveRange:
-		this->defaultStats->moveRange->RestoreVal();
+		*(uint16_t*)(this->defaultStats->customDefault + Offsets::unitDefaultMoveRange) =
+			*(uint16_t*)(this->defaultStats->base + Offsets::unitDefaultMoveRange);
 		break;
 	case UnitDefault::Property::SoftGroundAttack:
-		this->defaultStats->softGroundAttack->RestoreVal();
+		*(uint16_t*)(this->defaultStats->customDefault + Offsets::unitDefaultSoftGroundAttack) =
+			*(uint16_t*)(this->defaultStats->base + Offsets::unitDefaultSoftGroundAttack);
 		break;
 	case UnitDefault::Property::HardGroundAttack:
-		this->defaultStats->hardGroundAttack->RestoreVal();
+		*(uint16_t*)(this->defaultStats->customDefault + Offsets::unitDefaultHardGroundAttack) =
+			*(uint16_t*)(this->defaultStats->base + Offsets::unitDefaultHardGroundAttack);
 		break;
 	case UnitDefault::Property::CloseGroundAttack:
-		this->defaultStats->closeGroundAttack->RestoreVal();
+		*(uint16_t*)(this->defaultStats->customDefault + Offsets::unitDefaultCloseGroundAttack) =
+			*(uint16_t*)(this->defaultStats->base + Offsets::unitDefaultCloseGroundAttack);
 		break;
 	case UnitDefault::Property::CloseAirAttack:
-		this->defaultStats->closeAirAttack->RestoreVal();
+		*(uint16_t*)(this->defaultStats->customDefault + Offsets::unitDefaultCloseAirAttack) =
+			*(uint16_t*)(this->defaultStats->base + Offsets::unitDefaultCloseAirAttack);
 		break;
 	case UnitDefault::Property::MidAirAttack:
-		this->defaultStats->midAirAttack->RestoreVal();
+		*(uint16_t*)(this->defaultStats->customDefault + Offsets::unitDefaultMidAirAttack) =
+			*(uint16_t*)(this->defaultStats->base + Offsets::unitDefaultMidAirAttack);
 		break;
 	case UnitDefault::Property::HighAirAttack:
-		this->defaultStats->highAirAttack->RestoreVal();
+		*(uint16_t*)(this->defaultStats->customDefault + Offsets::unitDefaultHighAirAttack) =
+			*(uint16_t*)(this->defaultStats->base + Offsets::unitDefaultHighAirAttack);
 		break;
 	case UnitDefault::Property::GroundRange:
-		this->defaultStats->groundRange->RestoreVal();
+		*(float*)(this->defaultStats->customDefault + Offsets::unitDefaultGroundRange) =
+			*(float*)(this->defaultStats->base + Offsets::unitDefaultGroundRange);
 		break;
 	case UnitDefault::Property::NavalRange:
-		this->defaultStats->navalRange->RestoreVal();
+		*(float*)(this->defaultStats->customDefault + Offsets::unitDefaultNavalRange) =
+			*(float*)(this->defaultStats->base + Offsets::unitDefaultNavalRange);
 		break;
 	case UnitDefault::Property::AirRange:
-		this->defaultStats->airRange->RestoreVal();
+		*(float*)(this->defaultStats->customDefault + Offsets::unitDefaultAirRange) =
+			*(float*)(this->defaultStats->base + Offsets::unitDefaultAirRange);
 		break;
 	case UnitDefault::Property::FuelCapacity:
-		this->defaultStats->fuelCapacity->RestoreVal();
+		*(float*)(this->defaultStats->customDefault + Offsets::unitDefaultFuelCapacity) =
+			*(float*)(this->defaultStats->base + Offsets::unitDefaultFuelCapacity);
 		break;
 	case UnitDefault::Property::SupplyCapacity:
-		this->defaultStats->supplyCapacity->RestoreVal();
+		*(float*)(this->defaultStats->customDefault + Offsets::unitDefaultSupplyCapacity) =
+			*(float*)(this->defaultStats->base + Offsets::unitDefaultSupplyCapacity);
 		break;
 	case UnitDefault::Property::BuildTime:
-		this->defaultStats->buildTime->RestoreVal();
+		*(float*)(this->defaultStats->customDefault + Offsets::unitDefaultBuildTime) =
+			*(float*)(this->defaultStats->base + Offsets::unitDefaultBuildTime);
 		break;
 	}
 }
