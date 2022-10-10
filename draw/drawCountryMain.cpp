@@ -22,6 +22,8 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 {
 	DrawSelectedCountryText(cc, "Selected country: %s");
 
+	float inputWidth = 275;
+
 	//Treasury
 
 	if (ImGui::Checkbox("###cb_treasury", &cc->treasury->freeze))
@@ -29,10 +31,12 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 		cc->treasury->freezeVal = *cc->treasury->valPtr;
 	}
 	ImGui::SameLine();
+	ImGui::PushItemWidth(inputWidth);
 	if (ImGui::InputFloat("Treasury", cc->treasury->valPtr, 1000000000, 0.0f, "%.0f"))
 	{
 		cc->treasury->freezeVal = *cc->treasury->valPtr;
 	}
+	ImGui::PopItemWidth();
 
 	//Domnestic approval
 
@@ -41,12 +45,14 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 		cc->domApproval->freezeVal = *cc->domApproval->valPtr;
 	}
 	ImGui::SameLine();
+	ImGui::PushItemWidth(inputWidth);
 	if (ImGui::InputFloat("Dom. approval", cc->domApproval->valPtr, 0.1f))
 	{
 		float val = *cc->domApproval->valPtr;
 		*cc->domApproval->valPtr = std::clamp(val, 0.0f, 1.0f);
 		cc->domApproval->freezeVal = *cc->domApproval->valPtr;
 	}
+	ImGui::PopItemWidth();
 
 	//Military Approval
 
@@ -55,12 +61,14 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 		cc->milApproval->freezeVal = *cc->milApproval->valPtr;
 	}
 	ImGui::SameLine();
+	ImGui::PushItemWidth(inputWidth);
 	if (ImGui::InputFloat("Mil. approval", cc->milApproval->valPtr, 0.1f))
 	{
 		float val = *cc->milApproval->valPtr;
 		*cc->milApproval->valPtr = std::clamp(val, 0.0f, 1.0f);
 		cc->milApproval->freezeVal = *cc->milApproval->valPtr;
 	}
+	ImGui::PopItemWidth();
 
 	//Reserve personnel
 
@@ -69,12 +77,14 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 		cc->milReserve->freezeVal = *cc->milReserve->valPtr;
 	}
 	ImGui::SameLine();
+	ImGui::PushItemWidth(inputWidth);
 	if (ImGui::InputFloat("Reserve personnel", cc->milReserve->valPtr, 100000, 0, "%.0f"))
 	{
 		float val = *cc->milReserve->valPtr;
 		*cc->milApproval->valPtr = std::clamp(val, 0.0f, 999999999.0f);
 		cc->milReserve->freezeVal = *cc->milReserve->valPtr;
 	}
+	ImGui::PopItemWidth();
 
 	//Research efficiency
 
@@ -83,12 +93,14 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 		cc->researchEff->freezeVal = *cc->researchEff->valPtr;
 	}
 	ImGui::SameLine();
+	ImGui::PushItemWidth(inputWidth);
 	if (ImGui::InputFloat("Research efficiency", cc->researchEff->valPtr, 0.1f, 0.0f, "%.1f"))
 	{
 		float val = *cc->researchEff->valPtr;
 		*cc->researchEff->valPtr = std::clamp(val, 0.0f, 50000.0f);
 		cc->researchEff->freezeVal = *cc->researchEff->valPtr;
 	}
+	ImGui::PopItemWidth();
 
 	//Treaty integrity
 
@@ -97,12 +109,14 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 		cc->treatyIntegrity->freezeVal = *cc->treatyIntegrity->valPtr;
 	}
 	ImGui::SameLine();
+	ImGui::PushItemWidth(inputWidth);
 	if (ImGui::InputFloat("Treaty integrity", cc->treatyIntegrity->valPtr, 0.1f))
 	{
 		float val = *cc->treatyIntegrity->valPtr;
 		*cc->treatyIntegrity->valPtr = std::clamp(val, 0.0f, 3.0f);
 		cc->treatyIntegrity->freezeVal = *cc->treatyIntegrity->valPtr;
 	}
+	ImGui::PopItemWidth();
 
 	//World market opinion
 
@@ -111,18 +125,55 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 		cc->worldMarketOpinion->freezeVal = *cc->worldMarketOpinion->valPtr;
 	}
 	ImGui::SameLine();
+	ImGui::PushItemWidth(inputWidth);
 	if (ImGui::InputFloat("W. market opinion", cc->worldMarketOpinion->valPtr, 0.1f))
 	{
 		float val = *cc->worldMarketOpinion->valPtr;
 		*cc->worldMarketOpinion->valPtr = std::clamp(val, 0.0f, 3.0f);
 		cc->worldMarketOpinion->freezeVal = *cc->worldMarketOpinion->valPtr;
 	}
+	ImGui::PopItemWidth();
 
 	//-----------------------------------------------------------------------------------
 	//--- Goods -------------------------------------------------------------------------
 	//-----------------------------------------------------------------------------------
 
 	ImGui::Separator();
+	
+	std::string defconText = "Auto";
+
+	switch (cc->defconState)
+	{
+	case 0:
+		defconText = "Peace";
+		break;
+	case 1:
+		defconText = "Guarded";
+		break;
+	case 2:
+		defconText = "Elevated";
+		break;
+	case 3:
+		defconText = "High";
+		break;
+	case 4:
+		defconText = "War";
+		break;
+		
+	}
+
+	ImGui::Text("DEFCON");
+	ImGui::PushItemWidth(inputWidth);
+	if (ImGui::SliderInt("###defconslider", &cc->defconState, -1, 4, defconText.c_str()))
+	{
+		if (cc->defconState > -1)
+		{
+			*cc->defconPtrs[0] = cc->defconState;
+			*cc->defconPtrs[1] = cc->defconState;
+		}
+	}
+	ImGui::PopItemWidth();
+	ImGui::Separator();;
 	ImGui::Text("Goods");
 
 	for (int i = 0; i < cc->resources.size(); i++)
@@ -136,25 +187,29 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 				cc->resources[i].stock->freezeVal = *cc->resources[i].stock->valPtr;
 			}
 			ImGui::SameLine();
+			ImGui::PushItemWidth(inputWidth);
 			if (ImGui::InputFloat("Stock", cc->resources[i].stock->valPtr, 10000.0f, 0.0f, "%.1f"))
 			{
 				float val = *cc->resources[i].stock->valPtr;
 				*cc->resources[i].stock->valPtr = std::clamp(val, 0.0f, FLT_MAX);
 				cc->resources[i].stock->freezeVal = *cc->resources[i].stock->valPtr;
 			}
-			
+			ImGui::PopItemWidth();
+
 			//Production
 			if (ImGui::Checkbox(std::string("###cb" + name + "production").c_str(), &cc->resources[i].production->freeze))
 			{
 				cc->resources[i].production->freezeVal = *cc->resources[i].production->valPtr;
 			}
 			ImGui::SameLine();
+			ImGui::PushItemWidth(inputWidth);
 			if (ImGui::InputFloat("Production", cc->resources[i].production->valPtr, 100000.0f, 0.0f, "%.1f"))
 			{
 				float val = *cc->resources[i].production->valPtr;
 				*cc->resources[i].production->valPtr = std::clamp(val, 0.0f, FLT_MAX);
 				cc->resources[i].production->freezeVal = *cc->resources[i].production->valPtr;
 			}
+			ImGui::PopItemWidth();
 
 			//Production cost
 			if (ImGui::Checkbox(std::string("###cb" + name + "productioncost").c_str(), &cc->resources[i].productionCost->freeze))
@@ -162,12 +217,14 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 				cc->resources[i].productionCost->freezeVal = *cc->resources[i].productionCost->valPtr;
 			}
 			ImGui::SameLine();
+			ImGui::PushItemWidth(inputWidth);
 			if (ImGui::InputFloat("Production cost", cc->resources[i].productionCost->valPtr, 10000.0f, 0.0f, "%.1f"))
 			{
 				float val = *cc->resources[i].productionCost->valPtr;
 				*cc->resources[i].productionCost->valPtr = std::clamp(val, 0.0f, FLT_MAX);
 				cc->resources[i].productionCost->freezeVal = *cc->resources[i].productionCost->valPtr;
 			}
+			ImGui::PopItemWidth();
 
 			//Market price
 			if (ImGui::Checkbox(std::string("###cb" + name + "marketprice").c_str(), &cc->resources[i].marketPrice->freeze))
@@ -175,12 +232,14 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 				cc->resources[i].marketPrice->freezeVal = *cc->resources[i].marketPrice->valPtr;
 			}
 			ImGui::SameLine();
+			ImGui::PushItemWidth(inputWidth);
 			if (ImGui::InputFloat("Market price", cc->resources[i].marketPrice->valPtr, 10000.0f, 0.0f, "%.1f"))
 			{
 				float val = *cc->resources[i].marketPrice->valPtr;
 				*cc->resources[i].marketPrice->valPtr = std::clamp(val, 0.0f, FLT_MAX);
 				cc->resources[i].marketPrice->freezeVal = *cc->resources[i].marketPrice->valPtr;
 			}
+			ImGui::PopItemWidth();
 
 			//Margin
 			if (ImGui::Checkbox(std::string("###cb" + name + "margin").c_str(), &cc->resources[i].margin->freeze))
@@ -188,12 +247,14 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 				cc->resources[i].margin->freezeVal = *cc->resources[i].margin->valPtr;
 			}
 			ImGui::SameLine();
+			ImGui::PushItemWidth(inputWidth);
 			if (ImGui::InputFloat("Margin", cc->resources[i].margin->valPtr, 10000.0f, 0.0f, "%.1f"))
 			{
 				float val = *cc->resources[i].margin->valPtr;
 				*cc->resources[i].margin->valPtr = std::clamp(val, 0.0f, FLT_MAX);
 				cc->resources[i].margin->freezeVal = *cc->resources[i].margin->valPtr;
 			}
+			ImGui::PopItemWidth();
 
 			ImGui::TreePop();
 		}

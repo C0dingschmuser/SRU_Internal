@@ -30,6 +30,9 @@ void Base::SRU_Data::Country::Init(uintptr_t base)
 		}
 	}
 
+	this->defconPtrs[0] = (int*)(base + Offsets::countryDefconDirect);
+	this->defconPtrs[1] = (int*)(base + Offsets::countryDefconMain);
+
 	std::shared_ptr<FloatValue> treasury(new FloatValue);
 	treasury->valPtr = (float*)(base + Offsets::countryTreasury);
 	this->treasury = treasury;

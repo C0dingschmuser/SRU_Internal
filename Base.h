@@ -249,7 +249,7 @@ namespace Base
 			std::shared_ptr<FloatValue> culturalSubState;
 			std::shared_ptr<FloatValue> socialAssistanceState;
 
-			std::shared_ptr<IntValue> defcon;
+			int* defconPtrs[2] = {0, 0};
 			int defconState = -1;
 
 			//could be upgraded to int to make options scalable
@@ -396,6 +396,7 @@ namespace Base
 
 	namespace Utils
 	{
+		std::string FloatToPercent(float f, float max);
 		bool MemCompare(const BYTE* bData, const BYTE* bMask, const char* szMask);
 		bool CanReadPtr(void* ptr);
 		uintptr_t PointerChain(uintptr_t ptr, std::vector<unsigned int> offsets);

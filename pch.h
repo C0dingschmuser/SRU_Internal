@@ -25,6 +25,8 @@
 #include <future>
 #include <string>
 #include <mutex>
+#include <sstream>
+#include <iomanip>
 
 inline void SuspendThreads(bool suspend) {
 	HANDLE hThreadSnap = INVALID_HANDLE_VALUE;

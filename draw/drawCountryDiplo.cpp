@@ -5,9 +5,9 @@ void Base::Draw::DrawCountryDiplo(Base::SRU_Data::Country* cc, int& treatyMsg)
 	using namespace Base::SRU_Data;
 	bool menuDisabled = false;
 
-	Country t = g_countryList[g_selectedTargetCountry];
+	Country* t = &g_countryList[g_selectedTargetCountry];
 
-	if (t.base == cc->base)
+	if (t->base == cc->base)
 	{
 		menuDisabled = true;
 	}
@@ -17,9 +17,25 @@ void Base::Draw::DrawCountryDiplo(Base::SRU_Data::Country* cc, int& treatyMsg)
 	ImGui::Text("Click / Shift-Click to change");
 	ImGui::Separator();
 
+	static float tmp1 = 0, tmp2 = 0, tmp3 = 0;
+
+	float* diplRating = nullptr;
+	float* diplCivRating = nullptr;
+	float* diplBelliRating = nullptr;
+
 	if (menuDisabled)
 	{
 		ImGui::BeginDisabled();
+
+		diplRating = &tmp1;
+		diplCivRating = &tmp2;
+		diplBelliRating = &tmp3;
+	}
+	else
+	{
+		diplRating = (float*)(cc->base + t->oId * 4 + Offsets::countryDiplRatings);
+		diplCivRating = (float*)(cc->base + t->oId * 4 + Offsets::countryDiplCivRatings);
+		diplBelliRating = (float*)(cc->base + t->oId * 4 + Offsets::countryDiplCasusBelli);
 	}
 
 	ImGui::BeginChild("##countrydiplsliders", ImVec2(225, 225));
@@ -28,18 +44,21 @@ void Base::Draw::DrawCountryDiplo(Base::SRU_Data::Country* cc, int& treatyMsg)
 
 		ImGui::PushItemWidth(225);
 
-		float* diplRating = (float*)(cc->base + t.oId * 4 + Offsets::countryDiplRatings);
-		ImGui::SliderFloat("##countrydiplrating", diplRating, -1.5f, 1.5f, "%.3f");
+		std::string str = Base::Utils::FloatToPercent(*diplRating, 1.0f);
+
+		ImGui::SliderFloat("##countrydiplrating", diplRating, -1.5f, 1.5f, str.c_str());//"%.3f");
 
 		ImGui::Text("Civilian Rating");
 
-		float* diplCivRating = (float*)(cc->base + t.oId * 4 + Offsets::countryDiplCivRatings);
-		ImGui::SliderFloat("##countrydiplcivrating", diplCivRating, -1.5f, 1.5f, "%.3f");
+		str = Base::Utils::FloatToPercent(*diplCivRating, 1.0f);
+
+		ImGui::SliderFloat("##countrydiplcivrating", diplCivRating, -1.5f, 1.5f, str.c_str());//"%.3f");
 
 		ImGui::Text("Casus Belli");
 
-		float* diplBelliRating = (float*)(cc->base + t.oId * 4 + Offsets::countryDiplCasusBelli);
-		ImGui::SliderFloat("##countrydiplbellirating", diplBelliRating, -1.5f, 1.5f, "%.3f");
+		str = Base::Utils::FloatToPercent(*diplBelliRating, 1.0f);
+
+		ImGui::SliderFloat("##countrydiplbellirating", diplBelliRating, -1.5f, 1.5f, str.c_str());//"%.3f");
 
 		ImGui::PopItemWidth();
 	}

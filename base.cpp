@@ -463,7 +463,7 @@ void Base::SRU_Data::LoadUnits(bool refresh)
 	static double benchmarkResults[3] = { 0, 0, 0 };
 	double elapsedTime = fp_ms.count();
 
-	std::cout << "Elapsed U Time: " << fp_ms.count() << "ms" << std::endl;
+	//std::cout << "Elapsed U Time: " << fp_ms.count() << "ms" << std::endl;
 
 	if (refresh && g_unitList.size() > 1000 && benchmarked < 3)
 	{
@@ -517,7 +517,7 @@ void Base::SRU_Data::LoadUnits(bool refresh)
 	clockEnd = std::chrono::high_resolution_clock::now();
 	fp_ms = clockEnd - clockStart;
 
-	std::cout << "Elapsed C Time: " << fp_ms.count() << "ms" << std::endl;
+	//std::cout << "Elapsed C Time: " << fp_ms.count() << "ms" << std::endl;
 
 	if (g_defaultUnitList.size() > 2)
 	{
@@ -536,8 +536,8 @@ void Base::SRU_Data::LoadUnits(bool refresh)
 		}
 	}
 
-	std::cout << "Total default units found: " << std::dec << g_defaultUnitList.size() << std::endl;
-	std::cout << "Total units found: " << std::dec << g_unitList.size() << std::endl;	
+	//std::cout << "Total default units found: " << std::dec << g_defaultUnitList.size() << std::endl;
+	//std::cout << "Total units found: " << std::dec << g_unitList.size() << std::endl;	
 }
 
 void Base::SRU_Data::LoadDefaultUnits()
@@ -594,6 +594,14 @@ void Base::SRU_Data::LoadDefaultUnits()
 void Base::Init(bool full = false)
 {
 	Hooks::Init(full);
+}
+
+std::string Base::Utils::FloatToPercent(float f, float max)
+{
+	float p = (f / max) * 100;
+	std::stringstream str;
+	str << std::fixed << std::setprecision(2) << p << "%%";
+	return str.str();
 }
 
 bool Base::Utils::MemCompare(const BYTE* bData, const BYTE* bMask, const char* szMask)

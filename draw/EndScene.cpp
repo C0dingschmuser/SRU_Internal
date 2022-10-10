@@ -273,7 +273,10 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 					{
 						ImGui::Text("Settings");	
 						ImGui::Text("Minimum global hex supply");
-						ImGui::SliderByte("##hexsupplyslider", &Asm::g_lowestHexSupply, 0, 255);
+
+						std::string str = Base::Utils::FloatToPercent((float)Asm::g_lowestHexSupply, 255.0f);
+
+						ImGui::SliderByte("##hexsupplyslider", &Asm::g_lowestHexSupply, 0, 255, str.c_str());
 						ImGui::Checkbox("Let AI create colonies", &g_aiColony);
 						if (ImGui::Checkbox("[EXPERIMENTAL]\nNo automatic production adjustment", &g_productionAdjustment))
 						{

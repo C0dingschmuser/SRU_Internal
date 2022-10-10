@@ -86,9 +86,6 @@ void SetupSessionPtr(uintptr_t base = NULL)
     g_countryList.erase(g_countryList.begin() + pos);
     g_countryList.insert(g_countryList.begin(), own);
 
-    Country* o = &g_countryList[0];
-    o->defconState = 0;
-
     Base::Execute::SetupFunctions();
 
     Base::SRU_Data::LoadDefaultUnits();
@@ -124,6 +121,9 @@ void CheckCurrentCountry(uintptr_t* clickedCountryPtr)
         g_mouseClicked = false;
         //if (g_lastClickedCountry != *clickedCountryPtr)
         {
+            std::cout << "------------" << std::endl;
+			std::cout << "Old: " << std::dec << g_lastClickedCountry << " New: " << *clickedCountryPtr << std::endl;
+
             g_lastClickedCountry = *clickedCountryPtr;
 
             if (!g_shift)
