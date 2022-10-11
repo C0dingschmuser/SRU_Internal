@@ -73,104 +73,6 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 						{
 							treatyMsg = 0;
 						}
-						if (ImGui::BeginTabItem("Unit modifiers"))
-						{
-							Draw::DrawSelectedCountryText(cc, "Selected country: %s");
-
-							ImGui::BeginChild("##unitmodifierschild", ImVec2(225, 150), true);
-							{
-								Unit::Property p;
-								int stateChange = -1;
-
-								if (ImGui::Checkbox("Invincible", &cc->invincibleUnits))
-								{
-									p = Unit::Property::Health;
-									stateChange = (int)cc->invincibleUnits;
-								}
-
-								if (ImGui::Checkbox("Max Supply", &cc->maxSupplyUnits))
-								{
-									p = Unit::Property::Supply;
-									stateChange = (int)cc->maxSupplyUnits;
-								}
-
-								if (ImGui::Checkbox("Max Fuel", &cc->maxFuelUnits))
-								{
-									p = Unit::Property::Fuel;
-									stateChange = (int)cc->maxFuelUnits;
-								}
-
-								if (ImGui::Checkbox("Max Experience", &cc->maxExperienceUnits))
-								{
-									p = Unit::Property::Experience;
-									stateChange = (int)cc->maxExperienceUnits;
-								}
-
-								if (ImGui::Checkbox("Max Morale", &cc->maxMoraleUnits))
-								{
-									p = Unit::Property::Morale;
-									stateChange = (int)cc->maxMoraleUnits;
-								}
-
-								if (ImGui::Checkbox("Max Efficiency", &cc->maxEfficiencyUnits))
-								{
-									p = Unit::Property::Efficiency;
-									stateChange = (int)cc->maxEfficiencyUnits;
-								}
-
-								if (stateChange == 0)
-								{
-									//restore
-									for (int i = 0; i < cc->allUnits.size(); i++)
-									{
-										*cc->allUnits[i].properties[(int)p]->valPtr =
-											cc->allUnits[i].properties[(int)p]->freezeVal;
-									}
-								}
-								else if (stateChange == 1)
-								{
-									//save orig
-									for (int i = 0; i < cc->allUnits.size(); i++)
-									{
-										cc->allUnits[i].properties[(int)p]->freezeVal =
-											*cc->allUnits[i].properties[(int)p]->valPtr;
-									}
-								}
-							}
-							ImGui::EndChild();
-							ImGui::SameLine();
-							ImGui::BeginChild("##unitmodifierschild2");
-							{
-								if (ImGui::Checkbox("Lightspeed", &cc->maxMoveSpeedUnitsT))
-								{
-									if (!cc->maxMoveSpeedUnitsT)
-									{
-										for (int i = 0; i < cc->allUnits.size(); i++)
-										{
-											cc->allUnits[i].RestoreDesignProperty(cc, UnitDefault::Property::MoveSpeed);
-										}
-
-										*(uintptr_t*)(cc->base + Offsets::countryRailTransport) = (uint8_t)0;
-									}
-									else
-									{
-										UnitDefault::HolderValue v;
-										v.ui16 = (uint16_t)15000;
-
-										for (int i = 0; i < cc->allUnits.size(); i++)
-										{
-											cc->allUnits[i].SetDesignProperty(cc, UnitDefault::Property::MoveSpeed, v);
-										}
-
-										*(uintptr_t*)(cc->base + Offsets::countryRailTransport) = (uint8_t)2;
-									}
-								}
-							}
-							ImGui::EndChild();
-
-							ImGui::Text("Non-highlighted options affect the unit design");
-							ImGui::EndTabItem();
-						}
 
 						ImGui::EndTabBar();
 					}
@@ -190,7 +92,12 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 
 				if (ImGui::BeginTabItem("Units"))
 				{
-					Base::Draw::DrawUnit(cc);
+					ImGui::BeginTabBar("##unittabs");
+					{
+						Base::Draw::DrawUnitSpawn(cc);
+						Base::Draw::DrawUnitModifiers(cc);
+					}
+					ImGui::EndTabBar();
 
 					ImGui::EndTabItem();
 				}

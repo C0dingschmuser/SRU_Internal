@@ -199,6 +199,7 @@ namespace Base
 			};
 
 			void Init(uintptr_t base);
+			void SetDesignPropertySimple(Country* c, UnitDefault::Property p, int range);
 			void SetDesignProperty(Country* c, UnitDefault::Property p, UnitDefault::HolderValue v);
 			void RestoreDesignProperty(Country* c, UnitDefault::Property p);
 
@@ -261,12 +262,12 @@ namespace Base
 			bool maxExperienceUnits = false;
 			bool maxMoraleUnits = false;
 
-			bool maxMoveSpeedUnitsT = false;
-			bool maxSpottingUnitsT = false;
-			bool maxMoveRangeUnitsT = false;
-			bool maxGroundAttackRangeUnitsT = false;
-			bool maxAirAttackRangeUnitsT = false;
-			bool minBuildTimeUnitsT = false;
+			struct ModifierValue
+			{
+				int range = 0;
+			};
+
+			std::vector<ModifierValue> unitDefaultModifiers;
 
 			std::vector<std::shared_ptr<FloatValue>> allFloatValues;
 			std::vector<Base::SRU_Data::Unit> allUnits;
@@ -360,7 +361,7 @@ namespace Base
 
 	namespace Execute
 	{
-		typedef void(__thiscall* _DiplFunc)(void*, char);
+		typedef void(__fastcall* _DiplFunc)(void*, char);
 		typedef int(__fastcall* _SpawnUnitFunc)(int, int, int, int, int, int, int, int*, int);
 		
 		extern _DiplFunc diplFunc;
@@ -381,7 +382,8 @@ namespace Base
 		void DrawCountry(Base::SRU_Data::Country* cc);
 		void DrawCountryDiplo(Base::SRU_Data::Country* cc, int& treatyMsg);
 		void DrawMap(Base::SRU_Data::Country* cc);
-		void DrawUnit(Base::SRU_Data::Country* cc);
+		void DrawUnitSpawn(Base::SRU_Data::Country* cc);
+		void DrawUnitModifiers(Base::SRU_Data::Country* cc);
 	}
 
 	namespace Hooks
@@ -396,7 +398,8 @@ namespace Base
 
 	namespace Utils
 	{
-		std::string FloatToPercent(float f, float max);
+		bool CMPF(float A, float B, float E = 0.005f);
+		std::string FloatToPercent(float f, float max, bool simple = false);
 		bool MemCompare(const BYTE* bData, const BYTE* bMask, const char* szMask);
 		bool CanReadPtr(void* ptr);
 		uintptr_t PointerChain(uintptr_t ptr, std::vector<unsigned int> offsets);

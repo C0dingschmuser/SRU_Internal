@@ -121,9 +121,6 @@ void CheckCurrentCountry(uintptr_t* clickedCountryPtr)
         g_mouseClicked = false;
         //if (g_lastClickedCountry != *clickedCountryPtr)
         {
-            std::cout << "------------" << std::endl;
-			std::cout << "Old: " << std::dec << g_lastClickedCountry << " New: " << *clickedCountryPtr << std::endl;
-
             g_lastClickedCountry = *clickedCountryPtr;
 
             if (!g_shift)

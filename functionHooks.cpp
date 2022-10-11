@@ -440,7 +440,7 @@ void __declspec(naked) HandleDefconRaw4()
 
 void Base::SRU_Data::Hooks::SetupFunctionHooks()
 {
-    //Hook selected units
+    //Hook selected units (needs fix (register restore))
 
     int hookLength = 6;
     uintptr_t hookAddress = g_base + Offsets::selectedUnitsHook;

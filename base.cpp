@@ -585,7 +585,7 @@ void Base::SRU_Data::LoadDefaultUnits()
 
 	//auto clockEnd = std::chrono::high_resolution_clock::now();
 
-	std::cout << "Total default units found: " << std::dec << g_defaultUnitList.size() << std::endl;
+	//std::cout << "Total default units found: " << std::dec << g_defaultUnitList.size() << std::endl;
 
 	//std::chrono::duration<double, std::milli> fp_ms = clockEnd - clockStart;
 	//std::cout << "Elapsed Time: " << fp_ms.count() << std::endl;
@@ -596,12 +596,25 @@ void Base::Init(bool full = false)
 	Hooks::Init(full);
 }
 
-std::string Base::Utils::FloatToPercent(float f, float max)
+std::string Base::Utils::FloatToPercent(float f, float max, bool simple)
 {
-	float p = (f / max) * 100;
+	float p;
+	if (!simple)
+	{
+		p = (f / max) * 100;
+	}
+	else
+	{
+		p = f * 100;
+	}
 	std::stringstream str;
 	str << std::fixed << std::setprecision(2) << p << "%%";
 	return str.str();
+}
+
+bool Base::Utils::CMPF(float A, float B, float E)
+{
+	return (std::fabs(A - B) < E);
 }
 
 bool Base::Utils::MemCompare(const BYTE* bData, const BYTE* bMask, const char* szMask)

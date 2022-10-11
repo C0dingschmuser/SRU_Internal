@@ -165,6 +165,106 @@ void Base::SRU_Data::Unit::Init(uintptr_t base)
 	this->properties.push_back(morale);
 }
 
+void Base::SRU_Data::Unit::SetDesignPropertySimple(Country* c, UnitDefault::Property p, int range)
+{
+	UnitDefault::HolderValue v;
+
+	float base = 1;
+
+	switch (p)
+	{
+	case UnitDefault::Property::MoveSpeed:
+		base = (float)*(uint16_t*)(this->defaultStats->base + Offsets::unitDefaultMoveSpeed);
+		break;
+	case UnitDefault::Property::Spotting:
+		base = (float)*(uint16_t*)(this->defaultStats->base + Offsets::unitDefaultSpotting);
+		break;
+	case UnitDefault::Property::MoveRange:
+		base = (float)*(uint16_t*)(this->defaultStats->base + Offsets::unitDefaultMoveRange);
+		break;
+	case UnitDefault::Property::SoftGroundAttack:
+		base = (float)*(uint16_t*)(this->defaultStats->base + Offsets::unitDefaultSoftGroundAttack);
+		break;
+	case UnitDefault::Property::HardGroundAttack:
+		base = (float)*(uint16_t*)(this->defaultStats->base + Offsets::unitDefaultHardGroundAttack);
+		break;
+	case UnitDefault::Property::CloseGroundAttack:
+		base = (float)*(uint16_t*)(this->defaultStats->base + Offsets::unitDefaultCloseGroundAttack);
+		break;
+	case UnitDefault::Property::CloseAirAttack:
+		base = (float)*(uint16_t*)(this->defaultStats->base + Offsets::unitDefaultCloseAirAttack);
+		break;
+	case UnitDefault::Property::MidAirAttack:
+		base = (float)*(uint16_t*)(this->defaultStats->base + Offsets::unitDefaultMidAirAttack);
+		break;
+	case UnitDefault::Property::HighAirAttack:
+		base = (float)*(uint16_t*)(this->defaultStats->base + Offsets::unitDefaultHighAirAttack);
+		break;
+	case UnitDefault::Property::GroundRange:
+		base = *(float*)(this->defaultStats->base + Offsets::unitDefaultGroundRange);
+		break;
+	case UnitDefault::Property::NavalRange:
+		base = *(float*)(this->defaultStats->base + Offsets::unitDefaultNavalRange);
+		break;
+	case UnitDefault::Property::AirRange:
+		base = *(float*)(this->defaultStats->base + Offsets::unitDefaultAirRange);
+		break;
+	case UnitDefault::Property::FuelCapacity:
+		base = *(float*)(this->defaultStats->base + Offsets::unitDefaultFuelCapacity);
+		break;
+	case UnitDefault::Property::SupplyCapacity:
+		base = *(float*)(this->defaultStats->base + Offsets::unitDefaultSupplyCapacity);
+		break;
+	case UnitDefault::Property::BuildTime:
+		base = *(float*)(this->defaultStats->base + Offsets::unitDefaultBuildTime);
+		break;
+	}
+
+	switch (range)
+	{
+	case -3: //Minimum
+		base *= 0.1f;
+		break;
+	case -2: //-50%
+		base *= 0.5f;
+		break;
+	case -1: //-25%
+		base *= 0.75f;
+		break;
+	case 1: //+25%
+		base *= 1.25f;
+		break;
+	case 2: //+50%
+		base *= 1.5f;
+		break;
+	case 3: //Maximum
+		base = 15000;
+		break;
+	}
+
+	if (base < 0)
+	{
+		base = 0.0001f;
+	}
+
+	switch (p)
+	{
+	default:
+		v.ui16 = (uint16_t)base;
+		break;
+	case UnitDefault::Property::FuelCapacity:
+	case UnitDefault::Property::SupplyCapacity:
+	case UnitDefault::Property::GroundRange:
+	case UnitDefault::Property::NavalRange:
+	case UnitDefault::Property::AirRange:
+	case UnitDefault::Property::BuildTime:
+		v.f = base;
+		break;
+	}
+
+	SetDesignProperty(c, p, v);
+}
+
 void Base::SRU_Data::Unit::SetDesignProperty(Country* c, UnitDefault::Property p, UnitDefault::HolderValue v)
 {
 	std::shared_ptr<UnitDefault::ChangeHolder> change = 
@@ -188,7 +288,7 @@ void Base::SRU_Data::Unit::SetDesignProperty(Country* c, UnitDefault::Property p
 		case UnitDefault::Property::NavalRange:
 		case UnitDefault::Property::AirRange:
 		case UnitDefault::Property::BuildTime:
-			if (change->val.f == v.f)
+			if (Base::Utils::CMPF(change->val.f, v.f))
 			{
 				return;
 			}

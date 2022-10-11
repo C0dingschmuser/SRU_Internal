@@ -164,6 +164,12 @@ void Base::SRU_Data::Country::Init(uintptr_t base)
 		this->resources.push_back(res);
 	}
 
+	for (int i = 0; i < (int)UnitDefault::Property::MAX; i++)
+	{
+		ModifierValue m{};
+		this->unitDefaultModifiers.push_back(m);
+	}
+
 	//-----------------------------------------------------------------------------------
 	//--- State -------------------------------------------------------------------------
 	//-----------------------------------------------------------------------------------
@@ -213,9 +219,18 @@ void Base::SRU_Data::Country::Init(uintptr_t base)
 
 void Base::SRU_Data::Country::HandleUnits()
 {
-	if (!this->invincibleUnits && !this->maxFuelUnits && !this->maxSupplyUnits && !this->maxMoraleUnits &&
-		!this->maxMoveSpeedUnitsT && !this->maxSpottingUnitsT && !this->maxMoveRangeUnitsT &&
-		!this->maxGroundAttackRangeUnitsT && !this->maxAirAttackRangeUnitsT && !this->minBuildTimeUnitsT)
+	bool activated = false;
+
+	for (int i = 0; i < (int)UnitDefault::Property::MAX; i++)
+	{
+		if (this->unitDefaultModifiers[i].range != 0)
+		{
+			activated = true;
+			break;
+		}
+	}
+
+	if (!activated)
 	{
 		return;
 	}
