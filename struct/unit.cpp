@@ -20,6 +20,8 @@ void Base::SRU_Data::UnitDefault::Init(uintptr_t base)
 	char* namePtr = (char*)*(uintptr_t*)base;
 	this->name = std::string(namePtr);
 
+	this->unitClass = *(uint8_t*)(base + Offsets::unitDefaultClass);
+
 	std::shared_ptr<IntValue> moveSpeed(new IntValue);
 	moveSpeed->valPtr = (uintptr_t*)(base + Offsets::unitDefaultMoveSpeed);
 	this->moveSpeed = moveSpeed;

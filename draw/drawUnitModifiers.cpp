@@ -10,19 +10,19 @@ std::string GetRangeString(int range)
 		s = "Minimum";
 		break;
 	case -2:
-		s = "-50%";
+		s = "-50%%";
 		break;
 	case -1:
-		s = "-25%";
+		s = "-25%%";
 		break;
 	case 0:
 		s = "Default";
 		break;
 	case 1:
-		s = "+25%";
+		s = "+25%%";
 		break;
 	case 2:
-		s = "+50%";
+		s = "+50%%";
 		break;
 	case 3:
 		s = "Maximum";

@@ -36,6 +36,27 @@ void Base::Draw::DrawUnitSpawn(Base::SRU_Data::Country* cc)
 				ImGui::EndDisabled();
 			}
 
+			static int unitDesignType = 0;
+			static std::string unitDesignTypes[]{
+				"All",
+				"Land",
+				"Sea",
+				"Air"
+			};
+
+			if (ImGui::BeginCombo("##unitdesigntype", unitDesignTypes[unitDesignType].c_str()))
+			{
+				for (int i = 0; i < 4; i++)
+				{
+					const bool isSelected = (unitDesignType == i);
+					if (ImGui::Selectable(unitDesignTypes[i].c_str(), isSelected))
+					{
+						unitDesignType = i;
+					}
+				}
+				ImGui::EndCombo();
+			}
+
 			static bool onlyUseOwnDesigns = true;
 			bool enter = ImGui::Checkbox("Only show used Designs", &onlyUseOwnDesigns);
 
@@ -146,6 +167,34 @@ void Base::Draw::DrawUnitSpawn(Base::SRU_Data::Country* cc)
 							if (!g_defaultUnitList[i]->flag)
 							{
 								ok = false;
+							}
+						}
+
+						if (unitDesignType != 0 && ok)
+						{
+							ok = false;
+							
+							int unitType = g_defaultUnitList[i]->unitClass;
+							switch (unitDesignType)
+							{
+							case 1: //Land
+								if (unitType >= 0 && unitType <= 0x6)
+								{
+									ok = true;
+								}
+								break;
+							case 2: //Sea 
+								if (unitType >= 0xF && unitType <= 0x14)
+								{
+									ok = true;
+								}
+								break;
+							case 3: //Air
+								if (unitType >= 0x7 && unitType <= 0xE)
+								{
+									ok = true;
+								}
+								break;
 							}
 						}
 
