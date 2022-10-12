@@ -55,8 +55,10 @@ void Base::Draw::DrawMap(Base::SRU_Data::Country* cc)
 
 		ImGui::Text("Hex Supply");
 
+		std::string str = Base::Utils::FloatToPercent((float)*hexSupply, 255.0f);
+
 		ImGui::PushItemWidth(225);
-		ImGui::SliderByte("##hexsupplyslider", hexSupply, 0, 254);
+		ImGui::SliderByte("##hexsupplyslider", hexSupply, 0, 255, str.c_str());
 
 
 		ImGui::Text("Hex Ground");

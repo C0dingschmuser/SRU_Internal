@@ -12,6 +12,14 @@ int Base::Data::subMenu = 0;
 
 //Asm Vars
 
+unsigned int Base::SRU_Data::Asm::g_selectedReg0;
+unsigned int Base::SRU_Data::Asm::g_selectedReg1;
+unsigned int Base::SRU_Data::Asm::g_selectedReg2;
+unsigned int Base::SRU_Data::Asm::g_selectedReg3;
+unsigned int Base::SRU_Data::Asm::g_selectedReg4;
+unsigned int Base::SRU_Data::Asm::g_selectedReg5;
+unsigned int Base::SRU_Data::Asm::g_selectedReg6;
+
 unsigned int Base::SRU_Data::Asm::g_hexReg0;
 unsigned int Base::SRU_Data::Asm::g_hexReg1;
 unsigned int Base::SRU_Data::Asm::g_hexReg2;

@@ -276,10 +276,13 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 	ImGui::SameLine();
 
 	data = Base::Utils::FloatToPercent(*cc->healthcareState->valPtr, 1, true);
+	
+	ImGui::PushItemWidth(inputWidth);
 	if (ImGui::SliderFloat("Healthcare", cc->healthcareState->valPtr, 0, 1, data.c_str()))
 	{
 		cc->healthcareState->freezeVal = *cc->healthcareState->valPtr;
 	}
+	ImGui::PopItemWidth();
 
 	//Education
 
@@ -290,10 +293,13 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 	ImGui::SameLine();
 
 	data = Base::Utils::FloatToPercent(*cc->educationState->valPtr, 1, true);
+	
+	ImGui::PushItemWidth(inputWidth);
 	if (ImGui::SliderFloat("Education", cc->educationState->valPtr, 0, 1, data.c_str()))
 	{
 		cc->educationState->freezeVal = *cc->educationState->valPtr;
 	}
+	ImGui::PopItemWidth();
 
 	//Infrastructure
 
@@ -304,10 +310,13 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 	ImGui::SameLine();
 
 	data = Base::Utils::FloatToPercent(*cc->infrastructureState->valPtr, 1, true);
+	
+	ImGui::PushItemWidth(inputWidth);
 	if (ImGui::SliderFloat("Infrastructure", cc->infrastructureState->valPtr, 0, 1, data.c_str()))
 	{
 		cc->infrastructureState->freezeVal = *cc->infrastructureState->valPtr;
 	}
+	ImGui::PopItemWidth();
 
 	//Environment
 
@@ -318,10 +327,13 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 	ImGui::SameLine();
 
 	data = Base::Utils::FloatToPercent(*cc->environmentState->valPtr, 1, true);
+	
+	ImGui::PushItemWidth(inputWidth);
 	if (ImGui::SliderFloat("Environment", cc->environmentState->valPtr, 0, 1, data.c_str()))
 	{
 		cc->environmentState->freezeVal = *cc->environmentState->valPtr;
 	}
+	ImGui::PopItemWidth();
 
 	//Family
 
@@ -332,10 +344,13 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 	ImGui::SameLine();
 
 	data = Base::Utils::FloatToPercent(*cc->familyState->valPtr, 1, true);
+	
+	ImGui::PushItemWidth(inputWidth);
 	if (ImGui::SliderFloat("Family", cc->familyState->valPtr, 0, 1, data.c_str()))
 	{
 		cc->familyState->freezeVal = *cc->familyState->valPtr;
 	}
+	ImGui::PopItemWidth();
 
 	//Law Enforcement
 
@@ -346,10 +361,13 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 	ImGui::SameLine();
 
 	data = Base::Utils::FloatToPercent(*cc->lawEnforcementState->valPtr, 1, true);
+	
+	ImGui::PushItemWidth(inputWidth);
 	if (ImGui::SliderFloat("Law enforcement", cc->lawEnforcementState->valPtr, 0, 1, data.c_str()))
 	{
 		cc->lawEnforcementState->freezeVal = *cc->lawEnforcementState->valPtr;
 	}
+	ImGui::PopItemWidth();
 
 	//Cultural Subsidies
 
@@ -360,10 +378,13 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 	ImGui::SameLine();
 
 	data = Base::Utils::FloatToPercent(*cc->culturalSubState->valPtr, 1, true);
+	
+	ImGui::PushItemWidth(inputWidth);
 	if (ImGui::SliderFloat("Cultural subsidies", cc->culturalSubState->valPtr, 0, 1, data.c_str()))
 	{
 		cc->culturalSubState->freezeVal = *cc->culturalSubState->valPtr;
 	}
+	ImGui::PopItemWidth();
 
 	//Social Assistance
 
@@ -374,8 +395,11 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 	ImGui::SameLine();
 	
 	data = Base::Utils::FloatToPercent(*cc->socialAssistanceState->valPtr, 1, true);
+	
+	ImGui::PushItemWidth(inputWidth);
 	if (ImGui::SliderFloat("Social assistance", cc->socialAssistanceState->valPtr, 0, 1, data.c_str()))
 	{
 		cc->socialAssistanceState->freezeVal = *cc->socialAssistanceState->valPtr;
 	}
+	ImGui::PopItemWidth();
 }

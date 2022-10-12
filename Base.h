@@ -46,6 +46,7 @@ namespace Base
 
 		namespace Asm
 		{
+			extern unsigned int g_selectedReg0, g_selectedReg1, g_selectedReg2, g_selectedReg3, g_selectedReg4, g_selectedReg5, g_selectedReg6;
 			extern unsigned int g_hexReg0, g_hexReg1, g_hexReg2, g_hexReg3;
 			extern byte g_lowestHexSupply, g_currentHexSupply;
 			extern unsigned int g_aiSurrReg0, g_aiSurrReg1, g_aiSurrReg2, g_aiSurrReg3, g_aiSurrReg4, g_aiSurrReg5;
@@ -384,6 +385,7 @@ namespace Base
 		void DrawMap(Base::SRU_Data::Country* cc);
 		void DrawUnitSpawn(Base::SRU_Data::Country* cc);
 		void DrawUnitModifiers(Base::SRU_Data::Country* cc);
+		void DrawUnitSelected(Base::SRU_Data::Country* cc);
 	}
 
 	namespace Hooks

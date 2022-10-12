@@ -66,7 +66,7 @@ void InjectDLL(DWORD PID, const char* dllPath)
 	File.read((char*)(pSrcData), FileSize);
 	File.close();
 
-	ManualMapDll(hProc, pSrcData, FileSize, false, false);
+	ManualMapDll(hProc, pSrcData, FileSize);
 
 	delete[] pSrcData;
 	CloseHandle(hProc);
@@ -150,6 +150,10 @@ void CheckForUpdate(std::string origName)
 		remove("update.bat");
 		return;
 	}
+
+	system("COLOR 0E");
+	std::cout << "Checking for Update..." << std::endl;
+	system("cls");
 
 	std::string response = HttpsWebRequestPost("update.php?v=1");
 

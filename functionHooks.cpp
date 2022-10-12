@@ -7,14 +7,8 @@ using namespace Base::SRU_Data::Asm;
 void CreateUnit(uintptr_t base);
 void AddSurrenderEvent(int from, int to);
 
-void __declspec(naked) GetSelectedUnits()
+void HandleSelectedUnits()
 {
-    __asm {
-        xor eax, eax
-        cmp byte ptr[ebp + 0x16], 00
-        mov[g_nextUnitEntity], ebp
-    }
-
     g_addOk = true;
     for (int i = 0; i < g_selectedUnitList.size(); i++)
     {
@@ -32,8 +26,33 @@ void __declspec(naked) GetSelectedUnits()
 
         g_unitEntityCountSelected++;
     }
+}
+
+void __declspec(naked) GetSelectedUnits()
+{
+    __asm {
+        xor eax, eax
+        mov[g_nextUnitEntity], ebp
+        mov[g_selectedReg0], eax
+        mov[g_selectedReg1], ecx
+        mov[g_selectedReg2], edx
+        mov[g_selectedReg3], ebp
+        mov[g_selectedReg4], edi
+        mov[g_selectedReg5], esi
+        mov[g_selectedReg6], ebx
+    }
+
+    HandleSelectedUnits();
 
     __asm {
+		mov eax, g_selectedReg0
+		mov ecx, g_selectedReg1
+		mov edx, g_selectedReg2
+		mov ebp, g_selectedReg3
+		mov edi, g_selectedReg4
+		mov esi, g_selectedReg5
+		mov ebx, g_selectedReg6
+        cmp byte ptr[ebp + 0x16], 00
         jmp[g_selectedJmpBackAddr]
     }
 }
@@ -440,12 +459,12 @@ void __declspec(naked) HandleDefconRaw4()
 
 void Base::SRU_Data::Hooks::SetupFunctionHooks()
 {
-    //Hook selected units (needs fix (register restore))
+    //Hook selected units
 
     int hookLength = 6;
     uintptr_t hookAddress = g_base + Offsets::selectedUnitsHook;
     Base::SRU_Data::Hooks::g_selectedJmpBackAddr = hookAddress + hookLength;
-    //Base::Hooks::FunctionHook((void*)hookAddress, GetSelectedUnits, hookLength);
+    Base::Hooks::FunctionHook((void*)hookAddress, GetSelectedUnits, hookLength);
 
     //Hook hex supply
 

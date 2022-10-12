@@ -264,11 +264,5 @@ void Base::Draw::DrawUnitSpawn(Base::SRU_Data::Country* cc)
 			}
 		}
 		ImGui::EndTabItem();
-	}
-	if (ImGui::BeginTabItem("Selected"))
-	{
-
-		ImGui::EndTabItem();
-	}
-	
+	}	
 }

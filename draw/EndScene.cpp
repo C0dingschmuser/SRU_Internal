@@ -96,6 +96,7 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 					{
 						Base::Draw::DrawUnitSpawn(cc);
 						Base::Draw::DrawUnitModifiers(cc);
+						Base::Draw::DrawUnitSelected(cc);
 					}
 					ImGui::EndTabBar();
 
