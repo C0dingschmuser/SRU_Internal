@@ -20,7 +20,7 @@ __/\\\\\\\\\\\__________________\///////////_____\///________\///_____\/////////
 
 ## SRU_Internal - The **Ultimate** Trainer for Supreme Ruler Ultimate
 
-| [Features](#features) - [Usage](#usage) - [Troubleshooting](#troubleshooting) - [How it works](#how-it-works) - [Releases & Changelogs](#releases--changelogs)|
+| [Features](#features) - [Usage](#usage) - [Troubleshooting](#troubleshooting) - [How it works](#how-it-works) - [Releases & Changelogs](#releases--changelogs) - [License](#license)|
 :----------------------------------------------------------: |
 
 <img src="https://bruh.games/internal/sru/github/main.png" width="600" height="200" />
@@ -44,8 +44,11 @@ If evereything worked, you'll see the SRU_Internal window open. Once you enter a
 Contrary to ordinary mods or trainers, SRU_Interal gets injected into the core game process and has access to basically everything the game has access to. This means SRU_Internal is able to directly call, edit or hook game functions. To do so, it utilizes a slight modified version of <br> [Dear ImGui](https://github.com/ocornut/imgui), [Kiero](https://github.com/Rebzzel/kiero) and [Minhook](https://github.com/TsudaKageyu/minhook).
 
 ### Troubleshooting
-Since SRU_Internal directly manipulates the game's process memory it's possible that your antivirus flags this as harmful.<br>
-**That is a false positive. The Trainer is safe.** If that happens, you need to manually add an exception in your antivirus to exclude the trainer or a folder which contains the trainer. [Here](https://support.microsoft.com/en-us/windows/add-an-exclusion-to-windows-security-811816c0-4dfd-af4a-47e4-c301afe13b26) is a tutorial on how to do that with Windows Defender.
+Since SRU_Internal directly manipulates the game's process memory it's possible that your antivirus flags this as harmful. **That is a false positive. The Trainer is safe.** If that happens, you need to manually add an exception in your antivirus to exclude the trainer or a folder which contains the trainer. [Here](https://support.microsoft.com/en-us/windows/add-an-exclusion-to-windows-security-811816c0-4dfd-af4a-47e4-c301afe13b26) is a tutorial on how to do that with Windows Defender.
+If you find a bug, feel free to open an [Issue](https://github.com/C0dingschmuser/SRU_Internal/issues) with a detailed description or contact me via **info@bruh.games**.
 
 ### Releases & Changelogs
 See [Releases](https://github.com/C0dingschmuser/SRU_Internal/releases) page for builds and decorated Changelogs. 
+
+### License
+Copyright 2022 - All rights reserved
