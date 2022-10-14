@@ -51,4 +51,4 @@ If you find a bug, feel free to open an [Issue](https://github.com/C0dingschmuse
 See [Releases](https://github.com/C0dingschmuser/SRU_Internal/releases) page for builds and decorated Changelogs. 
 
 ### License
-Copyright 2022 - All rights reserved
+Copyright 2022 C0dingschmuser - All rights reserved

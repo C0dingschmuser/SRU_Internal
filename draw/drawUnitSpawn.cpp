@@ -104,8 +104,8 @@ void Base::Draw::DrawUnitSpawn(Base::SRU_Data::Country* cc)
 
 			if (useClickedPos)
 			{
-				xPos = Asm::g_xPos;
-				yPos = Asm::g_yPos;
+				xPos = *g_clickedXPtr;
+				yPos = *g_clickedYPtr;
 			}
 
 			ImGui::PushItemWidth(112);

@@ -230,11 +230,17 @@ void Base::SRU_Data::Country::HandleUnits()
 		}
 	}
 
+	
+
 	if (!activated)
 	{
-		return;
+		if (!this->invincibleUnits && !this->maxFuelUnits && !this->maxSupplyUnits && !this->maxMoraleUnits &&
+			!this->maxEfficiencyUnits && !this->maxExperienceUnits && !maxMoraleUnits)
+		{
+			return;
+		}
 	}
-
+	
 	for (int i = 0; i < this->allUnits.size(); i++)
 	{
 		if (*allUnits[i].deployedState == 0)

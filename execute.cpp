@@ -11,17 +11,23 @@ void Base::Execute::SetupFunctions()
 	spawnUnitFunc = (_SpawnUnitFunc)(Base::SRU_Data::g_base + Offsets::unitFunc);
 }
 
+void Base::Execute::ExecDipl(DWORD* buffer, char c)
+{
+	Base::SRU_Data::Asm::g_ownAllocs.push_back((uintptr_t)buffer);
+	diplFunc(buffer, c);
+}
+
 void Base::Execute::AnnexCountry(int from, int to)
 {
 	int* surrender = Offsets::CreateSimpleDiplOffer(Base::SRU_Data::g_base, Offsets::surrenderDiplo, 0, from, to, 0, 0, 0);
 
-	Base::Execute::diplFunc((void*)surrender, '\x01');
+	Base::Execute::ExecDipl((DWORD*)surrender, '\x01');
 }
 
 void Base::Execute::RespawnCountry(int from, int to, int type)
 {
 	int* buffer = Offsets::CreateAdvancedDiplOffer(Base::SRU_Data::g_base, Offsets::respawnCountry, to, 0, 0, 0, type, from, 0, 0, 0, 0);
-	diplFunc((void*)buffer, '\x01');
+	ExecDipl((DWORD*)buffer, '\x01');
 }
 
 void Base::Execute::SetRelations(int relationType, uintptr_t country, uintptr_t oCountry, int add)
@@ -49,7 +55,7 @@ void Base::Execute::SetRelations(int relationType, uintptr_t country, uintptr_t 
 		*relationAddr -= 0.25f;
 	}
 
-	std::cout << std::hex << relationAddr << " " << relationType << std::endl;
+	//std::cout << std::hex << relationAddr << " " << relationType << std::endl;
 }
 
 void Base::Execute::SpawnUnit(int unitDesign, int amount, uintptr_t country, int spread, bool reserve, uint16_t xPos, uint16_t yPos)
@@ -101,7 +107,7 @@ void Base::Execute::SpawnUnit(int unitDesign, int amount, uintptr_t country, int
 
 		//force disable
 		spread = 1;
-		std::cout << std::hex << country << " " << unitDesign << std::endl;
+		//std::cout << std::hex << country << " " << unitDesign << std::endl;
 
 		if (spread == 1)
 		{
@@ -172,7 +178,7 @@ int Base::Execute::ExecuteTreaty(int diplTreatyIndex)
 	int* diplOffer = 
 		Offsets::CreateSimpleDiplOffer(g_base, diplType, treaty.treatyId, from, to, currentDay, currentTime, expiryDay);
 
-	diplFunc((void*)diplOffer, '\x01');
+	ExecDipl((DWORD*)diplOffer, '\x01');
 
 	return 1;
 }

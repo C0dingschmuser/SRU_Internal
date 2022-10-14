@@ -61,6 +61,9 @@ void Base::Draw::DrawCountryDiplo(Base::SRU_Data::Country* cc, int& treatyMsg)
 		ImGui::SliderFloat("##countrydiplbellirating", diplBelliRating, -1.5f, 1.5f, str.c_str());//"%.3f");
 
 		ImGui::PopItemWidth();
+
+		ImGui::Dummy(ImVec2(1, 80));
+		ImGui::Text("Relation: Selected -> Target");
 	}
 	ImGui::EndChild();
 	ImGui::SameLine();

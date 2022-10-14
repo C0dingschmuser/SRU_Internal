@@ -86,8 +86,13 @@ void Base::Draw::DrawUnitModifiers(Base::SRU_Data::Country* cc)
 				//restore
 				for (int i = 0; i < cc->allUnits.size(); i++)
 				{
-					*cc->allUnits[i].properties[(int)p]->valPtr =
-						cc->allUnits[i].properties[(int)p]->freezeVal;
+					if (cc->allUnits[i].properties[(int)p]->saved)
+					{
+						cc->allUnits[i].properties[(int)p]->saved = false;
+
+						*cc->allUnits[i].properties[(int)p]->valPtr =
+							cc->allUnits[i].properties[(int)p]->freezeVal;
+					}
 				}
 			}
 			else if (stateChange == 1)
@@ -97,6 +102,8 @@ void Base::Draw::DrawUnitModifiers(Base::SRU_Data::Country* cc)
 				{
 					cc->allUnits[i].properties[(int)p]->freezeVal =
 						*cc->allUnits[i].properties[(int)p]->valPtr;
+
+					cc->allUnits[i].properties[(int)p]->saved = true;
 				}
 			}
 		}

@@ -36,9 +36,6 @@ int Base::SRU_Data::Asm::g_aiSurrSize;
 int Base::SRU_Data::Asm::g_aiSurrFrom;
 int Base::SRU_Data::Asm::g_aiSurrTo;
 
-int Base::SRU_Data::Asm::g_xPos = 0;
-int Base::SRU_Data::Asm::g_yPos = 0;
-
 unsigned int Base::SRU_Data::Asm::g_defconReg0;
 unsigned int Base::SRU_Data::Asm::g_defconReg1;
 unsigned int Base::SRU_Data::Asm::g_defconReg2;
@@ -69,6 +66,16 @@ unsigned int Base::SRU_Data::Asm::g_defconReg43;
 unsigned int Base::SRU_Data::Asm::g_defconReg53;
 unsigned int Base::SRU_Data::Asm::g_defconReg63;
 
+unsigned int Base::SRU_Data::Asm::g_diplFreeReg0;
+unsigned int Base::SRU_Data::Asm::g_diplFreeReg1;
+unsigned int Base::SRU_Data::Asm::g_diplFreeReg2;
+unsigned int Base::SRU_Data::Asm::g_diplFreeReg3;
+unsigned int Base::SRU_Data::Asm::g_diplFreeReg4;
+unsigned int Base::SRU_Data::Asm::g_diplFreeReg5;
+unsigned int Base::SRU_Data::Asm::g_diplFreeReg6;
+
+std::vector<uintptr_t> Base::SRU_Data::Asm::g_ownAllocs;
+
 uintptr_t Base::SRU_Data::Asm::g_aiSurrBase;
 
 //SRU Vars
@@ -86,12 +93,14 @@ uintptr_t Base::SRU_Data::Hooks::g_selectedJmpBackAddr = 0;
 uintptr_t Base::SRU_Data::Hooks::g_hexSupplyJmpBackAddr = 0;
 uintptr_t Base::SRU_Data::Hooks::g_aiSurrenderJmpBackAddr = 0;
 uintptr_t Base::SRU_Data::Hooks::g_mouseClickedJmpBackAddr = 0;
-uintptr_t Base::SRU_Data::Hooks::g_posChangedJmpBackAddr = 0;
 
 uintptr_t Base::SRU_Data::Hooks::g_defconJmpBackAddr = 0;
 uintptr_t Base::SRU_Data::Hooks::g_defconJmpBackAddr2 = 0;
 uintptr_t Base::SRU_Data::Hooks::g_defconJmpBackAddr3 = 0;
 uintptr_t Base::SRU_Data::Hooks::g_defconJmpBackAddr4 = 0;
+
+uintptr_t Base::SRU_Data::Hooks::g_diplFreeJmpBackAddr = 0;
+uintptr_t Base::SRU_Data::Hooks::g_diplFreeJmpBackAddrDefault = 0;
 
 uintptr_t Base::SRU_Data::g_nextUnitEntity = 0;
 
@@ -111,7 +120,7 @@ int Base::SRU_Data::g_paintSelectedComboGround = -1;
 
 int Base::SRU_Data::g_unitSpawnSelectedUnitDesign = -1;
 
-int Base::SRU_Data::g_unitRefreshMaxTime = 50;
+int Base::SRU_Data::g_unitRefreshMaxTime = 500;
 int Base::SRU_Data::g_mainRefreshTime = 25;
 
 byte Base::SRU_Data::Asm::g_currentHexSupply = 0;
@@ -134,6 +143,10 @@ Base::SRU_Data::Country* Base::SRU_Data::clickedTargetCountry = nullptr;
 Base::SRU_Data::Country* Base::SRU_Data::unitSpawnCountry = nullptr;
 
 uintptr_t* Base::SRU_Data::g_clickedHexPtr = nullptr;
+uintptr_t* Base::SRU_Data::g_playSpeedPtr = nullptr;
+
+uint16_t* Base::SRU_Data::g_clickedXPtr = nullptr;
+uint16_t* Base::SRU_Data::g_clickedYPtr = nullptr;
 
 //SRU Game Vars
 bool Base::SRU_Data::g_ingame = false;
@@ -211,6 +224,8 @@ void Base::SRU_Data::CheckSelectedUnits(uintptr_t* selectedUnitsCounter)
 
 std::vector<uintptr_t> LoadUnitsIntern(bool refresh, bool dir, uintptr_t start, uintptr_t end, int istart, int iend)
 {
+	//std::cout << "beginintern" << std::endl;
+
 	using namespace Base::SRU_Data;
 	uintptr_t main = start;
 
@@ -329,11 +344,15 @@ std::vector<uintptr_t> LoadUnitsIntern(bool refresh, bool dir, uintptr_t start, 
 		if (main == end) ok = false;
 	}
 
+	//std::cout << "endloadintern" << std::endl;
+
 	return tmpUnits;
 }
 
 void Base::SRU_Data::LoadUnits(bool refresh)
 {
+	//std::cout << "begin load units: " << refresh << std::endl;
+
 	if (!refresh)
 	{ //Complete reload
 		g_unitList.clear();
@@ -424,12 +443,17 @@ void Base::SRU_Data::LoadUnits(bool refresh)
 				}
 			}
 
-			if (!found)
+			if (!found && *g_playSpeedPtr > 0)
 			{
-				Unit newUnit{};
-				newUnit.Init(possibleNewUnits[i]);
+				bool uOk = false;
 
-				g_unitList.push_back(newUnit);
+				Unit newUnit{};
+				uOk = newUnit.Init(possibleNewUnits[i]);
+
+				if (uOk)
+				{
+					g_unitList.push_back(newUnit);
+				}
 			}
 		}
 	}
@@ -453,16 +477,42 @@ void Base::SRU_Data::LoadUnits(bool refresh)
 					}
 				}
 
-				if (!found)
+				bool firstScan = false;
+				if (!refresh)
 				{
-					Unit newUnit{};
-					newUnit.Init(possibleNewUnits[i]);
+					firstScan = true;
+				}
 
-					g_unitList.push_back(newUnit);
+				if (!found && (*g_playSpeedPtr > 0 || firstScan))
+				{
+					bool uOk = false;
+
+					Unit newUnit{};
+					uOk = newUnit.Init(possibleNewUnits[i]);
+
+					if (uOk)
+					{
+						g_unitList.push_back(newUnit);
+
+						Country* tmpCountry = nullptr;
+
+						for (int n = 0; n < g_countryList.size(); n++)
+						{
+							tmpCountry = &g_countryList[n];
+
+							if (newUnit.oldCountry == tmpCountry->oId)
+							{
+								tmpCountry->allUnits.push_back(newUnit);
+								break;
+							}
+						}
+					}
 				}
 			}
 		}
 	}
+
+#pragma region benchmark
 
 	auto clockEnd = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double, std::milli> fp_ms = clockEnd - clockStart;
@@ -501,25 +551,30 @@ void Base::SRU_Data::LoadUnits(bool refresh)
 		}
 	}
 
+#pragma endregion benchmark
+
 	clockStart = std::chrono::high_resolution_clock::now();
 
-	Country* tmpCountry = nullptr;
-	int size = g_unitList.size();
-	
-	for (int n = 0; n < g_countryList.size(); n++)
+	if (!refresh)
 	{
-		tmpCountry = &g_countryList[n];
-		tmpCountry->allUnits.clear();
+		Country* tmpCountry = nullptr;
+		int size = g_unitList.size();
 
-		for (int i = 0; i < size; i++)
+		for (int n = 0; n < g_countryList.size(); n++)
 		{
-			if (*g_unitList[i].countryId == tmpCountry->oId)
-			{
-				tmpCountry->allUnits.push_back(g_unitList[i]);
-			}
-		}
+			tmpCountry = &g_countryList[n];
+			tmpCountry->allUnits.clear();
 
-		//std::cout << "Country " << tmpCountry->name << " has " << tmpCountry->allUnits.size() << " units" << std::endl;
+			for (int i = 0; i < size; i++)
+			{
+				if (g_unitList[i].oldCountry == tmpCountry->oId)
+				{
+					tmpCountry->allUnits.push_back(g_unitList[i]);
+				}
+			}
+
+			//std::cout << "Country " << tmpCountry->name << " has " << tmpCountry->allUnits.size() << " units" << std::endl;
+		}
 	}
 
 	clockEnd = std::chrono::high_resolution_clock::now();
@@ -544,6 +599,7 @@ void Base::SRU_Data::LoadUnits(bool refresh)
 		}
 	}
 
+	//std::cout << "End load units" << std::endl;
 	//std::cout << "Total default units found: " << std::dec << g_defaultUnitList.size() << std::endl;
 	//std::cout << "Total units found: " << std::dec << g_unitList.size() << std::endl;	
 }

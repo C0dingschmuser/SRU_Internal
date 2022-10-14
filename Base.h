@@ -33,12 +33,14 @@ namespace Base
 			extern uintptr_t g_hexSupplyJmpBackAddr;
 			extern uintptr_t g_aiSurrenderJmpBackAddr;
 			extern uintptr_t g_mouseClickedJmpBackAddr;
-			extern uintptr_t g_posChangedJmpBackAddr;
 
 			extern uintptr_t g_defconJmpBackAddr;
 			extern uintptr_t g_defconJmpBackAddr2;
 			extern uintptr_t g_defconJmpBackAddr3;
 			extern uintptr_t g_defconJmpBackAddr4;
+
+			extern uintptr_t g_diplFreeJmpBackAddr;
+			extern uintptr_t g_diplFreeJmpBackAddrDefault;
 
 			void SetupFunctionHooks();
 			void SetProductionAdjustment(bool enabled);
@@ -51,20 +53,23 @@ namespace Base
 			extern byte g_lowestHexSupply, g_currentHexSupply;
 			extern unsigned int g_aiSurrReg0, g_aiSurrReg1, g_aiSurrReg2, g_aiSurrReg3, g_aiSurrReg4, g_aiSurrReg5;
 			extern int g_aiSurrSize, g_aiSurrFrom, g_aiSurrTo;
-			extern int g_xPos, g_yPos;
 			extern unsigned int g_defconReg0, g_defconReg1, g_defconReg2, g_defconReg3, g_defconReg4, g_defconReg5, g_defconReg6,
 				g_defconReg01, g_defconReg11, g_defconReg21, g_defconReg31, g_defconReg41, g_defconReg51, g_defconReg61,
 				g_defconReg12, g_defconReg22, g_defconReg32, g_defconReg42, g_defconReg52, g_defconReg62;
 			extern int g_defconReg02, g_defconNew;
 			extern unsigned int g_defconReg03, g_defconReg13, g_defconReg23, g_defconReg33, g_defconReg43, g_defconReg53, g_defconReg63;
+			extern unsigned int g_diplFreeReg0, g_diplFreeReg1, g_diplFreeReg2, g_diplFreeReg3, g_diplFreeReg4, g_diplFreeReg5, g_diplFreeReg6;
 			extern uintptr_t g_aiSurrBase;
+
+			extern std::vector<uintptr_t> g_ownAllocs;
 		}
 
 		struct FloatValue
 		{
 			float* valPtr;
-			float freezeVal, origVal;
+			float freezeVal = 0, origVal = 0;
 			bool freeze = false;
+			bool saved = false;
 
 			inline void OverrideVal(float val)
 			{
@@ -199,7 +204,7 @@ namespace Base
 				MAX
 			};
 
-			void Init(uintptr_t base);
+			bool Init(uintptr_t base);
 			void SetDesignPropertySimple(Country* c, UnitDefault::Property p, int range);
 			void SetDesignProperty(Country* c, UnitDefault::Property p, UnitDefault::HolderValue v);
 			void RestoreDesignProperty(Country* c, UnitDefault::Property p);
@@ -208,6 +213,8 @@ namespace Base
 			uintptr_t* currentHex;
 			uintptr_t* deployedState;
 			uint8_t* countryId;
+			uint16_t* xPos;
+			uint16_t* yPos;
 			int oldCountry = -1;
 
 			std::shared_ptr<UnitDefault> defaultStats;
@@ -345,6 +352,9 @@ namespace Base
 		extern Country* unitSpawnCountry;
 
 		extern uintptr_t* g_clickedHexPtr;
+		extern uintptr_t* g_playSpeedPtr;
+		extern uint16_t* g_clickedXPtr;
+		extern uint16_t* g_clickedYPtr;
 		
 		extern uintptr_t g_base;
 
@@ -362,7 +372,7 @@ namespace Base
 
 	namespace Execute
 	{
-		typedef void(__fastcall* _DiplFunc)(void*, char);
+		typedef void(__thiscall* _DiplFunc)(DWORD*, char);
 		typedef int(__fastcall* _SpawnUnitFunc)(int, int, int, int, int, int, int, int*, int);
 		
 		extern _DiplFunc diplFunc;
@@ -375,6 +385,7 @@ namespace Base
 		void SpawnUnit(int unitDesign, int amount, uintptr_t country, int spread = 1, bool reserve = true, uint16_t xPos = 0, uint16_t yPos = 0);
 		void SetCheat(uint8_t cheat);
 		int ExecuteTreaty(int diplTreatyIndex);
+		void ExecDipl(DWORD* buffer, char c);
 	}
 
 	namespace Draw

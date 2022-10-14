@@ -201,7 +201,7 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 		}
 		else
 		{
-			if (!g_ingame && !clickedCountry)
+			if (!g_ingame)
 			{
 				ImGui::Text("Waiting for active Game...");
 			}

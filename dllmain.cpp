@@ -93,6 +93,8 @@ void SetupSessionPtr(uintptr_t base = NULL)
     Base::SRU_Data::LoadDiplTreaties();
     Base::SRU_Data::LoadGroundTypes();	
 
+    Base::SRU_Data::Asm::g_ownAllocs.clear();
+
     unitTimer = 0;
 }
 
@@ -116,6 +118,8 @@ void CheckGameState(uintptr_t* gameStatePtr)
 
 void CheckCurrentCountry(uintptr_t* clickedCountryPtr)
 {
+    //std::cout << g_mouseClicked << " " << g_ingame << g_countryList.size() << std::endl; 
+
     if (g_mouseClicked && g_ingame && g_countryList.size() > 0)
     {
         g_mouseClicked = false;
@@ -241,7 +245,7 @@ void ProcessAiSurrenders()
 
                 if (from != 0)
                 {
-                    std::cout << "exec " << from << " " << to << std::endl;
+                    //std::cout << "exec " << from << " " << to << std::endl;
 
                     Base::Execute::RespawnCountry(from, to, 2);
 
@@ -353,15 +357,19 @@ DWORD WINAPI dllThread(HMODULE hModule) {
 
     Base::Init(true);
 
-    AllocConsole();
-    FILE* f;
-	freopen_s(&f, "CONOUT$", "w", stdout);
-    freopen_s(&f, "CONIN$", "r", stdin);
+    //AllocConsole();
+    //FILE* f;
+	//freopen_s(&f, "CONOUT$", "w", stdout);
+    //freopen_s(&f, "CONIN$", "r", stdin);
 
     //Ptr setup
 
     g_base = (uintptr_t)GetModuleHandle(NULL);
     g_clickedHexPtr = (uintptr_t*)(g_base + Offsets::mouseClickHex);
+    g_playSpeedPtr = (uintptr_t*)(g_base + Offsets::gameSpeed);
+
+    g_clickedXPtr = (uint16_t*)(g_base + Offsets::position[0]);
+    g_clickedYPtr = (uint16_t*)(g_base + Offsets::position[1]);
 
     uintptr_t* gameStatePtr = (uintptr_t*)(g_base + Offsets::gameState);
     uintptr_t* clickedCountryPtr = (uintptr_t*)(g_base + Offsets::clickedCountry);
@@ -378,14 +386,14 @@ DWORD WINAPI dllThread(HMODULE hModule) {
     bool finish = false;
     while (!finish) {
         mainTimer++;
-        if (mainTimer == 2)
+        if (mainTimer >= 2)
         {
 			//only exec every 2nd loop
             mainTimer = 0;
 			
             if (GetAsyncKeyState(VK_END) & 1)
             {
-                finish = true;
+                //finish = true;
             }
 
             CheckGameState(gameStatePtr);
@@ -422,12 +430,17 @@ DWORD WINAPI dllThread(HMODULE hModule) {
                 Base::SRU_Data::CheckSelectedUnits(selectedUnitsCounterPtr);
                 ProcessAiSurrenders();
 
-                unitTimer++;
-                if (unitTimer > g_unitRefreshMaxTime)
+                if (*g_playSpeedPtr > 0)
                 {
-                    unitTimer = 0;
-                    Base::SRU_Data::LoadUnits(true);
+                    //Only refresh units while game speed > 0
+                    unitTimer++;
+                    if (unitTimer > g_unitRefreshMaxTime)
+                    {
+                        unitTimer = 0;
+                        Base::SRU_Data::LoadUnits(true);
+                    }
                 }
+
             }
         }
         
@@ -439,10 +452,10 @@ DWORD WINAPI dllThread(HMODULE hModule) {
         Sleep(g_mainRefreshTime);
     }
 
-    fclose(f);
-    fclose(stdout);
-    fclose(stdin);
-    FreeConsole();
+    //fclose(f);
+    //fclose(stdout);
+    //fclose(stdin);
+    //FreeConsole();
     FreeLibraryAndExitThread(hModule, 0);
     return dwExit;
 }

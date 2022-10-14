@@ -36,7 +36,7 @@ inline void SuspendThreads(bool suspend) {
 	te32.dwSize = sizeof(THREADENTRY32);
 
 	if (!Thread32First(hThreadSnap, &te32)) {
-		std::cout << "Error!" << std::endl;
+		//std::cout << "Error!" << std::endl;
 		return;
 	}
 

@@ -117,19 +117,36 @@ void Base::SRU_Data::UnitDefault::AddUserCountry(int countryId)
 	}
 }
 
-void Base::SRU_Data::Unit::Init(uintptr_t base)
+bool Base::SRU_Data::Unit::Init(uintptr_t base)
 {
+	if ((uintptr_t*)base == nullptr)
+	{
+		return false;
+	}
+
 	this->base = base;
 	this->currentHex = (uintptr_t*)(base + Offsets::unitCurrentHex);
 
 	this->countryId = (uint8_t*)(base + Offsets::unitCountry);
 	this->oldCountry = *countryId;
 
+	this->xPos = (uint16_t*)(base + Offsets::unitXPos);
+	this->yPos = (uint16_t*)(base + Offsets::unitYPos);
+
 	this->deployedState = (uintptr_t*)(base + Offsets::unitDeployedState);
 
 	uintptr_t defaultBase = (uintptr_t) * (uintptr_t*)(base + Offsets::unitDefaultValues);
+
 	this->defaultStats = Base::SRU_Data::FindUnitDefault(defaultBase, *this->countryId);
 	this->defaultStats->AddUserCountry(*this->countryId);
+
+	if (this->defaultStats->customDefault != nullptr)
+	{
+		//Country modifier active, apply changes
+
+		*(uintptr_t*)(base + Offsets::unitDefaultValues) =
+			(uintptr_t)this->defaultStats->customDefault;
+	}
 
 	std::shared_ptr<FloatValue> health(new FloatValue);
 	health->valPtr = (float*)(base + Offsets::unitHealth);
@@ -165,6 +182,8 @@ void Base::SRU_Data::Unit::Init(uintptr_t base)
 	morale->valPtr = (float*)(base + Offsets::unitMorale);
 	morale->origVal = 1.0f;
 	this->properties.push_back(morale);
+
+	return true;
 }
 
 void Base::SRU_Data::Unit::SetDesignPropertySimple(Country* c, UnitDefault::Property p, int range)

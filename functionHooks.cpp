@@ -134,6 +134,60 @@ void __declspec(naked) HandleMouseClick()
     }
 }
 
+void check()
+{
+    using namespace Base::SRU_Data;
+	//do not free if own pointer
+
+    bool found = false;
+
+    for (int i = 0; i < Asm::g_ownAllocs.size(); i++)
+    {
+        if (Asm::g_ownAllocs[i] == (uintptr_t)g_diplFreeReg3)
+        {
+            found = true;
+            break;
+        }
+    }
+
+    if (found)
+    {
+        g_diplFreeJmpBackAddr = g_diplFreeJmpBackAddrDefault + 38;
+    }
+    else
+    {
+        g_diplFreeJmpBackAddr = g_diplFreeJmpBackAddrDefault;
+    }
+}
+
+void __declspec(naked) DiplFree()
+{
+    __asm {
+        mov ebp, ecx
+		mov edx, [ebp+0x3C]
+        mov[g_diplFreeReg0], eax
+        mov[g_diplFreeReg1], ecx
+        mov[g_diplFreeReg2], edx
+        mov[g_diplFreeReg3], ebp
+        mov[g_diplFreeReg4], edi
+        mov[g_diplFreeReg5], esi
+        mov[g_diplFreeReg6], ebx
+    }
+
+    check();
+
+    __asm {
+        mov eax, g_diplFreeReg0
+        mov ecx, g_diplFreeReg1
+        mov edx, g_diplFreeReg2
+        mov ebp, g_diplFreeReg3
+        mov edi, g_diplFreeReg4
+        mov esi, g_diplFreeReg5
+        mov ebx, g_diplFreeReg6
+        jmp [g_diplFreeJmpBackAddr]
+    }
+}
+
 int FindOldCountryOwner2(uint8_t newOwner, bool weak)
 {
     //Could propably be improved by checking for loyalty
@@ -274,16 +328,6 @@ void AddSurrenderEvent(int from, int to)
     if (g_surrenderEventCount >= 32)
     {
         g_surrenderEventCount = 0;
-    }
-}
-
-void __declspec(naked) HandleNewPos()
-{
-    __asm {
-		mov [esp + 0xBC4], ecx
-		mov [g_xPos], eax
-		mov [g_yPos], ecx
-		jmp [g_posChangedJmpBackAddr]
     }
 }
 
@@ -486,13 +530,6 @@ void Base::SRU_Data::Hooks::SetupFunctionHooks()
     Base::SRU_Data::Hooks::g_mouseClickedJmpBackAddr = hookAddress + hookLength;
     Base::Hooks::FunctionHook((void*)hookAddress, HandleMouseClick, hookLength);
 
-	//Hook position
-
-    hookLength = 7;
-    hookAddress = g_base + Offsets::posHook;
-	Base::SRU_Data::Hooks::g_posChangedJmpBackAddr = hookAddress + hookLength;
-	Base::Hooks::FunctionHook((void*)hookAddress, HandleNewPos, hookLength);
-
     //Hook defcon
 
     hookLength = 6;
@@ -514,6 +551,12 @@ void Base::SRU_Data::Hooks::SetupFunctionHooks()
     hookAddress = g_base + Offsets::defconHook4;
     Base::SRU_Data::Hooks::g_defconJmpBackAddr4 = hookAddress + hookLength;
     Base::Hooks::FunctionHook((void*)hookAddress, HandleDefconRaw4, hookLength);
+
+    hookLength = 5;
+    hookAddress = g_base + 0x8CE41;
+    Base::SRU_Data::Hooks::g_diplFreeJmpBackAddr = hookAddress + hookLength;
+    Base::SRU_Data::Hooks::g_diplFreeJmpBackAddrDefault = hookAddress + hookLength;
+    Base::Hooks::FunctionHook((void*)hookAddress, DiplFree, hookLength);
 }
 
 void Base::SRU_Data::Hooks::SetProductionAdjustment(bool enabled)
