@@ -17,7 +17,7 @@
 
 #define DISABLE_OUTPUT
 
-static const int version = 100;
+static const int version = 102;
 static bool updated = false;
 
 std::string VersionToString(int version)
@@ -100,6 +100,42 @@ std::string GenName(int len)
 	return s;
 }
 
+std::string StreamToMem(std::string URL)
+{
+	std::string header = "Accept: *" "/" "*\r\n\r\n";
+	HANDLE hInter = InternetOpen("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36", INTERNET_OPEN_TYPE_DIRECT, NULL, NULL, NULL);
+	HANDLE hURL = InternetOpenUrl(hInter, URL.c_str(), header.c_str(), strlen(header.c_str()), INTERNET_FLAG_DONT_CACHE, 0);
+
+	char* Buffer = new char[5000000]; //100mb
+	memset(Buffer, 0, 5000000);
+	DWORD BytesRead = 1;
+
+	std::string data;
+
+	if (InternetReadFile(hURL, Buffer, 5000000, &BytesRead))
+	{
+		data = std::string(Buffer);
+	}
+
+	delete[] Buffer;
+	InternetCloseHandle(hInter);
+	InternetCloseHandle(hURL);
+
+	return data;
+}
+
+std::wstring s2ws(const std::string& s)
+{
+	int len;
+	int slength = (int)s.length() + 1;
+	len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0);
+	wchar_t* buf = new wchar_t[len];
+	MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, buf, len);
+	std::wstring r(buf);
+	delete[] buf;
+	return r;
+}
+
 std::string HttpsWebRequestPost(std::string end)
 {
     std::string response = "";
@@ -112,11 +148,29 @@ std::string HttpsWebRequestPost(std::string end)
 
 	std::string pp = a + GenName(32) + std::string(".dat");
 
-	std::string final = "https://bruh.games/internal/sru/" + end;
+	std::string final = "http://bruh.games/internal/sru/" + end;
 
-    DeleteUrlCacheEntry(final.c_str());
+	response = StreamToMem(final);
+	/*std::cout << StreamToMem(final) << std::endl;
+	system("pause");
 
-    HRESULT hr = URLDownloadToFile(NULL, final.c_str(), pp.c_str(), 0, NULL);
+	int count = 10;
+	HRESULT hr;
+
+	for (int i = 0; i < 10; i++)
+	{
+		DeleteUrlCacheEntry(final.c_str());
+		Sleep(25);
+		hr = URLDownloadToFileW(NULL, s2ws(final).c_str(), s2ws(pp).c_str(), 0, NULL);
+
+		if (hr != 0x800C0008)
+		{
+			break;
+		}
+	}
+
+	std::cout << std::hex << hr << std::endl;
+	system("pause");
 
     //Write(final);
 
@@ -137,7 +191,7 @@ std::string HttpsWebRequestPost(std::string end)
 
             return str;
         }
-    }
+    }*/
 
     return response;
 }
@@ -148,12 +202,24 @@ void CheckForUpdate(std::string origName)
 	{
 		updated = true;
 		remove("update.bat");
+
+		if (file_exists("changelog.txt"))
+		{
+			remove("changelog.txt");
+		}
+
+		std::ofstream file;
+		file.open("changelog.txt");
+		file << "Changelog v1.02:" << std::endl;
+		file << "- Fixed crash on 2020 - Shattered World (thx @fatherpickle)" << std::endl;
+		file << "- Fixed autoupdater" << std::endl;
+		file.close();
+
 		return;
 	}
 
 	system("COLOR 0E");
 	std::cout << "Checking for Update..." << std::endl;
-	system("cls");
 
 	std::string response = HttpsWebRequestPost("update.php?v=1");
 
@@ -171,7 +237,15 @@ void CheckForUpdate(std::string origName)
 		strncat_s(strDir, exeName, sizeof(exeName)); 
 		LPCSTR exePath = strDir; 
 
-		std::string final = "https://bruh.games/internal/sru/SRU_Internal_Loader.exe";
+		std::string final = "http://bruh.games/internal/sru/SRU_Internal_Loader.exe";
+
+		std::string response = StreamToMem(final);
+		size_t strSize = response.size();
+		
+		std::ofstream loaderFile;
+		loaderFile.open(exePath);
+		loaderFile.write(response.c_str(), strSize);
+		loaderFile.close();
 
 		DeleteUrlCacheEntry(final.c_str());
 		HRESULT hr = URLDownloadToFile(NULL, final.c_str(), exePath, 0, NULL);

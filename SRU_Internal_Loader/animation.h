@@ -55,6 +55,7 @@ void AnimateIntro()
 	std::random_shuffle(std::begin(order), std::end(order));
 
 	system("COLOR 0A");
+	system("cls");
 	for (int i = 0; i < 17; i++)
 	{
 		Sleep(20);

@@ -33,15 +33,17 @@ void SetupSessionPtr(uintptr_t base = NULL)
 
         if (*address > 0)
         {
-            Country c{};
-            c.Init(*address);
-            c.id = g_countryList.size();
-
-            if (c.real)
+            if (Base::Utils::CanReadPtr((uintptr_t*)*address))
             {
-                Base::SRU_Data::g_countryList.push_back(c);
-            }
+                Country c{};
+                c.Init(*address);
+                c.id = g_countryList.size();
 
+                if (c.real)
+                {
+                    Base::SRU_Data::g_countryList.push_back(c);
+                }
+            }
         }
         else
         {
@@ -456,6 +458,7 @@ DWORD WINAPI dllThread(HMODULE hModule) {
     //fclose(stdout);
     //fclose(stdin);
     //FreeConsole();
+    
     FreeLibraryAndExitThread(hModule, 0);
     return dwExit;
 }
