@@ -10,6 +10,8 @@ void Base::Hooks::Init(bool full = false)
     if (res == kiero::Status::Success)
     {
         kiero::bind(42, (void**)&Base::Data::oEndScene, Hooks::hkEndScene);
+        //kiero::bind(82, (void**)&Base::Data::oDrawIndexedPrimitive, Hooks::hkDrawIndexedPrimitive); //not needed atm
+        //kiero::bind(84, (void**)&Base::Data::oDrawIndexedPrimitiveUp, Hooks::hkDrawIndexedPrimitiveUp); //^
         kiero::bind(16, (void**)&Base::Data::oReset, Hooks::hkReset);
     }
 

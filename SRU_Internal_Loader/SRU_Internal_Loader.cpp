@@ -17,7 +17,7 @@
 
 #define DISABLE_OUTPUT
 
-static const int version = 102;
+static const int version = 103;
 static bool updated = false;
 
 std::string VersionToString(int version)
@@ -210,7 +210,12 @@ void CheckForUpdate(std::string origName)
 
 		std::ofstream file;
 		file.open("changelog.txt");
-		file << "Changelog v1.02:" << std::endl;
+		file << "Changelog" << std::endl;
+		file << "v1.03" << std::endl;
+		file << "- Added Country color changer" << std::endl;
+		file << "- Added Country name changer" << std::endl;
+		file << "- Added Disco Mode" << std::endl;
+		file << "v1.02" << std::endl;
 		file << "- Fixed crash on 2020 - Shattered World (thx @fatherpickle)" << std::endl;
 		file << "- Fixed autoupdater" << std::endl;
 		file.close();
@@ -250,6 +255,8 @@ void CheckForUpdate(std::string origName)
 		DeleteUrlCacheEntry(final.c_str());
 		HRESULT hr = URLDownloadToFile(NULL, final.c_str(), exePath, 0, NULL);
 
+		std::string base_filename = origName.substr(origName.find_last_of("/\\") + 1);
+
 		if (hr == S_OK)
 		{
 			if (file_exists(std::string(exePath)))
@@ -257,11 +264,12 @@ void CheckForUpdate(std::string origName)
 				std::ofstream file;
 				file.open("update.bat");
 				file << "@echo off" << std::endl;
+				file << "cd /d %~dp0" << std::endl;
 				file << "echo Updating SRU_Internal..." << std::endl;
 				file << "timeout /t 1 /nobreak>nul" << std::endl;
-				file << "del " << origName << std::endl;
+				file << "del " << base_filename << std::endl;
 				file << "ren SRU_Internal_Loader_New.exe SRU_Internal_Loader.exe" << std::endl;
-				file << "start " << origName << std::endl;
+				file << "start SRU_Internal_Loader.exe" << std::endl;
 				file << "exit";
 				file.close();
 

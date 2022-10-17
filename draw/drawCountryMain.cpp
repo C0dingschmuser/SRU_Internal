@@ -24,6 +24,34 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 
 	float inputWidth = 275;
 
+	//Name
+
+	static char* buffer = (char*)calloc(1024, sizeof(char));
+
+	if (!g_countryColorLoaded)
+	{
+		//set to true down below
+		strcpy(buffer, cc->name.data());
+	}
+
+	ImGui::PushItemWidth(inputWidth + 27);
+	if (ImGui::InputText("Name", buffer, 1024, ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		std::string test = std::string(buffer);
+
+		if (test.length() > 0)
+		{
+			//apply
+			cc->ChangeName(test);
+		}
+		else
+		{
+			//reset
+			strcpy(buffer, cc->name.data());
+		}
+	}
+	ImGui::PopItemWidth();
+
 	//Treasury
 
 	if (ImGui::Checkbox("###cb_treasury", &cc->treasury->freeze))
@@ -135,7 +163,33 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 	ImGui::PopItemWidth();
 
 	//-----------------------------------------------------------------------------------
-	//--- Goods -------------------------------------------------------------------------
+	//--- Color -------------------------------------------------------------------------
+	//-----------------------------------------------------------------------------------
+
+	static float color[3] = { 0, 0, 0 };
+
+	if (!g_countryColorLoaded)
+	{
+		unsigned long inputColor = *cc->colorPtr;
+		Base::Utils::RGB rgb = Base::Utils::ColorConverter(inputColor);
+
+		color[0] = rgb.r;
+		color[1] = rgb.g;
+		color[2] = rgb.b;
+	}
+
+	g_countryColorLoaded = true;
+
+	ImGui::Text("Country Color (click square)");
+	if (ImGui::ColorEdit3("##countrycoloredit", (float*)&color))
+	{
+		unsigned long final = Base::Utils::ColorConverter(color[0], color[1], color[2], 1.0);
+
+		*cc->colorPtr = final;
+	}
+
+	//-----------------------------------------------------------------------------------
+	//--- DEFCON ------------------------------------------------------------------------
 	//-----------------------------------------------------------------------------------
 
 	ImGui::Separator();
@@ -174,6 +228,11 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 	}
 	ImGui::PopItemWidth();
 	ImGui::Separator();;
+
+	//-----------------------------------------------------------------------------------
+	//--- Goods -------------------------------------------------------------------------
+	//-----------------------------------------------------------------------------------
+
 	ImGui::Text("Goods");
 
 	for (int i = 0; i < cc->resources.size(); i++)

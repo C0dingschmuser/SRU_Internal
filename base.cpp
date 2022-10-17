@@ -3,6 +3,8 @@
 //Data Vars
 
 EndScene Base::Data::oEndScene = NULL;
+DrawIndexedPrimitive Base::Data::oDrawIndexedPrimitive = NULL;
+DrawIndexedPrimitiveUp Base::Data::oDrawIndexedPrimitiveUp = NULL;
 Reset Base::Data::oReset = NULL;
 WndProc_t Base::Data::oWndProc = NULL;
 HWND Base::Data::window = NULL;
@@ -133,8 +135,11 @@ bool Base::SRU_Data::g_mouseClicked = false;
 bool Base::SRU_Data::g_paintActive = false;
 bool Base::SRU_Data::g_paintEnabled = false;
 
+bool Base::SRU_Data::g_disco = false;
 bool Base::SRU_Data::g_productionAdjustment = false;
 bool Base::SRU_Data::g_aiColony = true;
+
+bool Base::Draw::g_countryColorLoaded = false;
 
 uint8_t Base::SRU_Data::g_currentHexSupply = 0;
 
@@ -658,6 +663,31 @@ void Base::SRU_Data::LoadDefaultUnits()
 void Base::Init(bool full = false)
 {
 	Hooks::Init(full);
+}
+
+struct Base::Utils::RGB Base::Utils::ColorConverter(unsigned long hexValue)
+{
+	struct RGB rgbColor;
+	rgbColor.r = ((hexValue >> 16) & 0xFF) / 255.0;
+	rgbColor.g = ((hexValue >> 8) & 0xFF) / 255.0;
+	rgbColor.b = ((hexValue) & 0xFF) / 255.0;
+
+	return rgbColor;
+}
+
+unsigned long Base::Utils::ColorConverter(int r, int g, int b, int a)
+{
+	return ((a & 0xff) << 24) + ((r & 0xff) << 16) + ((g & 0xff) << 8) + (b & 0xff);
+}
+
+unsigned long Base::Utils::ColorConverter(float r, float g, float b, float a)
+{
+	int ir = (int)(r * 255.0f);
+	int ig = (int)(g * 255.0f);
+	int ib = (int)(b * 255.0f);
+	int ia = (int)(a * 255.0f);
+
+	return ColorConverter(ir, ig, ib, ia);
 }
 
 std::string Base::Utils::FloatToPercent(float f, float max, bool simple)

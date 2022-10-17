@@ -158,6 +158,7 @@ void CheckCurrentCountry(uintptr_t* clickedCountryPtr)
                     clickedCountry = &g_countryList[0];
                 }
 
+                Base::Draw::g_countryColorLoaded = false;
             }
             else
             {
@@ -384,9 +385,11 @@ DWORD WINAPI dllThread(HMODULE hModule) {
     Base::SRU_Data::Hooks::SetupFunctionHooks();
 
     int mainTimer = 0;
+    int discoTimer = 0;
 
     bool finish = false;
     while (!finish) {
+
         mainTimer++;
         if (mainTimer >= 2)
         {
@@ -443,6 +446,36 @@ DWORD WINAPI dllThread(HMODULE hModule) {
                     }
                 }
 
+                if (g_disco)
+                {
+                    discoTimer++;
+                    if (discoTimer == 4)
+                    {
+                        static int discoColors[7] = {
+                            0xFF0062FF,
+                            0xFFFF0000,
+                            0xFFFFFF00,
+                            0xFF00FF2A,
+                            0xFF00FFA6,
+                            0xFF9900FF,
+                            0xFFFF00E6
+                        };
+
+                        discoTimer = 0;
+
+                        for (int i = 0; i < g_countryList.size(); i++)
+                        {
+                            int r = rand() % 8;
+
+                            while (discoColors[r] == *g_countryList[i].colorPtr)
+                            {
+                                r = rand() % 8;
+                            }
+
+                            *g_countryList[i].colorPtr = discoColors[r];
+                        }
+                    }
+                }
             }
         }
         

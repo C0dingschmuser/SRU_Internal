@@ -190,6 +190,49 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 						{
 							Base::SRU_Data::Hooks::SetProductionAdjustment(g_productionAdjustment);
 						}
+						if (ImGui::Checkbox("Disco Mode\n(Epilepsy warning)", &g_disco))
+						{
+							if (g_disco)
+							{
+								//save orig
+
+								for (int i = 0; i < g_countryList.size(); i++)
+								{
+									Country* tmpcc = &g_countryList[i];
+
+									unsigned long originalColor = *(uintptr_t*)(tmpcc->base + Offsets::countryColor);
+
+									if (originalColor > 0)
+									{
+										tmpcc->hasOwnColor = true;
+										tmpcc->originalColor = originalColor;
+									}
+									else
+									{
+										tmpcc->hasOwnColor = false;
+										tmpcc->originalColor = 0;
+									}
+								}
+							}
+							else
+							{
+								//restore
+
+								for (int i = 0; i < g_countryList.size(); i++)
+								{
+									Country* tmpcc = &g_countryList[i];
+
+									if (tmpcc->hasOwnColor)
+									{
+										*(uintptr_t*)(tmpcc->base + Offsets::countryColor) = tmpcc->originalColor;
+									}
+									else
+									{
+										*(uintptr_t*)(tmpcc->base + Offsets::countryColor) = 0;
+									}
+								}
+							}
+						}
 						ImGui::EndChild();
 					}
 

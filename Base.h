@@ -5,6 +5,8 @@
 #define WNDPROC_INDEX GWL_WNDPROC
 
 typedef long(__stdcall* EndScene)(LPDIRECT3DDEVICE9);
+typedef long(__stdcall* DrawIndexedPrimitive)(LPDIRECT3DDEVICE9, D3DPRIMITIVETYPE, INT, UINT, UINT, UINT, UINT);
+typedef long(__stdcall* DrawIndexedPrimitiveUp)(LPDIRECT3DDEVICE9, D3DPRIMITIVETYPE, UINT, UINT, UINT, CONST void*, D3DFORMAT, CONST void*, UINT);
 typedef long(__stdcall* Reset)(LPDIRECT3DDEVICE9, D3DPRESENT_PARAMETERS*);
 typedef LRESULT(CALLBACK* WndProc_t) (HWND, UINT, WPARAM, LPARAM);
 
@@ -17,6 +19,8 @@ namespace Base
 	namespace Data
 	{
 		extern EndScene oEndScene;
+		extern DrawIndexedPrimitive oDrawIndexedPrimitive;
+		extern DrawIndexedPrimitiveUp oDrawIndexedPrimitiveUp;
 		extern Reset oReset;
 		extern WndProc_t oWndProc;
 		extern HWND window;
@@ -227,6 +231,7 @@ namespace Base
 			void Init(uintptr_t base);
 			void HandleFreeze();
 			void HandleUnits();
+			void ChangeName(std::string newName);
 
 			uintptr_t base;
 			bool real;
@@ -235,7 +240,11 @@ namespace Base
 			int alive;
 			std::string name;
 
+			unsigned long originalColor = 0;
+			bool hasOwnColor = false;
+
 			uintptr_t* populationPtr;
+			uintptr_t* colorPtr;
 			unsigned int lastSurrenderTime = -1;
 
 			std::shared_ptr<FloatValue> treasury;
@@ -342,6 +351,7 @@ namespace Base
 		extern bool g_paintActive;
 		extern bool g_paintEnabled;
 
+		extern bool g_disco;
 		extern bool g_productionAdjustment;
 		extern bool g_aiColony;
 
@@ -390,6 +400,8 @@ namespace Base
 
 	namespace Draw
 	{
+		extern bool g_countryColorLoaded;
+		
 		void DrawSelectedCountryText(Base::SRU_Data::Country* cc, const char* text);
 		void DrawCountry(Base::SRU_Data::Country* cc);
 		void DrawCountryDiplo(Base::SRU_Data::Country* cc, int& treatyMsg);
@@ -405,12 +417,24 @@ namespace Base
 		bool FunctionHook(void* toHook, void* targetFunc, int len);
 
 		long __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDevice);
+		long __stdcall hkDrawIndexedPrimitive(LPDIRECT3DDEVICE9 pDevice, D3DPRIMITIVETYPE Type, INT BaseVertexIndex, UINT MinVertexIndex, UINT NumVertices, UINT startIndex, UINT primCount);
+		long __stdcall hkDrawIndexedPrimitiveUp(LPDIRECT3DDEVICE9 pDevice, D3DPRIMITIVETYPE Type, UINT MinVertexIndex, UINT NumVertices, UINT PrimitiveCount, CONST void* pIndexData, D3DFORMAT IndexDataFormat, CONST void* pVertexStreamZeroData, UINT VertexStreamZeroStride);
 		long __stdcall hkReset(LPDIRECT3DDEVICE9 pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters);
 		LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	}
 
 	namespace Utils
 	{
+		struct RGB
+		{
+			float r = 0;
+			float g = 0;
+			float b = 0;
+		};
+
+		struct RGB ColorConverter(unsigned long hexValue);
+		unsigned long ColorConverter(int r, int g, int b, int a);
+		unsigned long ColorConverter(float r, float g, float b, float a);
 		bool CMPF(float A, float B, float E = 0.005f);
 		std::string FloatToPercent(float f, float max, bool simple = false);
 		bool MemCompare(const BYTE* bData, const BYTE* bMask, const char* szMask);

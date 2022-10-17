@@ -20,6 +20,7 @@ void Base::SRU_Data::Country::Init(uintptr_t base)
 	this->oId = oId;
 
 	this->populationPtr = (uintptr_t*)(base + Offsets::countryPopulation);
+	this->colorPtr = (uintptr_t*)(base + Offsets::countryColor);
 
 	this->alive = 0;
 	if (Base::Utils::CanReadPtr(this->populationPtr))
@@ -336,4 +337,17 @@ void Base::SRU_Data::Country::HandleFreeze()
 	}
 
 	HandleUnits();
+}
+
+void Base::SRU_Data::Country::ChangeName(std::string newName)
+{
+	char* buffer = (char*)calloc(newName.length() + 3, sizeof(char));
+	strcpy(buffer, newName.data());
+
+	*(uintptr_t*)(this->base + Offsets::countryName) = (int)(int*)buffer;
+
+	uint8_t curr = *(uint8_t*)(this->base + Offsets::countryNameOverride);
+	*(uint8_t*)(this->base + Offsets::countryNameOverride) = curr | 0x4;
+
+	this->name = newName;
 }
