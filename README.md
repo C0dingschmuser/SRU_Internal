@@ -50,7 +50,7 @@ Contrary to ordinary mods or trainers, SRU_Interal gets injected into the core g
 Since SRU_Internal directly manipulates the game's process memory it's possible that your antivirus flags this as harmful. **That is a false positive. The Trainer is safe. (For a detailed explanation, look below)** If that happens, you need to manually add an exception in your antivirus to exclude the trainer or a folder which contains the trainer. [Here](https://support.microsoft.com/en-us/windows/add-an-exclusion-to-windows-security-811816c0-4dfd-af4a-47e4-c301afe13b26) is a tutorial on how to do that with Windows Defender.
 If you find a bug, feel free to open an [Issue](https://github.com/C0dingschmuser/SRU_Internal/issues) with a detailed description or contact me via **info@bruh.games**.
 
-### Why can the Antivrius flag this as harmful?
+### Why can the AV flag this as harmful?
 If you download a new unknow file, your AV (Antivirus) performs something called a "Heuristic analysis" to evaluate what the File/Program might do and compare it with a database of things that could be harmful. A good example for this is if a program listens for keypresses. SRU_Internal does this with the CAPSLOCK and CTRL Keys to check whether a player wants to paint the map or not. **But the AV doesn’t know that**, it just knows that said program listens for keypresses, and that other actual malicious programs listen for keypresses too, so it comes to the conclusion “oh, that’s dangerous”. And it’s not just that, game trainers/cheats will also manipulate process memory to change ingame variables (which in turn requires admin rights) etc. and this all accumulates together; basically, it’s too tasty for the AV to not flag it even though it's harmless.
 
 ### Releases & Changelogs
