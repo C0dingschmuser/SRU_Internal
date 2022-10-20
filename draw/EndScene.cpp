@@ -28,12 +28,18 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 	{
 		if (g_paintEnabled && !g_paintActive)
 		{
-			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 255, 0, 255));
+			ImGui::PushStyleColor(ImGuiCol_TitleBg, IM_COL32(255, 255, 0, 255));
+			ImGui::PushStyleColor(ImGuiCol_TitleBgActive, IM_COL32(255, 255, 0, 255));
+			ImGui::PushStyleColor(ImGuiCol_TitleBgCollapsed, IM_COL32(255, 255, 0, 255));
+			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 0, 255));
 		}
 		
 		if (g_paintActive)
 		{
-			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
+			ImGui::PushStyleColor(ImGuiCol_TitleBg, IM_COL32(0, 255, 0, 255));
+			ImGui::PushStyleColor(ImGuiCol_TitleBgActive, IM_COL32(0, 255, 0, 255));
+			ImGui::PushStyleColor(ImGuiCol_TitleBgCollapsed, IM_COL32(0, 255, 0, 255));
+			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 0, 255));
 		}
 
 		ImGui::Begin("SRU Internal", 0, ImGuiWindowFlags_NoResize);
@@ -41,9 +47,19 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 		if (g_paintActive || g_paintEnabled)
 		{
 			ImGui::PopStyleColor();
+			ImGui::PopStyleColor();
+			ImGui::PopStyleColor();
+			ImGui::PopStyleColor();
 		}
 
-		ImGui::SetWindowSize(ImVec2(525, 350));
+		if (g_ingame)
+		{
+			ImGui::SetWindowSize(ImVec2(525, 350));
+		}
+		else
+		{
+			ImGui::SetWindowSize(ImVec2(350, 50));
+		}
 
 		if (g_ingame && clickedCountry)
 		{

@@ -6,8 +6,10 @@ void Base::Draw::DrawUnitSpawn(Base::SRU_Data::Country* cc)
 {
 	if (ImGui::BeginTabItem("Spawn"))
 	{
+		g_paintUnitSpawn = true;
+
 		Draw::DrawSelectedCountryText(cc, "Clicked country: %s");
-		ImGui::BeginChild("##UnitSpawnData", ImVec2(225, 250));
+		ImGui::BeginChild("##UnitSpawnData", ImVec2(225, 240));
 		{
 			static bool spawnClickedCountry = true;
 			ImGui::Checkbox("Spawn for clicked Country", &spawnClickedCountry);
@@ -36,7 +38,6 @@ void Base::Draw::DrawUnitSpawn(Base::SRU_Data::Country* cc)
 				ImGui::EndDisabled();
 			}
 
-			static int unitDesignType = 0;
 			static std::string unitDesignTypes[]{
 				"All",
 				"Land",
@@ -44,14 +45,14 @@ void Base::Draw::DrawUnitSpawn(Base::SRU_Data::Country* cc)
 				"Air"
 			};
 
-			if (ImGui::BeginCombo("##unitdesigntype", unitDesignTypes[unitDesignType].c_str()))
+			if (ImGui::BeginCombo("##unitdesigntype", unitDesignTypes[g_unitDesignType].c_str()))
 			{
 				for (int i = 0; i < 4; i++)
 				{
-					const bool isSelected = (unitDesignType == i);
+					const bool isSelected = (g_unitDesignType == i);
 					if (ImGui::Selectable(unitDesignTypes[i].c_str(), isSelected))
 					{
-						unitDesignType = i;
+						g_unitDesignType = i;
 					}
 				}
 				ImGui::EndCombo();
@@ -80,47 +81,43 @@ void Base::Draw::DrawUnitSpawn(Base::SRU_Data::Country* cc)
 				}
 			}
 
-			static int unitCount = 1;
 			ImGui::Text("Amount");
-			if (ImGui::InputInt("##spawnunitamount", &unitCount))
+			if (ImGui::InputInt("##spawnunitamount", &g_unitSpawnCount))
 			{
-				unitCount = std::clamp(unitCount, 1, 2048);
+				g_unitSpawnCount = std::clamp(g_unitSpawnCount, 1, 2048);
 			}
 
-			static bool spawnReserve = false;
-			ImGui::Checkbox("Spawn in reserve", &spawnReserve);
+			ImGui::Checkbox("Spawn in reserve", &g_unitSpawnReserve);
 
 			static bool useClickedPos = true;
 			ImGui::Checkbox("Use clicked Position", &useClickedPos);
 
-			if (spawnReserve || useClickedPos)
+			if (g_unitSpawnReserve || useClickedPos)
 			{
 				ImGui::BeginDisabled();
 			}
 
 			ImGui::Text("X Pos            Y Pos");
 
-			static int xPos = 0, yPos = 0;
-
 			if (useClickedPos)
 			{
-				xPos = *g_clickedXPtr;
-				yPos = *g_clickedYPtr;
+				g_unitSpawnXPos = *g_clickedXPtr;
+				g_unitSpawnYPos = *g_clickedYPtr;
 			}
 
 			ImGui::PushItemWidth(112);
-			if (ImGui::InputInt("##inputX", &xPos, 0, 0))
+			if (ImGui::InputInt("##inputX", &g_unitSpawnXPos, 0, 0))
 			{
-				xPos = std::clamp(xPos, 0, 9999);
+				g_unitSpawnXPos = std::clamp(g_unitSpawnXPos, 0, 9999);
 			}
 			ImGui::SameLine();
 			ImGui::PushItemWidth(112);
-			if (ImGui::InputInt("##inputY", &yPos, 0, 0))
+			if (ImGui::InputInt("##inputY", &g_unitSpawnYPos, 0, 0))
 			{
-				yPos = std::clamp(yPos, 0, 9999);
+				g_unitSpawnYPos = std::clamp(g_unitSpawnYPos, 0, 9999);
 			}
 
-			if (spawnReserve || useClickedPos)
+			if (g_unitSpawnReserve || useClickedPos)
 			{
 				ImGui::EndDisabled();
 			}
@@ -137,12 +134,12 @@ void Base::Draw::DrawUnitSpawn(Base::SRU_Data::Country* cc)
 				int unitDesign = g_defaultUnitList[g_unitSpawnSelectedUnitDesign]->spawnId;
 				uintptr_t country = unitSpawnCountry->base;
 
-				Base::Execute::SpawnUnit(unitDesign, unitCount, country, 1, spawnReserve, xPos, yPos);
+				Base::Execute::SpawnUnit(unitDesign, g_unitSpawnCount, country, 1, g_unitSpawnReserve, g_unitSpawnXPos, g_unitSpawnYPos);
 			}
 
 			ImGui::EndChild();
 			ImGui::SameLine();
-			ImGui::BeginChild("##Unitspawndata2");
+			ImGui::BeginChild("##Unitspawndata2", ImVec2(0, 240));
 			{
 				static bool textSearch = false;
 
@@ -170,12 +167,12 @@ void Base::Draw::DrawUnitSpawn(Base::SRU_Data::Country* cc)
 							}
 						}
 
-						if (unitDesignType != 0 && ok)
+						if (g_unitDesignType != 0 && ok)
 						{
 							ok = false;
 							
 							int unitType = g_defaultUnitList[i]->unitClass;
-							switch (unitDesignType)
+							switch (g_unitDesignType)
 							{
 							case 1: //Land
 								if (unitType >= 0 && unitType <= 0x6)
@@ -262,6 +259,8 @@ void Base::Draw::DrawUnitSpawn(Base::SRU_Data::Country* cc)
 				}
 				ImGui::EndChild();
 			}
+
+			ImGui::Text("Or toggle paint mode with capslock and hold ctrl");
 		}
 		ImGui::EndTabItem();
 	}	

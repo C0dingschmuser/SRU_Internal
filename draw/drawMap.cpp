@@ -7,6 +7,8 @@ void Base::Draw::DrawMap(Base::SRU_Data::Country* cc)
 {
 	Country* target = &g_countryList[g_selectedTargetCountry];
 
+	g_paintUnitSpawn = false;
+
 	Draw::DrawSelectedCountryText(target, "Target country: %s");
 	ImGui::Text("Shift-Click to change");
 	ImGui::Separator();
@@ -129,108 +131,203 @@ void Base::Draw::DrawMap(Base::SRU_Data::Country* cc)
 		ImGui::Text("- Capslock to enable");
 		ImGui::Text("- Hold ctrl to paint");
 
-		static bool paintTargetCountry = true;
-
-		ImGui::Checkbox("Paint target country", &paintTargetCountry);
-
-		if (paintTargetCountry)
+		if (g_mapSizeX > 0)
 		{
-			ImGui::BeginDisabled();
-
-			g_paintSelectedComboCountry = g_selectedTargetCountry;
+			ImGui::Text("Brush size");
+			ImGui::SliderInt("##paintbrushsuze", &g_paintBrushSize, 1, 10);
 		}
 
-		if (ImGui::BeginCombo("##countrycombo", g_countryList[g_paintSelectedComboCountry].name.c_str()))
+		ImGui::BeginTabBar("##paintingtabbar");
+
+		if (ImGui::BeginTabItem("Land"))
 		{
-			for (int i = 0; i < g_countryList.size(); i++)
+			g_paintMode = 0;
+			static bool paintTargetCountry = true;
+
+			ImGui::Checkbox("Paint target country", &paintTargetCountry);
+
+			if (paintTargetCountry)
 			{
-				const bool isSelected = (g_paintSelectedComboCountry == i);
-				if (ImGui::Selectable(Base::SRU_Data::g_countryList[i].name.c_str(), isSelected))
+				ImGui::BeginDisabled();
+
+				g_paintSelectedComboCountry = g_selectedTargetCountry;
+			}
+
+			if (ImGui::BeginCombo("##countrycombo", g_countryList[g_paintSelectedComboCountry].name.c_str()))
+			{
+				for (int i = 0; i < g_countryList.size(); i++)
 				{
-					g_paintSelectedComboCountry = i;
+					const bool isSelected = (g_paintSelectedComboCountry == i);
+					if (ImGui::Selectable(Base::SRU_Data::g_countryList[i].name.c_str(), isSelected))
+					{
+						g_paintSelectedComboCountry = i;
+					}
+				}
+				ImGui::EndCombo();
+			}
+
+			if (paintTargetCountry)
+			{
+				ImGui::EndDisabled();
+			}
+
+			static bool customLoyalty = false;
+
+			ImGui::Checkbox("Custom Loyalty", &customLoyalty);
+
+			if (!customLoyalty)
+			{
+				ImGui::BeginDisabled();
+
+				for (int i = 0; i < g_countryList.size(); i++)
+				{
+					if (g_countryList[i].oId == hexLoyalty)
+					{
+						g_paintSelectedComboLoyalty = i;
+						break;
+					}
 				}
 			}
-			ImGui::EndCombo();
-		}
 
-		if (paintTargetCountry)
-		{
-			ImGui::EndDisabled();
-		}
-
-		static bool customLoyalty = false;
-
-		ImGui::Checkbox("Custom Loyalty", &customLoyalty);
-
-		if (!customLoyalty)
-		{
-			ImGui::BeginDisabled();
-
-			for (int i = 0; i < g_countryList.size(); i++)
+			if (ImGui::BeginCombo("##loyaltycombo", g_countryList[g_paintSelectedComboLoyalty].name.c_str()))
 			{
-				if (g_countryList[i].oId == hexLoyalty)
+				for (int i = 0; i < g_countryList.size(); i++)
 				{
-					g_paintSelectedComboLoyalty = i;
+					const bool isSelected = (g_paintSelectedComboLoyalty == i);
+					if (ImGui::Selectable(Base::SRU_Data::g_countryList[i].name.c_str(), isSelected))
+					{
+						g_paintSelectedComboLoyalty = i;
+					}
+				}
+				ImGui::EndCombo();
+			}
+
+			if (!customLoyalty)
+			{
+				ImGui::EndDisabled();
+			}
+
+			static bool customGround = false;
+			std::string groundText = "Unchanged";
+
+			ImGui::Checkbox("Custom Ground", &customGround);
+
+			if (!customGround)
+			{
+				ImGui::BeginDisabled();
+				g_paintSelectedComboGround = -1;
+			}
+			else
+			{
+				if (g_paintSelectedComboGround == -1)
+				{
+					g_paintSelectedComboGround = 0;
+				}
+
+				groundText = g_groundTypeList[g_paintSelectedComboGround].name;
+			}
+
+			if (ImGui::BeginCombo("##groundcombo", groundText.c_str()))
+			{
+				for (int i = 0; i < g_groundTypeList.size(); i++)
+				{
+					const bool isSelected = (g_paintSelectedComboGround == i);
+					if (ImGui::Selectable(g_groundTypeList[i].name.c_str(), isSelected))
+					{
+						g_paintSelectedComboGround = i;
+					}
+				}
+				ImGui::EndCombo();
+			}
+
+			if (!customGround)
+			{
+				ImGui::EndDisabled();
+			}
+			ImGui::EndTabItem();
+		}
+
+		if(ImGui::BeginTabItem("Unit"))
+		{
+			ImGui::Text("Changes unit stats under cursor");
+			g_paintMode = 1;
+
+			static bool customUnitCountry = false;
+
+			ImGui::Checkbox("Only Apply to target Country Units", &g_paintUnitTargetCountry);
+			ImGui::Checkbox("Manual Unit Country", &customUnitCountry);
+
+			if (!customUnitCountry)
+			{
+				ImGui::BeginDisabled();
+				g_paintSelectedComboCountry = g_selectedTargetCountry;
+			}
+
+			if (ImGui::BeginCombo("##countrycombo", g_countryList[g_paintSelectedComboCountry].name.c_str()))
+			{
+				for (int i = 0; i < g_countryList.size(); i++)
+				{
+					const bool isSelected = (g_paintSelectedComboCountry == i);
+					if (ImGui::Selectable(Base::SRU_Data::g_countryList[i].name.c_str(), isSelected))
+					{
+						g_paintSelectedComboCountry = i;
+					}
+				}
+				ImGui::EndCombo();
+			}
+
+			if (!customUnitCountry)
+			{
+				ImGui::EndDisabled();
+			}
+
+			std::string sliderLabel = "";
+			std::string val = "";
+			for (int i = 0; i < Unit::Property::MAX; i++)
+			{
+				if (i == 1) i++; //skip max health
+
+				switch (i)
+				{
+				default:
+				case 0:
+					sliderLabel = "Health";
+					break;
+				case 2:
+					sliderLabel = "Fuel";
+					break;
+				case 3:
+					sliderLabel = "Supply";
+					break;
+				case 4:
+					sliderLabel = "Efficiency";
+					break;
+				case 5:
+					sliderLabel = "Experience";
+					break;
+				case 6:
+					sliderLabel = "Morale";
 					break;
 				}
-			}
-		}
 
-		if (ImGui::BeginCombo("##loyaltycombo", g_countryList[g_paintSelectedComboLoyalty].name.c_str()))
-		{
-			for (int i = 0; i < g_countryList.size(); i++)
-			{
-				const bool isSelected = (g_paintSelectedComboLoyalty == i);
-				if (ImGui::Selectable(Base::SRU_Data::g_countryList[i].name.c_str(), isSelected))
+				ImGui::Text(sliderLabel.c_str());
+
+				if (g_paintUnitModes[i] == -1)
 				{
-					g_paintSelectedComboLoyalty = i;
+					val = "Don't change";
 				}
-			}
-			ImGui::EndCombo();
-		}
-
-		if (!customLoyalty)
-		{
-			ImGui::EndDisabled();
-		}
-
-		static bool customGround = false;
-		std::string groundText = "Unchanged";
-
-		ImGui::Checkbox("Custom Ground", &customGround);
-
-		if (!customGround)
-		{
-			ImGui::BeginDisabled();
-			g_paintSelectedComboGround = -1;
-		}
-		else
-		{
-			if (g_paintSelectedComboGround == -1)
-			{
-				g_paintSelectedComboGround = 0;
-			}
-
-			groundText = g_groundTypeList[g_paintSelectedComboGround].name;
-		}
-
-		if (ImGui::BeginCombo("##groundcombo", groundText.c_str()))
-		{
-			for (int i = 0; i < g_groundTypeList.size(); i++)
-			{
-				const bool isSelected = (g_paintSelectedComboGround == i);
-				if (ImGui::Selectable(g_groundTypeList[i].name.c_str(), isSelected))
+				else
 				{
-					g_paintSelectedComboGround = i;
+					val = std::to_string(g_paintUnitModes[i]) + "%%";
 				}
-			}
-			ImGui::EndCombo();
-		}
 
-		if (!customGround)
-		{
-			ImGui::EndDisabled();
+				sliderLabel = "##paint" + sliderLabel;
+				ImGui::SliderInt(sliderLabel.c_str(), &g_paintUnitModes[i], -1, 100, val.c_str());
+			}
+
+			ImGui::EndTabItem();
 		}
+		ImGui::EndTabBar();
 	}
 	ImGui::EndChild();
 }

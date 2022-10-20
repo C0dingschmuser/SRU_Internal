@@ -46,6 +46,8 @@ namespace Base
 			extern uintptr_t g_diplFreeJmpBackAddr;
 			extern uintptr_t g_diplFreeJmpBackAddrDefault;
 
+			extern uintptr_t g_mapSizeJumpBackAddr;
+
 			void SetupFunctionHooks();
 			void SetProductionAdjustment(bool enabled);
 		}
@@ -63,6 +65,7 @@ namespace Base
 			extern int g_defconReg02, g_defconNew;
 			extern unsigned int g_defconReg03, g_defconReg13, g_defconReg23, g_defconReg33, g_defconReg43, g_defconReg53, g_defconReg63;
 			extern unsigned int g_diplFreeReg0, g_diplFreeReg1, g_diplFreeReg2, g_diplFreeReg3, g_diplFreeReg4, g_diplFreeReg5, g_diplFreeReg6;
+			extern unsigned int g_mapSizeReg0, g_mapSizeReg1, g_mapSizeReg2, g_mapSizeReg3, g_mapSizeReg4, g_mapSizeReg5, g_mapSizeReg6;
 			extern uintptr_t g_aiSurrBase;
 
 			extern std::vector<uintptr_t> g_ownAllocs;
@@ -214,7 +217,6 @@ namespace Base
 			void RestoreDesignProperty(Country* c, UnitDefault::Property p);
 
 			uintptr_t base = 0;
-			uintptr_t* currentHex;
 			uintptr_t* deployedState;
 			uint8_t* countryId;
 			uint16_t* xPos;
@@ -238,6 +240,7 @@ namespace Base
 			int id;
 			int oId;
 			int alive;
+			int flagOption = 0;
 			std::string name;
 
 			unsigned long originalColor = 0;
@@ -245,6 +248,10 @@ namespace Base
 
 			uintptr_t* populationPtr;
 			uintptr_t* colorPtr;
+			uint16_t* flagIdPtr;
+
+			uint16_t originalFlagId;
+			
 			unsigned int lastSurrenderTime = -1;
 
 			std::shared_ptr<FloatValue> treasury;
@@ -342,14 +349,29 @@ namespace Base
 
 		extern int g_unitRefreshMaxTime;
 		extern int g_mainRefreshTime;
+
+		extern int g_mapSizeX;
+
+		extern int g_paintMode;
+		extern int g_paintBrushSize;
+		extern bool g_paintUnitTargetCountry;
+		extern std::vector<int> g_paintUnitModes;
 		
+		extern int g_unitDesignType;
+		extern int g_unitSpawnCount;
+		extern int g_unitSpawnXPos;
+		extern int g_unitSpawnYPos;
+		extern bool g_unitSpawnReserve;
+
 		extern bool g_ingame;
 		extern bool g_addOk;
 		extern bool g_shift;
+		extern bool g_mapSizeLoaded;
 		extern bool g_uiHexSupplySet;
 		extern bool g_mouseClicked;
 		extern bool g_paintActive;
 		extern bool g_paintEnabled;
+		extern bool g_paintUnitSpawn;
 
 		extern bool g_disco;
 		extern bool g_productionAdjustment;

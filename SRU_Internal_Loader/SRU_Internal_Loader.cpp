@@ -17,7 +17,7 @@
 
 #define DISABLE_OUTPUT
 
-static const int version = 103;
+static const int version = 104;
 static bool updated = false;
 
 std::string VersionToString(int version)
@@ -124,6 +124,33 @@ std::string StreamToMem(std::string URL)
 	return data;
 }
 
+std::vector<unsigned char> StreamToMemBinary(std::string URL)
+{
+	std::string header = "Accept: *" "/" "*\r\n\r\n";
+	HANDLE hInter = InternetOpen("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36", INTERNET_OPEN_TYPE_DIRECT, NULL, NULL, NULL);
+	HANDLE hURL = InternetOpenUrl(hInter, URL.c_str(), header.c_str(), strlen(header.c_str()), INTERNET_FLAG_DONT_CACHE, 0);
+
+	unsigned char* Buffer = new unsigned char[5000000]; //100mb
+	memset(Buffer, 0, 5000000);
+	DWORD BytesRead = 1;
+
+	std::vector<unsigned char> data;
+
+	if (InternetReadFile(hURL, Buffer, 5000000, &BytesRead))
+	{
+		for (int i = 0; i < BytesRead; i++)
+		{
+			data.push_back(Buffer[i]);
+		}
+	}
+
+	delete[] Buffer;
+	InternetCloseHandle(hInter);
+	InternetCloseHandle(hURL);
+
+	return data;
+}
+
 std::wstring s2ws(const std::string& s)
 {
 	int len;
@@ -211,6 +238,12 @@ void CheckForUpdate(std::string origName)
 		std::ofstream file;
 		file.open("changelog.txt");
 		file << "Changelog" << std::endl;
+		file << "v1.04" << std::endl;
+		file << "- Improved Land painting(you can now create islands and land connections)" << std::endl;
+		file << "- Added Unit painting(change stats of unit(s) by hovering over them / spawn paint units)" << std::endl;
+		file << "- Added paint brush size" << std::endl;
+		file << "- Added Country flag change" << std::endl;
+		file << "- Improved ui" << std::endl;
 		file << "v1.03" << std::endl;
 		file << "- Added Country color changer" << std::endl;
 		file << "- Added Country name changer" << std::endl;
@@ -219,6 +252,8 @@ void CheckForUpdate(std::string origName)
 		file << "- Fixed crash on 2020 - Shattered World (thx @fatherpickle)" << std::endl;
 		file << "- Fixed autoupdater" << std::endl;
 		file.close();
+
+		system("changelog.txt");
 
 		return;
 	}
@@ -244,20 +279,19 @@ void CheckForUpdate(std::string origName)
 
 		std::string final = "http://bruh.games/internal/sru/SRU_Internal_Loader.exe";
 
-		std::string response = StreamToMem(final);
+		std::vector<unsigned char> response = StreamToMemBinary(final);
 		size_t strSize = response.size();
-		
-		std::ofstream loaderFile;
-		loaderFile.open(exePath);
-		loaderFile.write(response.c_str(), strSize);
+
+		std::ofstream loaderFile(exePath, std::ios::out | std::ios::binary);
+		loaderFile.write((char*)&response[0], strSize);
 		loaderFile.close();
 
-		DeleteUrlCacheEntry(final.c_str());
-		HRESULT hr = URLDownloadToFile(NULL, final.c_str(), exePath, 0, NULL);
+		//DeleteUrlCacheEntry(final.c_str());
+		//HRESULT hr = URLDownloadToFile(NULL, final.c_str(), exePath, 0, NULL);
 
 		std::string base_filename = origName.substr(origName.find_last_of("/\\") + 1);
 
-		if (hr == S_OK)
+		//if (hr == S_OK)
 		{
 			if (file_exists(std::string(exePath)))
 			{

@@ -21,6 +21,9 @@ void Base::SRU_Data::Country::Init(uintptr_t base)
 
 	this->populationPtr = (uintptr_t*)(base + Offsets::countryPopulation);
 	this->colorPtr = (uintptr_t*)(base + Offsets::countryColor);
+	this->flagIdPtr = (uint16_t*)(base + Offsets::countryFlagId);
+
+	this->originalFlagId = *this->flagIdPtr;
 
 	this->alive = 0;
 	if (Base::Utils::CanReadPtr(this->populationPtr))
@@ -230,8 +233,6 @@ void Base::SRU_Data::Country::HandleUnits()
 			break;
 		}
 	}
-
-	
 
 	if (!activated)
 	{

@@ -97,6 +97,8 @@ void SetupSessionPtr(uintptr_t base = NULL)
 
     Base::SRU_Data::Asm::g_ownAllocs.clear();
 
+    g_mapSizeLoaded = false;
+
     unitTimer = 0;
 }
 
@@ -337,22 +339,179 @@ int FindNewCountryOwner(uint8_t oldOwner, bool weak)
     else return 0;
 }
 
-void PaintMap(uintptr_t* mouseHoverHex)
+void PaintMap(uintptr_t mouseHoverHex, uint16_t xPos, uint16_t yPos)
+{
+    if (g_paintUnitSpawn)
+    {
+        //Paint spawn unit(s)
+
+        static uintptr_t lastSpawnTile = 0;
+        uintptr_t newSpawnTile = mouseHoverHex;
+
+        if (lastSpawnTile != newSpawnTile)
+        {
+            lastSpawnTile = newSpawnTile;
+
+            int unitDesign = g_defaultUnitList[g_unitSpawnSelectedUnitDesign]->spawnId;
+            uintptr_t country = unitSpawnCountry->base;
+
+            Base::Execute::SpawnUnit(unitDesign, g_unitSpawnCount, country, 1, g_unitSpawnReserve, xPos, yPos);
+        }
+
+        return;
+    }
+
+    if (g_paintMode == 0)
+    {
+        //Paint Land
+
+        uint8_t* ownerPtr = (uint8_t*)(mouseHoverHex);
+        uint8_t* loyaltyPtr = (uint8_t*)(mouseHoverHex + Offsets::hexLoyalty);
+        uint8_t* groundPtr = (uint8_t*)(mouseHoverHex + Offsets::hexGround);
+
+        *ownerPtr = (uint8_t)g_countryList[g_paintSelectedComboCountry].oId;
+        *loyaltyPtr = (uint8_t)g_countryList[g_paintSelectedComboLoyalty].oId;
+
+        if (g_paintSelectedComboGround > -1)
+        {
+            uint8_t newGround = (uint8_t)g_groundTypeList[g_paintSelectedComboGround].id;
+
+            if (*groundPtr == 14)
+            {
+                //If Ocean override second style attrib
+                uint8_t* groundPtr2 = (uint8_t*)(mouseHoverHex + 0x2);
+                *groundPtr2 = 240;
+            }
+            else if (newGround == 14)
+            {
+                uint8_t* groundPtr2 = (uint8_t*)(mouseHoverHex + 0x2);
+                *groundPtr2 = 243;
+            }
+
+            *groundPtr = newGround;
+        }
+    }
+    else if (g_paintMode == 1)
+    {
+        //Paint Unit(s) stats
+
+        Country* cc = &g_countryList[g_paintSelectedComboCountry];
+
+        uint8_t newOwner = (uint8_t)cc->oId;
+
+        Country* newcc = nullptr;
+
+        for (int i = 0; i < g_countryList.size(); i++)
+        {
+            if ((uint8_t)g_countryList[i].oId == newOwner)
+            {
+                newcc = &g_countryList[i];
+                break;
+            }
+        }
+
+        if (newcc == nullptr) return;
+
+        Base::SRU_Data::Unit* tmpUnit = nullptr;
+
+        int size = g_unitList.size();
+        for (int i = 0; i < size; i++)
+        {
+            tmpUnit = &g_unitList[i];
+
+            if (!*tmpUnit->deployedState)
+            {
+                //Deployed
+                if (*tmpUnit->xPos == xPos && *tmpUnit->yPos == yPos)
+                {
+                    if (*tmpUnit->countryId != newOwner)
+                    {
+                        //Country change only to units with other country then original
+
+                        *tmpUnit->countryId = newOwner;
+
+                        for (int a = 0; a < cc->allUnits.size(); a++)
+                        {
+                            if (cc->allUnits[a].base == tmpUnit->base)
+                            {
+                                cc->allUnits.erase(cc->allUnits.begin() + a);
+                                break;
+                            }
+                        }
+
+                        newcc->allUnits.push_back(*tmpUnit);
+                    }
+
+                    if ((g_paintUnitTargetCountry && *tmpUnit->countryId == cc->oId) ||
+                        !g_paintUnitTargetCountry)
+                    {
+                        for (int i = 0; i < g_paintUnitModes.size(); i++)
+                        {
+                            if (g_paintUnitModes[i] > -1 && i != Unit::MaxHalth)
+                            {
+                                float newVal =
+                                    (g_paintUnitModes[i] / 100.0f) * tmpUnit->properties[i]->origVal;
+
+                                *tmpUnit->properties[i]->valPtr = newVal;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+void PaintMapBrush(uintptr_t* mouseHoverHex, uint16_t* xPos, uint16_t* yPos)
 {
     if (mouseHoverHex == nullptr) return;
     if (*mouseHoverHex == 0) return;
-	
-    uint8_t* ownerPtr = (uint8_t*)(uintptr_t*)(*mouseHoverHex);
-    uint8_t* loyaltyPtr = (uint8_t*)(uintptr_t*)(*mouseHoverHex + Offsets::hexLoyalty);
-    uint8_t* groundPtr = (uint8_t*)(uintptr_t*)(*mouseHoverHex + Offsets::hexGround);
 
-    *ownerPtr = (uint8_t)g_countryList[g_paintSelectedComboCountry].oId;
-    *loyaltyPtr = (uint8_t)g_countryList[g_paintSelectedComboLoyalty].oId;
-
-    if (g_paintSelectedComboGround > -1)
+    if (g_paintBrushSize == 1 || g_paintUnitSpawn)
     {
-        *groundPtr = (uint8_t)g_groundTypeList[g_paintSelectedComboGround].id;
+        PaintMap(*mouseHoverHex, *xPos, *yPos);
+        return;
     }
+
+	int xMin = *xPos - g_paintBrushSize / 2;
+	int xMax = *xPos + g_paintBrushSize / 2;
+	int yMin = *yPos - g_paintBrushSize / 2;
+	int yMax = *yPos + g_paintBrushSize / 2;
+
+	for (int x = xMin; x < xMax; x++)
+	{
+		for (int y = yMin; y < yMax; y++)
+		{
+            __int16 realX = x;
+            __int16 realY = y;
+			
+            if (realX < 0)
+            {
+                realX = g_mapSizeX + x;
+            }
+
+            if (realY < 0) realY = 0;
+
+            DWORD posData = MAKELONG(realX, realY);
+
+            __int16 v9 = (__int16)posData;
+            if (v9 >= g_mapSizeX)
+            {
+                v9 = (__int16)posData % g_mapSizeX;
+            }
+            else if ((posData & 0x8000) != 0)
+            {
+                v9 = g_mapSizeX + (__int16)posData % g_mapSizeX;
+            }
+
+            long temp = v9 + g_mapSizeX * HIWORD(posData);
+            long mult = 16 * temp;
+
+            DWORD base = *(uintptr_t*)((*(uintptr_t*)(g_base + Offsets::allHexStart)) + 0xC) + mult;
+
+            PaintMap((uintptr_t)base, realX, realY);
+		}
+	}
 }
 
 DWORD WINAPI dllThread(HMODULE hModule) {
@@ -377,7 +536,10 @@ DWORD WINAPI dllThread(HMODULE hModule) {
     uintptr_t* gameStatePtr = (uintptr_t*)(g_base + Offsets::gameState);
     uintptr_t* clickedCountryPtr = (uintptr_t*)(g_base + Offsets::clickedCountry);
     uintptr_t* selectedUnitsCounterPtr = (uintptr_t*)(g_base + Offsets::selectedUnitsCounter);
+	
     uintptr_t* mouseHoverHex = (uintptr_t*)(g_base + Offsets::mouseHoverHex);
+    uint16_t* mouseHoverX = (uint16_t*)(g_base + Offsets::mouseHoverXPos);
+    uint16_t* mouseHoverY = (uint16_t*)(g_base + Offsets::mouseHoverYPos);
 
     //Main loop
 
@@ -427,7 +589,7 @@ DWORD WINAPI dllThread(HMODULE hModule) {
 
                     if (g_paintActive)
                     {
-                        PaintMap(mouseHoverHex);
+                        PaintMapBrush(mouseHoverHex, mouseHoverX, mouseHoverY);
                     }
                 }
 

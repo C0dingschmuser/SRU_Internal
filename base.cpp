@@ -76,6 +76,14 @@ unsigned int Base::SRU_Data::Asm::g_diplFreeReg4;
 unsigned int Base::SRU_Data::Asm::g_diplFreeReg5;
 unsigned int Base::SRU_Data::Asm::g_diplFreeReg6;
 
+unsigned int Base::SRU_Data::Asm::g_mapSizeReg0;
+unsigned int Base::SRU_Data::Asm::g_mapSizeReg1;
+unsigned int Base::SRU_Data::Asm::g_mapSizeReg2;
+unsigned int Base::SRU_Data::Asm::g_mapSizeReg3;
+unsigned int Base::SRU_Data::Asm::g_mapSizeReg4;
+unsigned int Base::SRU_Data::Asm::g_mapSizeReg5;
+unsigned int Base::SRU_Data::Asm::g_mapSizeReg6;
+
 std::vector<uintptr_t> Base::SRU_Data::Asm::g_ownAllocs;
 
 uintptr_t Base::SRU_Data::Asm::g_aiSurrBase;
@@ -104,6 +112,8 @@ uintptr_t Base::SRU_Data::Hooks::g_defconJmpBackAddr4 = 0;
 uintptr_t Base::SRU_Data::Hooks::g_diplFreeJmpBackAddr = 0;
 uintptr_t Base::SRU_Data::Hooks::g_diplFreeJmpBackAddrDefault = 0;
 
+uintptr_t Base::SRU_Data::Hooks::g_mapSizeJumpBackAddr = 0;
+
 uintptr_t Base::SRU_Data::g_nextUnitEntity = 0;
 
 int Base::SRU_Data::g_unitEntityCountSelected = 0;
@@ -125,15 +135,30 @@ int Base::SRU_Data::g_unitSpawnSelectedUnitDesign = -1;
 int Base::SRU_Data::g_unitRefreshMaxTime = 500;
 int Base::SRU_Data::g_mainRefreshTime = 25;
 
+int Base::SRU_Data::g_mapSizeX = 0;
+
+int Base::SRU_Data::g_paintMode = 0;
+int Base::SRU_Data::g_paintBrushSize = 1;
+bool Base::SRU_Data::g_paintUnitTargetCountry = false;
+std::vector<int> Base::SRU_Data::g_paintUnitModes;
+
+int Base::SRU_Data::g_unitDesignType = 0;
+int Base::SRU_Data::g_unitSpawnCount = 1;
+int Base::SRU_Data::g_unitSpawnXPos = 0;
+int Base::SRU_Data::g_unitSpawnYPos = 0;
+bool Base::SRU_Data::g_unitSpawnReserve = false;
+
 byte Base::SRU_Data::Asm::g_currentHexSupply = 0;
 byte Base::SRU_Data::Asm::g_lowestHexSupply = 0x1A;
 
 bool Base::SRU_Data::g_addOk = false;
 bool Base::SRU_Data::g_shift = false;
+bool Base::SRU_Data::g_mapSizeLoaded = false;
 bool Base::SRU_Data::g_uiHexSupplySet = false;
 bool Base::SRU_Data::g_mouseClicked = false;
 bool Base::SRU_Data::g_paintActive = false;
 bool Base::SRU_Data::g_paintEnabled = false;
+bool Base::SRU_Data::g_paintUnitSpawn = false;
 
 bool Base::SRU_Data::g_disco = false;
 bool Base::SRU_Data::g_productionAdjustment = false;
@@ -612,6 +637,12 @@ void Base::SRU_Data::LoadUnits(bool refresh)
 void Base::SRU_Data::LoadDefaultUnits()
 {
 	g_defaultUnitList.clear();
+	g_paintUnitModes.clear();
+
+	for (int i = 0; i < Unit::Property::MAX; i++)
+	{
+		g_paintUnitModes.push_back(-1);
+	}
 
 	uintptr_t start = *(uintptr_t*)(g_base + Offsets::allDefaultUnitStart);
 	uintptr_t main = start;
@@ -701,6 +732,9 @@ std::string Base::Utils::FloatToPercent(float f, float max, bool simple)
 	{
 		p = f * 100;
 	}
+
+	p = std::clamp(p, 0.0f, 100.0f);
+
 	std::stringstream str;
 	str << std::fixed << std::setprecision(2) << p << "%%";
 	return str.str();

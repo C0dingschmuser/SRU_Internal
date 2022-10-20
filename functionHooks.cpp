@@ -188,6 +188,46 @@ void __declspec(naked) DiplFree()
     }
 }
 
+void HandleMapSize()
+{
+    if (!g_mapSizeLoaded)
+    {
+        if (g_mapSizeReg6 > 0)
+        {
+            g_mapSizeLoaded = true;
+            g_mapSizeX = g_mapSizeReg6;
+        }
+    }
+}
+
+void __declspec(naked) GetMapSize()
+{
+    __asm {
+        mov [esp], eax
+        mov ebx, [ecx + 0x5C]
+        mov[g_mapSizeReg0], eax
+        mov[g_mapSizeReg1], ecx
+        mov[g_mapSizeReg2], edx
+        mov[g_mapSizeReg3], ebp
+        mov[g_mapSizeReg4], edi
+        mov[g_mapSizeReg5], esi
+        mov[g_mapSizeReg6], ebx
+    }
+
+    HandleMapSize();
+
+    __asm {
+        mov eax, g_mapSizeReg0
+        mov ecx, g_mapSizeReg1
+        mov edx, g_mapSizeReg2
+        mov ebp, g_mapSizeReg3
+        mov edi, g_mapSizeReg4
+        mov esi, g_mapSizeReg5
+        mov ebx, g_mapSizeReg6
+		jmp [g_mapSizeJumpBackAddr]
+    }
+}
+
 int FindOldCountryOwner2(uint8_t newOwner, bool weak)
 {
     //Could propably be improved by checking for loyalty
@@ -553,10 +593,15 @@ void Base::SRU_Data::Hooks::SetupFunctionHooks()
     Base::Hooks::FunctionHook((void*)hookAddress, HandleDefconRaw4, hookLength);
 
     hookLength = 5;
-    hookAddress = g_base + 0x8CE41;
+    hookAddress = g_base + Offsets::diplFreeHook;
     Base::SRU_Data::Hooks::g_diplFreeJmpBackAddr = hookAddress + hookLength;
     Base::SRU_Data::Hooks::g_diplFreeJmpBackAddrDefault = hookAddress + hookLength;
     Base::Hooks::FunctionHook((void*)hookAddress, DiplFree, hookLength);
+
+    hookLength = 6;
+    hookAddress = g_base + Offsets::mapSizeHook;
+    Base::SRU_Data::Hooks::g_mapSizeJumpBackAddr = hookAddress + hookLength;
+    Base::Hooks::FunctionHook((void*)hookAddress, GetMapSize, hookLength);
 }
 
 void Base::SRU_Data::Hooks::SetProductionAdjustment(bool enabled)

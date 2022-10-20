@@ -125,7 +125,6 @@ bool Base::SRU_Data::Unit::Init(uintptr_t base)
 	}
 
 	this->base = base;
-	this->currentHex = (uintptr_t*)(base + Offsets::unitCurrentHex);
 
 	this->countryId = (uint8_t*)(base + Offsets::unitCountry);
 	this->oldCountry = *countryId;
@@ -155,6 +154,8 @@ bool Base::SRU_Data::Unit::Init(uintptr_t base)
 	std::shared_ptr<FloatValue> maxHealth(new FloatValue);
 	maxHealth->valPtr = (float*)(base + Offsets::unitHealthMax);
 	this->properties.push_back(maxHealth);
+
+	health->origVal = *maxHealth->valPtr;
 
 	std::shared_ptr<FloatValue> fuel(new FloatValue);
 	fuel->valPtr = (float*)(base + Offsets::unitFuel);

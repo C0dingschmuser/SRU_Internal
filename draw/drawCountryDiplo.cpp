@@ -93,7 +93,7 @@ void Base::Draw::DrawCountryDiplo(Base::SRU_Data::Country* cc, int& treatyMsg)
 			treatyMsg = Base::Execute::ExecuteTreaty(currentTreatyId);
 		}
 
-		if (treatyMsg != 0)
+		/*if (treatyMsg != 0)
 		{
 			ImGui::Dummy(ImVec2(1, 1));
 			ImGui::SameLine(175);
@@ -105,7 +105,7 @@ void Base::Draw::DrawCountryDiplo(Base::SRU_Data::Country* cc, int& treatyMsg)
 			{
 				ImGui::Text("Error");
 			}
-		}
+		}*/
 	}
 	ImGui::EndChild();
 

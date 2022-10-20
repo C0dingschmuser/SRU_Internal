@@ -20,6 +20,8 @@ void Base::Draw::DrawSelectedCountryText(Base::SRU_Data::Country* cc, const char
 
 void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 {
+	using namespace Base::SRU_Data;
+
 	DrawSelectedCountryText(cc, "Selected country: %s");
 
 	float inputWidth = 275;
@@ -181,11 +183,104 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 	g_countryColorLoaded = true;
 
 	ImGui::Text("Country Color (click square)");
+
+	ImGui::PushItemWidth(inputWidth + 27);
 	if (ImGui::ColorEdit3("##countrycoloredit", (float*)&color))
 	{
 		unsigned long final = Base::Utils::ColorConverter(color[0], color[1], color[2], 1.0);
 
 		*cc->colorPtr = final;
+	}
+	ImGui::PopItemWidth();
+
+	//Flag
+
+	static std::string flagOptions[3]{
+		"Unchanged",
+		"Flag from Country",
+		"Flag from Id"
+	};
+
+	static Country* flagCountry = cc;
+
+	ImGui::Text("Flag");
+	ImGui::PushItemWidth(inputWidth + 27);
+	if (ImGui::BeginCombo("##countryflagcombo", flagOptions[cc->flagOption].c_str()))
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			bool isSelected = (cc->flagOption == i);
+			if (ImGui::Selectable(flagOptions[i].c_str(), isSelected))
+			{
+				cc->flagOption = i;
+			}
+
+			if (isSelected)
+			{
+				ImGui::SetItemDefaultFocus();
+			}
+		}
+		ImGui::EndCombo();
+	}
+	ImGui::PopItemWidth();
+
+	if (cc->flagOption == 2 || cc->flagOption == 0)
+	{
+		ImGui::BeginDisabled();
+	}
+
+	if (!g_countryColorLoaded)
+	{
+		flagCountry = cc;
+
+		if (*cc->flagIdPtr != cc->originalFlagId)
+		{
+			for (int i = 0; i < g_countryList.size(); i++)
+			{
+				if (g_countryList[i].base != cc->base)
+				{
+					if (*g_countryList[i].flagIdPtr == *cc->flagIdPtr)
+					{
+						flagCountry = &g_countryList[i];
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	ImGui::PushItemWidth(inputWidth + 27);
+	if (ImGui::BeginCombo("##countrycombo", flagCountry->name.c_str()))
+	{
+		for (int i = 0; i < g_countryList.size(); i++)
+		{
+			const bool isSelected = (flagCountry->base == g_countryList[i].base);
+			if (ImGui::Selectable(Base::SRU_Data::g_countryList[i].name.c_str(), isSelected))
+			{
+				flagCountry = &g_countryList[i];
+				*cc->flagIdPtr = flagCountry->originalFlagId;
+			}
+		}
+		ImGui::EndCombo();
+	}
+	ImGui::PopItemWidth();
+
+	if (cc->flagOption == 2)
+	{
+		ImGui::EndDisabled();
+	}
+	else if (cc->flagOption == 1)
+	{
+		ImGui::BeginDisabled();
+	}
+
+	ImGui::PushItemWidth(inputWidth + 27);
+	ImGui::InputUInt16("##countryflagid", cc->flagIdPtr, 1U, 0);
+	ImGui::PopItemWidth();
+
+	if (cc->flagOption == 1 || cc->flagOption == 0)
+	{
+		ImGui::EndDisabled();
 	}
 
 	//-----------------------------------------------------------------------------------
@@ -217,7 +312,7 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 	}
 
 	ImGui::Text("DEFCON");
-	ImGui::PushItemWidth(inputWidth);
+	ImGui::PushItemWidth(inputWidth + 27);
 	if (ImGui::SliderInt("###defconslider", &cc->defconState, -1, 4, defconText.c_str()))
 	{
 		if (cc->defconState > -1)
