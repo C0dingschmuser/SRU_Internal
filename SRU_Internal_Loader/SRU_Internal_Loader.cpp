@@ -399,6 +399,4 @@ int main(int argc, char** argv)
 	}
 
 	InjectDLL(procId, dPath.c_str());
-
-	//remove(dPath.c_str());
 }
