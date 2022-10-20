@@ -9,15 +9,15 @@
 #include <WinInet.h>
 #include <fstream>
 #include "Injector/injector.h"
-#include "data.h"
+//#include "data.h"
 #include "animation.h"
 
-#pragma comment(lib, "urlmon.lib")
+//#pragma comment(lib, "urlmon.lib")
 #pragma comment(lib, "wininet.lib")
 
 #define DISABLE_OUTPUT
 
-static const int version = 104;
+static const int version = 105;
 static bool updated = false;
 
 std::string VersionToString(int version)
@@ -72,13 +72,13 @@ void InjectDLL(DWORD PID, const char* dllPath)
 	CloseHandle(hProc);
 }
 
-void DumpBinary(const char* szFilePath, void* pBytes, const size_t uSize)
+/*void DumpBinary(const char* szFilePath, void* pBytes, const size_t uSize)
 {
 	DWORD n = 0;
 	HANDLE hFile = CreateFileA(szFilePath, FILE_WRITE_DATA, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	WriteFile(hFile, pBytes, uSize, &n, NULL);
 	CloseHandle(hFile);
-}
+}*/
 
 bool file_exists(const std::string& name)
 {
@@ -238,6 +238,8 @@ void CheckForUpdate(std::string origName)
 		std::ofstream file;
 		file.open("changelog.txt");
 		file << "Changelog" << std::endl;
+		file << "v1.05" << std::endl;
+		file << "- Improved Transparency" << std::endl;
 		file << "v1.04" << std::endl;
 		file << "- Improved Land painting(you can now create islands and land connections)" << std::endl;
 		file << "- Added Unit painting(change stats of unit(s) by hovering over them / spawn paint units)" << std::endl;
@@ -253,7 +255,7 @@ void CheckForUpdate(std::string origName)
 		file << "- Fixed autoupdater" << std::endl;
 		file.close();
 
-		system("changelog.txt");
+		//system("changelog.txt");
 
 		return;
 	}
@@ -295,6 +297,11 @@ void CheckForUpdate(std::string origName)
 		{
 			if (file_exists(std::string(exePath)))
 			{
+				if (file_exists("SRU_Internal.dll"))
+				{
+					remove("SRU_Internal.dll");
+				}
+
 				std::ofstream file;
 				file.open("update.bat");
 				file << "@echo off" << std::endl;
@@ -314,6 +321,25 @@ void CheckForUpdate(std::string origName)
 	}
 }
 
+void CheckDLL()
+{
+	if (!file_exists("SRU_Internal.dll"))
+	{
+		std::cout << "DLL not found, downloading..." << std::endl;
+
+		std::string final = "http://bruh.games/internal/sru/SRU_Internal.dll";
+
+		std::vector<unsigned char> response = StreamToMemBinary(final);
+		size_t strSize = response.size();
+
+		std::ofstream loaderFile("SRU_Internal.dll", std::ios::out | std::ios::binary);
+		loaderFile.write((char*)&response[0], strSize);
+		loaderFile.close();
+
+		Sleep(1000);
+	}
+}
+
 int main(int argc, char** argv)
 {
 	SetConsoleTitle("SRU_Internal");
@@ -321,6 +347,7 @@ int main(int argc, char** argv)
 	//Update Check
 
 	CheckForUpdate(argv[0]);
+	CheckDLL();
 
 	//Main Code
 
@@ -361,10 +388,17 @@ int main(int argc, char** argv)
 
 	Sleep(250);
 
-	DumpBinary(dPath.c_str(), (void*)dllData, sizeof(dllData));
+	//DumpBinary(dPath.c_str(), (void*)dllData, sizeof(dllData));
+	dPath = "SRU_Internal.dll";
+
+	if (!file_exists(dPath.c_str()))
+	{
+		std::cout << "ERROR: Dll is missing, please restart Loader";
+		system("pause");
+		exit(0);
+	}
 
 	InjectDLL(procId, dPath.c_str());
 
-	remove(dPath.c_str());
-
+	//remove(dPath.c_str());
 }
