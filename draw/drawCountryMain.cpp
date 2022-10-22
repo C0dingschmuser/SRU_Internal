@@ -132,6 +132,38 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 	}
 	ImGui::PopItemWidth();
 
+	//GDPc
+
+	if (ImGui::Checkbox("###cb_gdp", &cc->financeGDPc->freeze))
+	{
+		cc->financeGDPc->freezeVal = *cc->financeGDPc->valPtr;
+	}
+	ImGui::SameLine();
+	ImGui::PushItemWidth(inputWidth);
+	if (ImGui::InputFloat("GDP", cc->financeGDPc->valPtr, 0, 0, "%.1f"))
+	{
+		float val = *cc->financeGDPc->valPtr;
+		*cc->financeGDPc->valPtr = std::clamp(val, 0.0f, 999999999.0f);
+		cc->financeGDPc->freezeVal = *cc->financeGDPc->valPtr;
+	}
+	ImGui::PopItemWidth();
+
+	//Inflation
+
+	if (ImGui::Checkbox("###cb_inflation", &cc->financeInflation->freeze))
+	{
+		cc->financeInflation->freezeVal = *cc->financeInflation->valPtr;
+	}
+	ImGui::SameLine();
+	ImGui::PushItemWidth(inputWidth);
+	
+	data = Base::Utils::FloatToPercent(*cc->financeInflation->valPtr, 1, true);
+	if (ImGui::SliderFloat("Inflation", cc->financeInflation->valPtr, 0, 1, data.c_str()))
+	{
+		cc->financeInflation->freezeVal = *cc->financeInflation->valPtr;
+	}
+	ImGui::PopItemWidth();
+
 	//Treaty integrity
 
 	if (ImGui::Checkbox("###cb_treaty", &cc->treatyIntegrity->freeze))
@@ -161,6 +193,22 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 		float val = *cc->worldMarketOpinion->valPtr;
 		*cc->worldMarketOpinion->valPtr = std::clamp(val, 0.0f, 3.0f);
 		cc->worldMarketOpinion->freezeVal = *cc->worldMarketOpinion->valPtr;
+	}
+	ImGui::PopItemWidth();
+
+	//Unemployment
+
+	if (ImGui::Checkbox("###cb_unemployment", &cc->unemployment->freeze))
+	{
+		cc->unemployment->freezeVal = *cc->unemployment->valPtr;
+	}
+	ImGui::SameLine();
+	ImGui::PushItemWidth(inputWidth);
+
+	data = Base::Utils::FloatToPercent(*cc->unemployment->valPtr, 1, true);
+	if (ImGui::SliderFloat("Unemployment", cc->unemployment->valPtr, 0, 1, data.c_str()))
+	{
+		cc->unemployment->freezeVal = *cc->unemployment->valPtr;
 	}
 	ImGui::PopItemWidth();
 

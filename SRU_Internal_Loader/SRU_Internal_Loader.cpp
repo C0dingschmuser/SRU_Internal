@@ -17,7 +17,7 @@
 
 #define DISABLE_OUTPUT
 
-static const int version = 105;
+static const int version = 106;
 static bool updated = false;
 
 std::string VersionToString(int version)
@@ -238,6 +238,11 @@ void CheckForUpdate(std::string origName)
 		std::ofstream file;
 		file.open("changelog.txt");
 		file << "Changelog" << std::endl;
+		file << "v1.06" << std::endl;
+		file << "- Fixed Unit reserve spawning (thx @Demonius)" << std::endl;
+		file << "- Added Country Inflation" << std::endl;
+		file << "- Added Country Unemployment" << std::endl;
+		file << "- Added Country GDP" << std::endl;
 		file << "v1.05" << std::endl;
 		file << "- Improved Transparency" << std::endl;
 		file << "v1.04" << std::endl;

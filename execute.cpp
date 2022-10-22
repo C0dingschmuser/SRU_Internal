@@ -67,6 +67,8 @@ void Base::Execute::SpawnUnit(int unitDesign, int amount, uintptr_t country, int
 		minAm += 4 * amount;
 	}
 
+	const uint32_t posData = ((yPos << 16) | ((xPos) & 0xffff));
+
 	if (reserve)
 	{
 		int* buffer = (int*)malloc(minAm * sizeof(int));
@@ -89,7 +91,7 @@ void Base::Execute::SpawnUnit(int unitDesign, int amount, uintptr_t country, int
 			buffer2[i] = 0;
 		}
 
-		spawnUnitFunc((int)country, (int)buffer, unitDesign, amount, 0x590070, 1, 0, buffer2, 0);
+		spawnUnitFunc((int)country, (int)buffer, unitDesign, amount, posData, 1, 0, buffer2, 0);
 	}
 	else
 	{
@@ -111,8 +113,6 @@ void Base::Execute::SpawnUnit(int unitDesign, int amount, uintptr_t country, int
 
 		if (spread == 1)
 		{
-			const uint32_t posData = ((yPos << 16) | ((xPos) & 0xffff));
-
 			spawnUnitFunc((int)country, (int)xPos, unitDesign, amount, posData, 0, 0, buffer2, 1);
 		}
 		else

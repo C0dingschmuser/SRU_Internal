@@ -62,6 +62,16 @@ void Base::SRU_Data::Country::Init(uintptr_t base)
 	this->researchEff = researchEff;
 	this->allFloatValues.push_back(researchEff);
 
+	std::shared_ptr<FloatValue> financeGDPc(new FloatValue);
+	financeGDPc->valPtr = (float*)(base + Offsets::countryFinanceGDPc);
+	this->financeGDPc = financeGDPc;
+	this->allFloatValues.push_back(financeGDPc);
+
+	std::shared_ptr<FloatValue> financeInflation(new FloatValue);
+	financeInflation->valPtr = (float*)(base + Offsets::countryFinanceInflation);
+	this->financeInflation = financeInflation;
+	this->allFloatValues.push_back(financeInflation);
+
 	std::shared_ptr<FloatValue> financeCreditRating(new FloatValue);
 	financeCreditRating->valPtr = (float*)(base + Offsets::countryFinanceCreditRating);
 	this->financeCreditRating = financeCreditRating;
@@ -73,9 +83,14 @@ void Base::SRU_Data::Country::Init(uintptr_t base)
 	this->allFloatValues.push_back(worldMarketOpinion);
 
 	std::shared_ptr<FloatValue> treatyIntegrity(new FloatValue);
-	treatyIntegrity->valPtr = (float*)(base + Offsets::countryTreatyIntegrity);
+	treatyIntegrity->valPtr = (float*)(base + Offsets::countryFinanceTreatyIntegrity);
 	this->treatyIntegrity = treatyIntegrity;
 	this->allFloatValues.push_back(treatyIntegrity);
+
+	std::shared_ptr<FloatValue> unemployment(new FloatValue);
+	unemployment->valPtr = (float*)(base + Offsets::countryUnemployment);
+	this->unemployment = unemployment;
+	this->allFloatValues.push_back(unemployment);
 
 	//-----------------------------------------------------------------------------------
 	//--- Goods -------------------------------------------------------------------------

@@ -259,7 +259,10 @@ namespace Base
 			std::shared_ptr<FloatValue> milApproval;
 			std::shared_ptr<FloatValue> milReserve;
 			std::shared_ptr<FloatValue> researchEff;
+			std::shared_ptr<FloatValue> financeInflation;
+			std::shared_ptr<FloatValue> financeGDPc;
 			std::shared_ptr<FloatValue> financeCreditRating;
+			std::shared_ptr<FloatValue> unemployment;
 			std::shared_ptr<FloatValue> worldMarketOpinion;
 			std::shared_ptr<FloatValue> treatyIntegrity;
 
