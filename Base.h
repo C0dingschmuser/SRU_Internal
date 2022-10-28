@@ -228,11 +228,19 @@ namespace Base
 			std::vector<std::shared_ptr<FloatValue>> properties;
 		};
 
+		struct Tech
+		{
+			int id;
+			uint8_t category;
+			std::string name;
+		};
+
 		struct Country
 		{
 			void Init(uintptr_t base);
 			void HandleFreeze();
 			void HandleUnits();
+			void RefreshResearch();
 			void ChangeName(std::string newName);
 
 			uintptr_t base;
@@ -267,6 +275,7 @@ namespace Base
 			std::shared_ptr<FloatValue> treatyIntegrity;
 
 			std::vector<Resource> resources;
+			std::vector<Tech> technologies;
 
 			std::shared_ptr<FloatValue> healthcareState;
 			std::shared_ptr<FloatValue> educationState;
@@ -408,14 +417,18 @@ namespace Base
 	namespace Execute
 	{
 		typedef void(__thiscall* _DiplFunc)(DWORD*, char);
+		typedef void(__thiscall* _UnlockTechFunc)(unsigned __int8*, int);
 		typedef int(__fastcall* _SpawnUnitFunc)(int, int, int, int, int, int, int, int*, int);
 		
 		extern _DiplFunc diplFunc;
+		extern _UnlockTechFunc unlockTechFunc;
 		extern _SpawnUnitFunc spawnUnitFunc;
 
 		void SetupFunctions();
 		void AnnexCountry(int from, int to);
 		void RespawnCountry(int from, int to, int type);
+		void UnlockDesign(int to, int design, bool lock);
+		void UnlockTech(int to, int tech, bool lock);
 		void SetRelations(int relationType, uintptr_t country, uintptr_t oCountry, int add);
 		void SpawnUnit(int unitDesign, int amount, uintptr_t country, int spread = 1, bool reserve = true, uint16_t xPos = 0, uint16_t yPos = 0);
 		void SetCheat(uint8_t cheat);

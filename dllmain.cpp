@@ -97,6 +97,11 @@ void SetupSessionPtr(uintptr_t base = NULL)
 
     Base::SRU_Data::Asm::g_ownAllocs.clear();
 
+    for (int i = 0; i < g_countryList.size(); i++)
+    {
+        g_countryList[i].RefreshResearch();
+    }
+
     g_mapSizeLoaded = false;
 
     unitTimer = 0;
@@ -519,10 +524,10 @@ DWORD WINAPI dllThread(HMODULE hModule) {
 
     Base::Init(true);
 
-    //AllocConsole();
-    //FILE* f;
-	//freopen_s(&f, "CONOUT$", "w", stdout);
-    //freopen_s(&f, "CONIN$", "r", stdin);
+    AllocConsole();
+    FILE* f;
+	freopen_s(&f, "CONOUT$", "w", stdout);
+    freopen_s(&f, "CONIN$", "r", stdin);
 
     //Ptr setup
 
@@ -540,6 +545,18 @@ DWORD WINAPI dllThread(HMODULE hModule) {
     uintptr_t* mouseHoverHex = (uintptr_t*)(g_base + Offsets::mouseHoverHex);
     uint16_t* mouseHoverX = (uint16_t*)(g_base + Offsets::mouseHoverXPos);
     uint16_t* mouseHoverY = (uint16_t*)(g_base + Offsets::mouseHoverYPos);
+
+    /*int unitDesingIdShifted = 0x926 << 8;
+    int targetCountryId = 89; //russia
+    int countryIdShifted = targetCountryId >> 5;
+    int unitDesignAddr = 0x1958A620;
+    int unitAddr2 = unitDesignAddr + 196;
+
+    int result = 1 << targetCountryId;
+    int result1 = result | *(int*)(unitAddr2 + countryIdShifted * 4);
+    *(int*)(unitAddr2 + countryIdShifted * 4) = result1;*/
+
+    //*(int*)((unitDesignAddr + 196) + 4 * countryIdShifted + unitDesingIdShifted) |= 1 << 89;
 
     //Main loop
 

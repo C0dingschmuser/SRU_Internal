@@ -1,6 +1,7 @@
 #include "base.h"
 
 Base::Execute::_DiplFunc Base::Execute::diplFunc = 0;
+Base::Execute::_UnlockTechFunc Base::Execute::unlockTechFunc = 0;
 Base::Execute::_SpawnUnitFunc Base::Execute::spawnUnitFunc = 0;
 
 void Base::Execute::SetupFunctions()
@@ -8,6 +9,7 @@ void Base::Execute::SetupFunctions()
 	using namespace Base::Execute;
 
 	diplFunc = (_DiplFunc)(Base::SRU_Data::g_base + Offsets::diplFunc);
+	unlockTechFunc = (_UnlockTechFunc)(Base::SRU_Data::g_base + Offsets::unlockTechFunc);
 	spawnUnitFunc = (_SpawnUnitFunc)(Base::SRU_Data::g_base + Offsets::unitFunc);
 }
 
@@ -28,6 +30,98 @@ void Base::Execute::RespawnCountry(int from, int to, int type)
 {
 	int* buffer = Offsets::CreateAdvancedDiplOffer(Base::SRU_Data::g_base, Offsets::respawnCountry, to, 0, 0, 0, type, from, 0, 0, 0, 0);
 	ExecDipl((DWORD*)buffer, '\x01');
+}
+
+void Base::Execute::UnlockTech(int to, int tech, bool lock)
+{
+	using namespace Base::SRU_Data;
+
+	if (!lock)
+	{
+		//unlock
+
+		unsigned __int8* buffer = (unsigned __int8*)calloc(16, sizeof(unsigned __int8));
+		buffer[4] = to;
+
+		//unlocks tech requirements recursive
+		unlockTechFunc(buffer, tech);
+	}
+	else
+	{
+		//lock
+
+		uintptr_t techStart = *(uintptr_t*)(g_base + Offsets::techIdStart);
+		int v3 = 88 * tech;
+
+		int main = (v3 + techStart + 0x38);
+		//int mini = (techStart + v3);
+
+		int countryIdShiftedR = to >> 5;
+		//int countryIdShiftedL = 1 << to;
+
+		*(int*)(main + countryIdShiftedR * 4) = 0;
+	}
+}
+
+void Base::Execute::UnlockDesign(int to, int design, bool lock)
+{
+	using namespace Base::SRU_Data;
+
+	//get unit tech requirements & unlock them (if unlock)
+
+	if (!lock)
+	{
+		uintptr_t defaultStart = *(uintptr_t*)(g_base + Offsets::allDefaultUnitStart);
+		int designShifted = design << 8;
+		uintptr_t prereAddr = (defaultStart + designShifted + 0x28);
+		int value = *(int*)prereAddr;
+
+		if (LOWORD(value) > 0)
+		{
+			UnlockTech(to, LOWORD(value), false);
+		}
+		if (HIWORD(value) > 0)
+		{
+			UnlockTech(to, HIWORD(value), false);
+		}
+	}
+
+	//(un)lock unit
+
+	std::shared_ptr<UnitDefault> ud;
+
+	for (int i = 0; i < g_defaultUnitList.size(); i++)
+	{
+		if (g_defaultUnitList[i]->spawnId == design)
+		{
+			ud = g_defaultUnitList[i];
+			break;
+		}
+	}
+
+	int base = ud->base;
+	int countryIdShifted = to >> 5;
+	int unitAddr2 = base + 196;
+
+	int* addr = (int*)(unitAddr2 + countryIdShifted * 4);
+
+	if (!lock)
+	{
+		//Unlock
+
+		int result = 1 << to;
+
+		if (*addr == 0)
+		{
+			*addr = result | *addr;
+		}
+	}
+	else
+	{
+		//Lock
+
+		*addr = 0;
+	}
 }
 
 void Base::Execute::SetRelations(int relationType, uintptr_t country, uintptr_t oCountry, int add)
