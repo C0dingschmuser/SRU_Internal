@@ -359,40 +359,18 @@ void Base::SRU_Data::Country::RefreshResearch()
 {
 	this->technologies.clear();
 
-	int maxTech = *(int*)(g_base + Offsets::techIdMax);
-
-	uintptr_t techStart = *(uintptr_t*)(g_base + Offsets::techIdStart);
-
-	for (int i = 0; i < maxTech; i++)
+	for (int i = 0; i < g_techList.size(); i++)
 	{
-		int v3 = 88 * i;
+		int mini = g_techList[i]->base;
+		int main = mini + 0x38;
 
-		int main = (v3 + techStart + 0x38);
-		int mini = (techStart + v3);
+		int countryIdShiftedR = this->oId >> 5;
 
-		if (*(uint8_t*)mini)
+		int* ptr = (int*)(main + countryIdShiftedR * 4);
+
+		if (*ptr > 0)
 		{
-			int countryIdShiftedR = this->oId >> 5;
-			int countryIdShiftedL = 1 << this->oId;
-
-			int* ptr = (int*)(main + countryIdShiftedR * 4);
-
-			//if (ptr == nullptr) continue;
-
-			if (*ptr > 0)
-			{
-				//add
-
-				Tech t{};
-
-				t.name = std::string((char*)*(uintptr_t*)(mini + 0x4));
-				t.id = i;
-				t.category = *(uint8_t*)(mini);
-
-				//std::cout << std::dec << (int)t.category << " " << t.name << std::endl;
-
-				this->technologies.push_back(t);
-			}
+			this->technologies.push_back(g_techList[i]);
 		}
 	}
 }

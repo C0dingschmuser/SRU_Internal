@@ -90,6 +90,12 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 							treatyMsg = 0;
 						}
 
+						if (ImGui::BeginTabItem("Technology"))
+						{
+							Draw::DrawCountryTech(cc);
+							ImGui::EndTabItem();
+						}
+
 						ImGui::EndTabBar();
 					}
 					else

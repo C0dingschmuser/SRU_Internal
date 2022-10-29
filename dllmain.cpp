@@ -94,13 +94,9 @@ void SetupSessionPtr(uintptr_t base = NULL)
     Base::SRU_Data::LoadUnits();
     Base::SRU_Data::LoadDiplTreaties();
     Base::SRU_Data::LoadGroundTypes();	
+    Base::SRU_Data::LoadTechnologies();
 
     Base::SRU_Data::Asm::g_ownAllocs.clear();
-
-    for (int i = 0; i < g_countryList.size(); i++)
-    {
-        g_countryList[i].RefreshResearch();
-    }
 
     g_mapSizeLoaded = false;
 

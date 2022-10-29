@@ -231,6 +231,7 @@ namespace Base
 		struct Tech
 		{
 			int id;
+			uintptr_t base;
 			uint8_t category;
 			std::string name;
 		};
@@ -275,7 +276,7 @@ namespace Base
 			std::shared_ptr<FloatValue> treatyIntegrity;
 
 			std::vector<Resource> resources;
-			std::vector<Tech> technologies;
+			std::vector<std::shared_ptr<Tech>> technologies;
 
 			std::shared_ptr<FloatValue> healthcareState;
 			std::shared_ptr<FloatValue> educationState;
@@ -337,6 +338,7 @@ namespace Base
 		extern std::vector<Unit> g_unitList;
 		extern std::vector<DiplTreaty> g_diplTreatyList;
 		extern std::vector<Country> g_countryList;
+		extern std::vector<std::shared_ptr<Tech>> g_techList;
 		extern std::vector<GroundType> g_groundTypeList;
 		
 		extern SurrenderEvent surrenderEvents[];
@@ -412,6 +414,7 @@ namespace Base
 		void LoadDefaultUnits();
 		void LoadDiplTreaties();
 		void LoadGroundTypes();
+		void LoadTechnologies();
 	}
 
 	namespace Execute
@@ -443,6 +446,7 @@ namespace Base
 		void DrawSelectedCountryText(Base::SRU_Data::Country* cc, const char* text);
 		void DrawCountry(Base::SRU_Data::Country* cc);
 		void DrawCountryDiplo(Base::SRU_Data::Country* cc, int& treatyMsg);
+		void DrawCountryTech(Base::SRU_Data::Country* cc);
 		void DrawMap(Base::SRU_Data::Country* cc);
 		void DrawUnitSpawn(Base::SRU_Data::Country* cc);
 		void DrawUnitModifiers(Base::SRU_Data::Country* cc);

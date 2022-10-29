@@ -93,6 +93,7 @@ uintptr_t Base::SRU_Data::Asm::g_aiSurrBase;
 std::vector<std::shared_ptr<Base::SRU_Data::UnitDefault>> Base::SRU_Data::g_defaultUnitList;
 std::vector<Base::SRU_Data::Unit> Base::SRU_Data::g_selectedUnitList;
 std::vector<Base::SRU_Data::Country> Base::SRU_Data::g_countryList;
+std::vector<std::shared_ptr<Base::SRU_Data::Tech>> Base::SRU_Data::g_techList;
 std::vector<Base::SRU_Data::Unit> Base::SRU_Data::g_unitList;
 std::vector<Base::SRU_Data::DiplTreaty> Base::SRU_Data::g_diplTreatyList;
 std::vector<Base::SRU_Data::GroundType> Base::SRU_Data::g_groundTypeList;
@@ -689,6 +690,56 @@ void Base::SRU_Data::LoadDefaultUnits()
 
 	//std::chrono::duration<double, std::milli> fp_ms = clockEnd - clockStart;
 	//std::cout << "Elapsed Time: " << fp_ms.count() << std::endl;
+}
+
+void Base::SRU_Data::LoadTechnologies()
+{
+	g_techList.clear();
+
+	int maxTech = *(int*)(g_base + Offsets::techIdMax);
+
+	uintptr_t techStart = *(uintptr_t*)(g_base + Offsets::techIdStart);
+
+	for (int i = 0; i < maxTech; i++)
+	{
+		int v3 = 88 * i;
+
+		//int main = (v3 + techStart + 0x38);
+		int mini = (techStart + v3);
+
+		if (*(uint8_t*)mini)
+		{
+			//valid
+
+			std::shared_ptr<Tech> tech(new Tech);
+
+			tech->name = std::string((char*)*(uintptr_t*)(mini + 0x4));
+			tech->id = i;
+			tech->base = (uintptr_t)mini;
+			tech->category = *(uint8_t*)(mini);
+
+			g_techList.push_back(tech);
+		}
+	}
+
+	//sort by name
+	for (int i = 1; i < g_techList.size(); i++)
+	{
+		std::shared_ptr<Tech> tmp = g_techList[i];
+		int n = i - 1;
+
+		while (n >= 0 && g_techList[n]->name > tmp->name)
+		{
+			g_techList[n + 1] = g_techList[n];
+			n--;
+		}
+		g_techList[n + 1] = tmp;
+	}
+
+	for (int i = 0; i < g_countryList.size(); i++)
+	{
+		g_countryList[i].RefreshResearch();
+	}
 }
 
 void Base::Init(bool full = false)
