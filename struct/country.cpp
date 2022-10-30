@@ -357,18 +357,13 @@ void Base::SRU_Data::Country::HandleFreeze()
 
 void Base::SRU_Data::Country::RefreshResearch()
 {
+	using namespace Base::Execute;
+
 	this->technologies.clear();
 
 	for (int i = 0; i < g_techList.size(); i++)
 	{
-		int mini = g_techList[i]->base;
-		int main = mini + 0x38;
-
-		int countryIdShiftedR = this->oId >> 5;
-
-		int* ptr = (int*)(main + countryIdShiftedR * 4);
-
-		if (*ptr > 0)
+		if (HasTechUnlocked(this->oId, g_techList[i]->id))
 		{
 			this->technologies.push_back(g_techList[i]);
 		}

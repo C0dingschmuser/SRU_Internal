@@ -224,7 +224,7 @@ void Base::Draw::DrawUnitSpawn(Base::SRU_Data::Country* cc)
 					searchCleared = true;
 				}
 
-				ImGui::Text("Search");
+				ImGui::Text("Search (Empty + Enter to reset)");
 				ImGui::PushItemWidth(275);
 				if (ImGui::InputText("##unitdesignsearch", searchVal, 256, ImGuiInputTextFlags_EnterReturnsTrue))
 				{

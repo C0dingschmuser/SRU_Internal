@@ -36,12 +36,24 @@ void Base::Execute::UnlockTech(int to, int tech, bool lock)
 {
 	using namespace Base::SRU_Data;
 
+	Country* cc = nullptr;
+	for (int i = 0; i < g_countryList.size(); i++)
+	{
+		if (g_countryList[i].oId == to)
+		{
+			cc = &g_countryList[i];
+			break;
+		}
+	}
+
 	if (!lock)
 	{
 		//unlock
 
 		unsigned __int8* buffer = (unsigned __int8*)calloc(16, sizeof(unsigned __int8));
 		buffer[4] = to;
+
+		
 
 		//unlocks tech requirements recursive
 		unlockTechFunc(buffer, tech);
@@ -60,6 +72,11 @@ void Base::Execute::UnlockTech(int to, int tech, bool lock)
 		//int countryIdShiftedL = 1 << to;
 
 		*(int*)(main + countryIdShiftedR * 4) = 0;
+	}
+
+	if (cc != nullptr)
+	{
+		cc->RefreshResearch();
 	}
 }
 
@@ -110,8 +127,26 @@ void Base::Execute::UnlockDesign(int to, int design, bool lock)
 		//Unlock
 
 		int result = 1 << to;
+		int currentVal = *addr;
 
-		if (*addr == 0)
+		int testVal = currentVal | result;
+
+		bool found = false;
+		for (int i = 0; i < ud->countryIds.size(); i++)
+		{
+			if (ud->countryIds[i] == to)
+			{
+				found = true;
+				break;
+			}
+		}
+
+		if (!found)
+		{
+			ud->countryIds.push_back(to);
+		}
+
+		if (testVal > currentVal)
 		{
 			*addr = result | *addr;
 		}
@@ -121,6 +156,21 @@ void Base::Execute::UnlockDesign(int to, int design, bool lock)
 		//Lock
 
 		*addr = 0;
+
+		int search = -1;
+		for (int i = 0; i < ud->countryIds.size(); i++)
+		{
+			if (ud->countryIds[i] == to)
+			{
+				search = i;
+				break;
+			}
+		}
+
+		if (search > -1)
+		{
+			ud->countryIds.erase(ud->countryIds.begin() + search);
+		}
 	}
 }
 
@@ -275,4 +325,61 @@ int Base::Execute::ExecuteTreaty(int diplTreatyIndex)
 	ExecDipl((DWORD*)diplOffer, '\x01');
 
 	return 1;
+}
+
+bool Base::Execute::HasTechUnlocked(int countryId, int techId)
+{
+	using namespace Base::SRU_Data;
+
+	uintptr_t techStart = *(uintptr_t*)(g_base + Offsets::techIdStart);
+	uint32_t v3 = 88 * techId;
+
+	uintptr_t main = (v3 + techStart + 0x38);
+	//int mini = (techStart + v3);
+
+	uint32_t countryIdShiftedR = countryId >> 5;
+	uint32_t countryIdShiftedL = 1 << countryId;
+
+	uint32_t currentVal = *(uintptr_t*)(main + countryIdShiftedR * 4);
+	uint32_t testVal = currentVal | countryIdShiftedL;
+
+	if (testVal > currentVal)
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+}
+
+bool Base::Execute::HasDesignUnlocked(int countryId, int designId)
+{
+	return false;
+}
+
+bool Base::Execute::HasDesignUnlocked(int countryId, uintptr_t base)
+{
+	using namespace Base::SRU_Data;
+
+	//std::cout << std::hex << base << std::dec << " " << countryId << std::endl;
+
+	uint32_t countryIdShiftedR = countryId >> 5;
+	uint32_t countryIdShiftedL = 1 << countryId;
+	
+	uintptr_t unitAddr2 = base + 196;
+
+	uintptr_t* addr = (uintptr_t*)(unitAddr2 + countryIdShiftedR * 4);
+
+	uint32_t currentVal = *addr;
+	uint32_t testVal = currentVal | countryIdShiftedL;
+
+	if (testVal > currentVal)
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
 }

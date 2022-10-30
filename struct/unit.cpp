@@ -2,6 +2,20 @@
 
 using namespace Base::SRU_Data;
 
+void Base::SRU_Data::UnitDefault::RefreshUserCountrys()
+{
+	bool ok = false;
+
+	this->countryIds.clear();
+	for (int i = 0; i < g_countryList.size(); i++)
+	{
+		if (Base::Execute::HasDesignUnlocked(g_countryList[i].oId, this->base))
+		{
+			this->countryIds.push_back(g_countryList[i].oId);
+		}
+	}
+}
+
 void Base::SRU_Data::UnitDefault::Init(uintptr_t base)
 {
 	this->base = base;
@@ -89,6 +103,10 @@ void Base::SRU_Data::UnitDefault::Init(uintptr_t base)
 		change->p = (Property)i;
 		propertyChanges.push_back(change);
 	}
+
+	//Load all user countrys
+
+	RefreshUserCountrys();
 }
 
 bool Base::SRU_Data::UnitDefault::HasUser(int countryId)

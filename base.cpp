@@ -711,14 +711,19 @@ void Base::SRU_Data::LoadTechnologies()
 		{
 			//valid
 
-			std::shared_ptr<Tech> tech(new Tech);
+			char* namePtr = (char*)*(uintptr_t*)(mini + 0x4);
 
-			tech->name = std::string((char*)*(uintptr_t*)(mini + 0x4));
-			tech->id = i;
-			tech->base = (uintptr_t)mini;
-			tech->category = *(uint8_t*)(mini);
+			if (namePtr != nullptr)
+			{
+				std::shared_ptr<Tech> tech(new Tech);
 
-			g_techList.push_back(tech);
+				tech->name = std::string(namePtr);
+				tech->id = i;
+				tech->base = (uintptr_t)mini;
+				tech->category = *(uint8_t*)(mini);
+
+				g_techList.push_back(tech);
+			}
 		}
 	}
 

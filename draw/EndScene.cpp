@@ -96,6 +96,12 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 							ImGui::EndTabItem();
 						}
 
+						if (ImGui::BeginTabItem("Unit Designs"))
+						{
+							Draw::DrawCountryDesigns(cc);
+							ImGui::EndTabItem();
+						}
+
 						ImGui::EndTabBar();
 					}
 					else

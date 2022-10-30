@@ -164,6 +164,7 @@ namespace Base
 			};
 
 			void Init(uintptr_t base);
+			void RefreshUserCountrys();
 			void AddUserCountry(int countryId);
 			bool HasUser(int countryId);
 
@@ -231,6 +232,7 @@ namespace Base
 		struct Tech
 		{
 			int id;
+			bool flag = false;
 			uintptr_t base;
 			uint8_t category;
 			std::string name;
@@ -254,6 +256,9 @@ namespace Base
 
 			unsigned long originalColor = 0;
 			bool hasOwnColor = false;
+
+			int selectedTechnologyId = -1;
+			int selectedUnitDesignId = -1;
 
 			uintptr_t* populationPtr;
 			uintptr_t* colorPtr;
@@ -437,6 +442,9 @@ namespace Base
 		void SetCheat(uint8_t cheat);
 		int ExecuteTreaty(int diplTreatyIndex);
 		void ExecDipl(DWORD* buffer, char c);
+		bool HasTechUnlocked(int countryId, int techId);
+		bool HasDesignUnlocked(int countryId, int designId);
+		bool HasDesignUnlocked(int countryId, uintptr_t designBase);
 	}
 
 	namespace Draw
@@ -447,6 +455,7 @@ namespace Base
 		void DrawCountry(Base::SRU_Data::Country* cc);
 		void DrawCountryDiplo(Base::SRU_Data::Country* cc, int& treatyMsg);
 		void DrawCountryTech(Base::SRU_Data::Country* cc);
+		void DrawCountryDesigns(Base::SRU_Data::Country* cc);
 		void DrawMap(Base::SRU_Data::Country* cc);
 		void DrawUnitSpawn(Base::SRU_Data::Country* cc);
 		void DrawUnitModifiers(Base::SRU_Data::Country* cc);
