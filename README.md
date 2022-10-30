@@ -27,16 +27,18 @@ __/\\\\\\\\\\\__________________\///////////_____\///________\///_____\/////////
 
 ### Features
 - Modify stats of all countries (treasury, approval ratings, goods, defcon, etc.)
-- Change diplomatic relations between countries (diplomatic, civilian and casus belli)
-- Force treaties like declaration of war, formal alliances, etc.
+- Force treaties between countries like declaration of war, formal alliances, etc.
+- Change diplomatic relations between countries
 - Spawn Units (Customizable amount, owner, location, deployement type etc.)
+- Edit Map (Change Borders, Loyalty, Annex/Colonize/Liberate etc.)
+- Paint your own Islands and/or Land connections
+- Lock/Unlock Technologies and Unit Designs for each country
 - Per country unit modifiers (Invincibility, Lightspeed movement, Max Supply/Morale/Fuel/etc.)
 - Mouse Hover unit modifiers (Changing owner country, health, etc.)
-- Edit Map (Change Borders, Loyalty, Annex/Colonize/Liberate etc.)
-  -> You can even create your own Islands and/or Land connections!
 - Adjustable global minimum hex supply, so units don't get stuck in the middle of nowhere
 - Default AI can create colonies insted of just annexing everything
-- Change Country colors and names
+- Change Country colors, names and flags
+- Much more!
 
 ### Usage
 Simply download the latest Release from [here](https://github.com/C0dingschmuser/SRU_Internal/releases) or from the [Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=2874935554)

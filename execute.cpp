@@ -204,6 +204,8 @@ void Base::Execute::SetRelations(int relationType, uintptr_t country, uintptr_t 
 
 void Base::Execute::SpawnUnit(int unitDesign, int amount, uintptr_t country, int spread, bool reserve, uint16_t xPos, uint16_t yPos)
 {
+	//std::cout << std::dec << unitDesign << " " << amount << std::hex << " " << country << " " << std::dec << spread << " " << reserve << " " << xPos << " " << yPos << std::endl;
+
 	int minAm = 512;
 
 	if (amount >= minAm)

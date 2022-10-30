@@ -520,10 +520,10 @@ DWORD WINAPI dllThread(HMODULE hModule) {
 
     Base::Init(true);
 
-    AllocConsole();
-    FILE* f;
-	freopen_s(&f, "CONOUT$", "w", stdout);
-    freopen_s(&f, "CONIN$", "r", stdin);
+    //AllocConsole();
+    //FILE* f;
+	//freopen_s(&f, "CONOUT$", "w", stdout);
+    //freopen_s(&f, "CONIN$", "r", stdin);
 
     //Ptr setup
 

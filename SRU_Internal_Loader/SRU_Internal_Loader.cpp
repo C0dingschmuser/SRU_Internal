@@ -17,7 +17,7 @@
 
 #define DISABLE_OUTPUT
 
-static const int version = 106;
+static const int version = 107;
 static bool updated = false;
 
 std::string VersionToString(int version)
@@ -238,6 +238,10 @@ void CheckForUpdate(std::string origName)
 		std::ofstream file;
 		file.open("changelog.txt");
 		file << "Changelog" << std::endl;
+		file << "v1.07" << std::endl;
+		file << "- Added Technology (Un)Locking per country" << std::endl;
+		file << "- Added Unit Design (Un)Locking per country" << std::endl;
+		file << "- Improved Unit Spawn UI" << std::endl;
 		file << "v1.06" << std::endl;
 		file << "- Fixed Unit reserve spawning (thx @Demonius)" << std::endl;
 		file << "- Added Country Inflation" << std::endl;
@@ -404,4 +408,7 @@ int main(int argc, char** argv)
 	}
 
 	InjectDLL(procId, dPath.c_str());
+
+	printf("\n\x1B[92mInjection successful!\033[0m\t\t");
+	Sleep(2000);
 }

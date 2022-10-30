@@ -62,6 +62,26 @@ void Unlock(Base::SRU_Data::Country* cc, int id, bool tech, bool lock)
 	}
 }
 
+void UnlockAll(Base::SRU_Data::Country* cc, bool tech, bool lock)
+{
+	using namespace Base::SRU_Data;
+
+	if (tech)
+	{
+		for (int i = 0; i < g_techList.size(); i++)
+		{
+			Unlock(cc, g_techList[i]->id, true, lock);
+		}
+	}
+	else
+	{
+		for (int i = 0; i < g_defaultUnitList.size(); i++)
+		{
+			Unlock(cc, g_defaultUnitList[i]->spawnId, false, lock);
+		}
+	}
+}
+
 void Base::Draw::DrawCountryTech(Base::SRU_Data::Country* cc)
 {
 	using namespace Base::SRU_Data;
@@ -205,6 +225,21 @@ void Base::Draw::DrawCountryTech(Base::SRU_Data::Country* cc)
 		if (unlocked || cc->selectedTechnologyId == -1)
 		{
 			ImGui::EndDisabled();
+		}
+
+		if (ImGui::TreeNode("Lock/Unlock All"))
+		{
+			if (ImGui::Button("Lock All", ImVec2(85, 0)))
+			{
+				UnlockAll(cc, true, true);
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Unlock All", ImVec2(85, 0)))
+			{
+				UnlockAll(cc, true, false);
+			}
+
+			ImGui::TreePop();
 		}
 	}
 	ImGui::EndChild();
@@ -373,7 +408,7 @@ void Base::Draw::DrawCountryDesigns(Base::SRU_Data::Country* cc)
 
 	Draw::DrawSelectedCountryText(cc, "Selected country: %s");
 
-	ImGui::BeginChild("##countrydesigns", ImVec2(225, 225));
+	ImGui::BeginChild("##countrydesigns", ImVec2(225, 235));
 	{
 		static std::string filter[]{
 			"All",
@@ -576,6 +611,21 @@ void Base::Draw::DrawCountryDesigns(Base::SRU_Data::Country* cc)
 		if (unlocked || cc->selectedUnitDesignId == -1)
 		{
 			ImGui::EndDisabled();
+		}
+
+		if (ImGui::TreeNode("Lock/Unlock All"))
+		{
+			if (ImGui::Button("Lock All", ImVec2(85, 0)))
+			{
+				UnlockAll(cc, false, true);
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Unlock All", ImVec2(85, 0)))
+			{
+				UnlockAll(cc, false, false);
+			}
+
+			ImGui::TreePop();
 		}
 	}
 	ImGui::EndChild();
