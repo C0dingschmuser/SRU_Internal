@@ -90,16 +90,48 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 							treatyMsg = 0;
 						}
 
+						static bool techWasOpen = false;
+
 						if (ImGui::BeginTabItem("Technologies"))
 						{
+							if (!techWasOpen)
+							{
+								techWasOpen = true;
+
+								for (int i = 0; i < g_countryList.size(); i++)
+								{
+									g_countryList[i].RefreshResearch();
+								}
+							}
+
 							Draw::DrawCountryTech(cc);
 							ImGui::EndTabItem();
 						}
+						else
+						{
+							techWasOpen = false;
+						}
+
+						static bool designWasOpen = false;
 
 						if (ImGui::BeginTabItem("Unit Designs"))
 						{
+							if (!designWasOpen)
+							{
+								designWasOpen = true;
+
+								for (int i = 0; i < g_defaultUnitList.size(); i++)
+								{
+									g_defaultUnitList[i]->RefreshUserCountrys();
+								}
+							}
+
 							Draw::DrawCountryDesigns(cc);
 							ImGui::EndTabItem();
+						}
+						else
+						{
+							designWasOpen = false;
 						}
 
 						ImGui::EndTabBar();

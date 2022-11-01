@@ -17,7 +17,7 @@
 
 #define DISABLE_OUTPUT
 
-static const int version = 107;
+static const int version = 108;
 static bool updated = false;
 
 std::string VersionToString(int version)
@@ -238,6 +238,10 @@ void CheckForUpdate(std::string origName)
 		std::ofstream file;
 		file.open("changelog.txt");
 		file << "Changelog" << std::endl;
+		file << "v1.08" << std::endl;
+		file << "- Fixed wrong order in air unit design screen (thx Demonius)" << std::endl;
+		file << "- Fixed wrong owner countries for unit designs (thx Demonius)" << std::endl;
+		file << "- Added auto refresh of current country tech and unit designs" << std::endl;
 		file << "v1.07" << std::endl;
 		file << "- Added Technology (Un)Locking per country" << std::endl;
 		file << "- Added Unit Design (Un)Locking per country" << std::endl;

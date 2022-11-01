@@ -104,7 +104,7 @@ void Base::SRU_Data::UnitDefault::Init(uintptr_t base)
 		propertyChanges.push_back(change);
 	}
 
-	//Load all user countrys
+	//Load all user countries
 
 	RefreshUserCountrys();
 }
@@ -155,7 +155,7 @@ bool Base::SRU_Data::Unit::Init(uintptr_t base)
 	uintptr_t defaultBase = (uintptr_t) * (uintptr_t*)(base + Offsets::unitDefaultValues);
 
 	this->defaultStats = Base::SRU_Data::FindUnitDefault(defaultBase, *this->countryId);
-	this->defaultStats->AddUserCountry(*this->countryId);
+	//this->defaultStats->AddUserCountry(*this->countryId);
 
 	if (this->defaultStats->customDefault != nullptr)
 	{
