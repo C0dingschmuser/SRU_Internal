@@ -656,12 +656,12 @@ void Base::SRU_Data::Hooks::SetupFunctionHooks()
     hookLength = 5;
     hookAddress = g_base + Offsets::buildCheckHook;
     Base::SRU_Data::Hooks::g_buildCheckJumpBackAddr = hookAddress + hookLength;
-    //Base::Hooks::FunctionHook((void*)hookAddress, BuildCheckOwner, hookLength);
+    Base::Hooks::FunctionHook((void*)hookAddress, BuildCheckOwner, hookLength);
 
     //overwrite transport build
 
     uintptr_t addr = g_base + Offsets::buildTransportHook;
-    //Utils::Nop((BYTE*)addr, 6);
+    Utils::Nop((BYTE*)addr, 6);
 }
 
 void Base::SRU_Data::Hooks::SetProductionAdjustment(bool enabled)

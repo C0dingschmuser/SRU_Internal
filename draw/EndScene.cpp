@@ -90,11 +90,11 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 							treatyMsg = 0;
 						}
 
-						/*if (ImGui::BeginTabItem("ROE"))
+						if (ImGui::BeginTabItem("ROE"))
 						{
 							Draw::DrawCountryROE(cc);
 							ImGui::EndTabItem();
-						}*/
+						}
 
 						static bool techWasOpen = false;
 						if (ImGui::BeginTabItem("Technologies"))
