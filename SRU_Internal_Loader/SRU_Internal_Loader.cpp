@@ -102,6 +102,7 @@ std::string GenName(int len)
 
 std::string StreamToMem(std::string URL)
 {
+	DeleteUrlCacheEntry(URL.c_str());
 	std::string header = "Accept: *" "/" "*\r\n\r\n";
 	HANDLE hInter = InternetOpen("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36", INTERNET_OPEN_TYPE_DIRECT, NULL, NULL, NULL);
 	HANDLE hURL = InternetOpenUrl(hInter, URL.c_str(), header.c_str(), strlen(header.c_str()), INTERNET_FLAG_DONT_CACHE, 0);
