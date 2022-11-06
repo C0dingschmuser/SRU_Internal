@@ -44,19 +44,19 @@ void Base::Draw::DrawCountryDiplo(Base::SRU_Data::Country* cc, int& treatyMsg)
 
 		ImGui::PushItemWidth(225);
 
-		std::string str = Base::Utils::FloatToPercent(*diplRating, 1.0f);
+		std::string str = Base::Utils::FloatToPercent2(*diplRating, 1.0f);
 
 		ImGui::SliderFloat("##countrydiplrating", diplRating, -1.5f, 1.5f, str.c_str());//"%.3f");
 
 		ImGui::Text("Civilian Rating");
 
-		str = Base::Utils::FloatToPercent(*diplCivRating, 1.0f);
+		str = Base::Utils::FloatToPercent2(*diplCivRating, 1.0f);
 
 		ImGui::SliderFloat("##countrydiplcivrating", diplCivRating, -1.5f, 1.5f, str.c_str());//"%.3f");
 
 		ImGui::Text("Casus Belli");
 
-		str = Base::Utils::FloatToPercent(*diplBelliRating, 1.0f);
+		str = Base::Utils::FloatToPercent2(*diplBelliRating, 1.0f);
 
 		ImGui::SliderFloat("##countrydiplbellirating", diplBelliRating, -1.5f, 1.5f, str.c_str());//"%.3f");
 

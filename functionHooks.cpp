@@ -228,6 +228,56 @@ void __declspec(naked) GetMapSize()
     }
 }
 
+void CheckBuildOwner()
+{
+    if (g_buildCheckReg6 == g_ownOtherCountryId)
+    {
+        int type = *(int*)(g_buildCheckReg7 + 0x90);
+
+        if (type == 21903 || type == 21904 || type == 21902) //road or rail or bridge
+        {
+            int base = g_buildCheckReg5;
+
+            int from = *(int*)base;
+
+            __int16 toX = (__int16)*(int*)(base + 0xA4);
+            __int16 toY = (__int16)*(int*)(base + 0xA8);
+
+            int to = (int)MAKELONG(toX, toY);
+
+            Base::Execute::CreateTransport(from, to, type, 1);
+        }
+    }
+}
+
+void __declspec(naked) BuildCheckOwner()
+{
+    __asm {
+		movzx ecx, byte ptr [edx]
+        mov[g_buildCheckReg0], eax
+        mov[g_buildCheckReg1], ecx
+        mov[g_buildCheckReg2], edx
+        mov[g_buildCheckReg3], ebp
+        mov[g_buildCheckReg4], edi
+        mov[g_buildCheckReg5], esi
+        mov[g_buildCheckReg6], ebx
+        mov[g_buildCheckReg7], esp
+    }
+
+    CheckBuildOwner();
+
+    __asm {
+        mov eax, g_buildCheckReg0
+        mov ecx, g_buildCheckReg1
+        mov edx, g_buildCheckReg2
+        mov ebp, g_buildCheckReg3
+        mov edi, g_buildCheckReg4
+        mov esi, g_buildCheckReg5
+        mov ebx, g_buildCheckReg6
+		jmp [g_buildCheckJumpBackAddr]
+    }
+}
+
 int FindOldCountryOwner2(uint8_t newOwner, bool weak)
 {
     //Could propably be improved by checking for loyalty
@@ -602,6 +652,16 @@ void Base::SRU_Data::Hooks::SetupFunctionHooks()
     hookAddress = g_base + Offsets::mapSizeHook;
     Base::SRU_Data::Hooks::g_mapSizeJumpBackAddr = hookAddress + hookLength;
     Base::Hooks::FunctionHook((void*)hookAddress, GetMapSize, hookLength);
+
+    hookLength = 5;
+    hookAddress = g_base + Offsets::buildCheckHook;
+    Base::SRU_Data::Hooks::g_buildCheckJumpBackAddr = hookAddress + hookLength;
+    //Base::Hooks::FunctionHook((void*)hookAddress, BuildCheckOwner, hookLength);
+
+    //overwrite transport build
+
+    uintptr_t addr = g_base + Offsets::buildTransportHook;
+    //Utils::Nop((BYTE*)addr, 6);
 }
 
 void Base::SRU_Data::Hooks::SetProductionAdjustment(bool enabled)

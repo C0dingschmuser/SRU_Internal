@@ -84,6 +84,15 @@ unsigned int Base::SRU_Data::Asm::g_mapSizeReg4;
 unsigned int Base::SRU_Data::Asm::g_mapSizeReg5;
 unsigned int Base::SRU_Data::Asm::g_mapSizeReg6;
 
+unsigned int Base::SRU_Data::Asm::g_buildCheckReg0;
+unsigned int Base::SRU_Data::Asm::g_buildCheckReg1;
+unsigned int Base::SRU_Data::Asm::g_buildCheckReg2;
+unsigned int Base::SRU_Data::Asm::g_buildCheckReg3;
+unsigned int Base::SRU_Data::Asm::g_buildCheckReg4;
+unsigned int Base::SRU_Data::Asm::g_buildCheckReg5;
+unsigned int Base::SRU_Data::Asm::g_buildCheckReg6;
+unsigned int Base::SRU_Data::Asm::g_buildCheckReg7;
+
 std::vector<uintptr_t> Base::SRU_Data::Asm::g_ownAllocs;
 
 uintptr_t Base::SRU_Data::Asm::g_aiSurrBase;
@@ -114,6 +123,8 @@ uintptr_t Base::SRU_Data::Hooks::g_diplFreeJmpBackAddr = 0;
 uintptr_t Base::SRU_Data::Hooks::g_diplFreeJmpBackAddrDefault = 0;
 
 uintptr_t Base::SRU_Data::Hooks::g_mapSizeJumpBackAddr = 0;
+
+uintptr_t Base::SRU_Data::Hooks::g_buildCheckJumpBackAddr = 0;
 
 uintptr_t Base::SRU_Data::g_nextUnitEntity = 0;
 
@@ -681,6 +692,18 @@ void Base::SRU_Data::LoadDefaultUnits()
 				}
 			}
 		}
+
+		/*if (Base::Utils::CanReadPtr(check1))
+		{
+			char* namePtr = (char*)*(uintptr_t*)i;
+			if (Base::Utils::CanReadPtr(namePtr))
+			{
+				int classVal = *(uint8_t*)(i + Offsets::unitDefaultClass);
+
+				std::cout << std::hex << i << " " << std::dec << count << " " << classVal << " " << std::string(namePtr) << std::endl;
+			}
+		}*/
+
 		count++;
 	}
 
@@ -790,6 +813,25 @@ std::string Base::Utils::FloatToPercent(float f, float max, bool simple)
 	}
 
 	p = std::clamp(p, 0.0f, 100.0f);
+
+	std::stringstream str;
+	str << std::fixed << std::setprecision(2) << p << "%%";
+	return str.str();
+}
+
+std::string Base::Utils::FloatToPercent2(float f, float max, bool simple)
+{
+	float p;
+	if (!simple)
+	{
+		p = (f / max) * 100;
+	}
+	else
+	{
+		p = f * 100;
+	}
+
+	p = std::clamp(p, -150.0f, 150.0f);
 
 	std::stringstream str;
 	str << std::fixed << std::setprecision(2) << p << "%%";

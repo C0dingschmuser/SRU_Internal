@@ -322,7 +322,7 @@ void Base::Draw::DrawUnitSpawn(Base::SRU_Data::Country* cc)
 								}
 								else if (showCategory > 1)
 								{
-									int start = 9;
+									int start = 8;
 
 									if (unitClass != start + showCategory - 1)
 									{

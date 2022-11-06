@@ -48,6 +48,8 @@ namespace Base
 
 			extern uintptr_t g_mapSizeJumpBackAddr;
 
+			extern uintptr_t g_buildCheckJumpBackAddr;
+
 			void SetupFunctionHooks();
 			void SetProductionAdjustment(bool enabled);
 		}
@@ -66,6 +68,7 @@ namespace Base
 			extern unsigned int g_defconReg03, g_defconReg13, g_defconReg23, g_defconReg33, g_defconReg43, g_defconReg53, g_defconReg63;
 			extern unsigned int g_diplFreeReg0, g_diplFreeReg1, g_diplFreeReg2, g_diplFreeReg3, g_diplFreeReg4, g_diplFreeReg5, g_diplFreeReg6;
 			extern unsigned int g_mapSizeReg0, g_mapSizeReg1, g_mapSizeReg2, g_mapSizeReg3, g_mapSizeReg4, g_mapSizeReg5, g_mapSizeReg6;
+			extern unsigned int g_buildCheckReg0, g_buildCheckReg1, g_buildCheckReg2, g_buildCheckReg3, g_buildCheckReg4, g_buildCheckReg5, g_buildCheckReg6, g_buildCheckReg7;
 			extern uintptr_t g_aiSurrBase;
 
 			extern std::vector<uintptr_t> g_ownAllocs;
@@ -295,6 +298,15 @@ namespace Base
 			int* defconPtrs[2] = {0, 0};
 			int defconState = -1;
 
+			//roe
+			int roeSpeed = 0;
+			int roeRoute = 0;
+			int roeInitiative = 0;
+			int roeContactOptions = 0;
+			int roeLossTolerance = 0;
+			int roeOpportunityFire = 0;
+			int roeApproach = 0;
+
 			//could be upgraded to int to make options scalable
 
 			bool invincibleUnits = false;
@@ -427,16 +439,20 @@ namespace Base
 		typedef void(__thiscall* _DiplFunc)(DWORD*, char);
 		typedef void(__thiscall* _UnlockTechFunc)(unsigned __int8*, int);
 		typedef int(__fastcall* _SpawnUnitFunc)(int, int, int, int, int, int, int, int*, int);
+		typedef int(__stdcall* _CreateTransportFuncEvent)(int, int, int, int, int, int);
 		
 		extern _DiplFunc diplFunc;
 		extern _UnlockTechFunc unlockTechFunc;
 		extern _SpawnUnitFunc spawnUnitFunc;
+		extern _CreateTransportFuncEvent createTransportFuncEvent;
 
 		void SetupFunctions();
 		void AnnexCountry(int from, int to);
 		void RespawnCountry(int from, int to, int type);
 		void UnlockDesign(int to, int design, bool lock);
 		void UnlockTech(int to, int tech, bool lock);
+		void CreateTransport(int from, int to, int type, int noConstruction);
+		void CreateTransport(__int16 fromX, __int16 fromY, __int16 toX, __int16 toY, int country, int type, int noConstruction);
 		void SetRelations(int relationType, uintptr_t country, uintptr_t oCountry, int add);
 		void SpawnUnit(int unitDesign, int amount, uintptr_t country, int spread = 1, bool reserve = true, uint16_t xPos = 0, uint16_t yPos = 0);
 		void SetCheat(uint8_t cheat);
@@ -454,6 +470,7 @@ namespace Base
 		void DrawSelectedCountryText(Base::SRU_Data::Country* cc, const char* text);
 		void DrawCountry(Base::SRU_Data::Country* cc);
 		void DrawCountryDiplo(Base::SRU_Data::Country* cc, int& treatyMsg);
+		void DrawCountryROE(Base::SRU_Data::Country* cc);
 		void DrawCountryTech(Base::SRU_Data::Country* cc);
 		void DrawCountryDesigns(Base::SRU_Data::Country* cc);
 		void DrawMap(Base::SRU_Data::Country* cc);
@@ -488,6 +505,7 @@ namespace Base
 		unsigned long ColorConverter(float r, float g, float b, float a);
 		bool CMPF(float A, float B, float E = 0.005f);
 		std::string FloatToPercent(float f, float max, bool simple = false);
+		std::string FloatToPercent2(float f, float max, bool simple = false);
 		bool MemCompare(const BYTE* bData, const BYTE* bMask, const char* szMask);
 		bool CanReadPtr(void* ptr);
 		uintptr_t PointerChain(uintptr_t ptr, std::vector<unsigned int> offsets);

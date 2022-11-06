@@ -3,6 +3,7 @@
 Base::Execute::_DiplFunc Base::Execute::diplFunc = 0;
 Base::Execute::_UnlockTechFunc Base::Execute::unlockTechFunc = 0;
 Base::Execute::_SpawnUnitFunc Base::Execute::spawnUnitFunc = 0;
+Base::Execute::_CreateTransportFuncEvent Base::Execute::createTransportFuncEvent = 0;
 
 void Base::Execute::SetupFunctions()
 {
@@ -11,6 +12,7 @@ void Base::Execute::SetupFunctions()
 	diplFunc = (_DiplFunc)(Base::SRU_Data::g_base + Offsets::diplFunc);
 	unlockTechFunc = (_UnlockTechFunc)(Base::SRU_Data::g_base + Offsets::unlockTechFunc);
 	spawnUnitFunc = (_SpawnUnitFunc)(Base::SRU_Data::g_base + Offsets::unitFunc);
+	createTransportFuncEvent = (_CreateTransportFuncEvent)(Base::SRU_Data::g_base + Offsets::transportFuncEvent);
 }
 
 void Base::Execute::ExecDipl(DWORD* buffer, char c)
@@ -172,6 +174,19 @@ void Base::Execute::UnlockDesign(int to, int design, bool lock)
 			ud->countryIds.erase(ud->countryIds.begin() + search);
 		}
 	}
+}
+
+void Base::Execute::CreateTransport(int from, int to, int type, int noConstruction)
+{
+	createTransportFuncEvent(type, 0, from, to, noConstruction, 0);
+}
+
+void Base::Execute::CreateTransport(__int16 fromX, __int16 fromY, __int16 toX, __int16 toY, int country, int type, int noConstruction)
+{
+	int fromPosData = (int)MAKELONG(fromX, fromY);
+	int toPosData = (int)MAKELONG(toX, toY);
+
+	CreateTransport(fromPosData, toPosData, type, noConstruction);
 }
 
 void Base::Execute::SetRelations(int relationType, uintptr_t country, uintptr_t oCountry, int add)
