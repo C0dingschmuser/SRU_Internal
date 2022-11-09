@@ -359,6 +359,38 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 		
 	}
 
+	static std::vector<std::string> stances = {
+		"Normal",
+		"Passive",
+		"Defensive",
+		"Aggressive",
+		"Unpredictable"
+	};
+
+	int stance = (int)*(uint8_t*)(cc->base + Offsets::countryAIStance);
+
+	ImGui::Text("AI Stance");
+	ImGui::PushItemWidth(inputWidth + 27);
+	if (ImGui::BeginCombo("##aistancecombo", stances[stance].c_str()))
+	{
+		for (int i = 0; i < stances.size(); i++)
+		{
+			bool isSelected = (stance == i);
+			if (ImGui::Selectable(stances[i].c_str(), isSelected))
+			{
+				stance = i;
+				Base::Execute::SetCountryAIStance(cc, stance);
+			}
+
+			if (isSelected)
+			{
+				ImGui::SetItemDefaultFocus();
+			}
+		}
+
+		ImGui::EndCombo();
+	}
+
 	ImGui::Text("DEFCON");
 	ImGui::PushItemWidth(inputWidth + 27);
 	if (ImGui::SliderInt("###defconslider", &cc->defconState, -1, 4, defconText.c_str()))

@@ -233,6 +233,70 @@ void Base::SRU_Data::Country::Init(uintptr_t base)
 	this->socialAssistanceState = socialAssistanceState;
 	this->allFloatValues.push_back(socialAssistanceState);
 
+	//-----------------------------------------------------------------------------------
+	//--- Ministers ---------------------------------------------------------------------
+	//-----------------------------------------------------------------------------------
+
+	std::shared_ptr<Minister> financeMinister(new Minister);
+	financeMinister->propertiesPtr = (uintptr_t*)(this->base + Offsets::Ministers::Finance::offset);
+	financeMinister->name = "Finance";
+
+	for (int i = 0; i < Offsets::Ministers::Finance::properties.size(); i++)
+	{
+		std::shared_ptr<MinisterProperty> p(new MinisterProperty);
+		p->changeVal = Offsets::Ministers::Finance::properties[i];
+		p->name = Offsets::Ministers::Finance::names[i];
+
+		financeMinister->properties.push_back(p);
+	}
+
+	this->ministers.push_back(financeMinister);
+
+	std::shared_ptr<Minister> resourceMinister(new Minister);
+	resourceMinister->propertiesPtr = (uintptr_t*)(this->base + Offsets::Ministers::Resources::offset);
+	resourceMinister->name = "Resources";
+
+	for (int i = 0; i < Offsets::Ministers::Resources::properties.size(); i++)
+	{
+		std::shared_ptr<MinisterProperty> p(new MinisterProperty);
+		p->changeVal = Offsets::Ministers::Resources::properties[i];
+		p->name = Offsets::Ministers::Resources::names[i];
+
+		resourceMinister->properties.push_back(p);
+	}
+
+	this->ministers.push_back(resourceMinister);
+
+	std::shared_ptr<Minister> researchMinister(new Minister);
+	researchMinister->propertiesPtr = (uintptr_t*)(this->base + Offsets::Ministers::Research::offset);
+	researchMinister->name = "Research";
+
+	for (int i = 0; i < Offsets::Ministers::Research::properties.size(); i++)
+	{
+		std::shared_ptr<MinisterProperty> p(new MinisterProperty);
+		p->changeVal = Offsets::Ministers::Research::properties[i];
+		p->name = Offsets::Ministers::Research::names[i];
+
+		researchMinister->properties.push_back(p);
+	}
+
+	this->ministers.push_back(researchMinister);
+
+	std::shared_ptr<Minister> defenseMinister(new Minister);
+	defenseMinister->propertiesPtr = (uintptr_t*)(this->base + Offsets::Ministers::Defense::offset);
+	defenseMinister->name = "Defense";
+
+	for (int i = 0; i < Offsets::Ministers::Defense::properties.size(); i++)
+	{
+		std::shared_ptr<MinisterProperty> p(new MinisterProperty);
+		p->changeVal = Offsets::Ministers::Defense::properties[i];
+		p->name = Offsets::Ministers::Defense::names[i];	
+
+		defenseMinister->properties.push_back(p);
+	}
+
+	this->ministers.push_back(defenseMinister);
+
 	return;
 }
 
@@ -305,6 +369,68 @@ void Base::SRU_Data::Country::HandleUnits()
 	}
 }
 
+void Base::SRU_Data::Country::HandleROE()
+{
+	using namespace Base::Utils;
+
+	uintptr_t* mainROE = (uintptr_t*)(this->base + Offsets::mainROE);
+	uintptr_t* secondROE = (uintptr_t*)(this->base + Offsets::secondROE);
+
+	if (this->roeSpeed > 0)
+	{
+		SetValueMask(mainROE, Offsets::roeSpeed, this->roeSpeed - 1);
+	}
+
+	if (this->roeRoute > 0)
+	{
+		SetValueMask(mainROE, Offsets::roeRoute, this->roeRoute - 1);
+	}
+
+	if (this->roeInitiative > 0)
+	{
+		SetValueMask(mainROE, Offsets::roeInitiative, this->roeInitiative - 1);
+	}
+
+	if (this->roeContactOptions > 0)
+	{
+		SetValueMask(mainROE, Offsets::roeContactOptions, this->roeContactOptions - 1);
+	}
+
+	if (this->roeLossTolerance > 0)
+	{
+		SetValueMask(mainROE, Offsets::roeLossTolerance, this->roeLossTolerance - 1);
+	}
+
+	if (this->roeOpportunityFire > 0)
+	{
+		bool enable = this->roeOpportunityFire - 1;
+		SetValueBool(secondROE, Offsets::roeOpportunityFire, enable);
+	}
+
+	if (this->roeApproach > 0)
+	{
+		bool enable = this->roeApproach - 1;
+		SetValueBool(secondROE, Offsets::roeApproach, enable);
+	}
+}
+
+void Base::SRU_Data::Country::HandleMinisters()
+{
+	using namespace Base::Utils;
+
+	for (int i = 0; i < this->ministers.size(); i++)
+	{
+		for (int a = 0; a < this->ministers[i]->properties.size(); a++)
+		{
+			if (this->ministers[i]->properties[a]->status > 0)
+			{
+				bool enabled = this->ministers[i]->properties[a]->status - 1;
+				SetValueBool(this->ministers[i]->propertiesPtr, this->ministers[i]->properties[a]->changeVal, !enabled);
+			}
+		}
+	}
+}
+
 void Base::SRU_Data::Country::HandleFreeze()
 {
 	for (int i = 0; i < this->allFloatValues.size(); i++)
@@ -353,6 +479,8 @@ void Base::SRU_Data::Country::HandleFreeze()
 	}
 
 	HandleUnits();
+	HandleROE();
+	HandleMinisters();
 }
 
 void Base::SRU_Data::Country::RefreshResearch()

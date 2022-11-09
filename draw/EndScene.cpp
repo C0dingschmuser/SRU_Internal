@@ -90,6 +90,12 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 							treatyMsg = 0;
 						}
 
+						if (ImGui::BeginTabItem("Ministers"))
+						{
+							Draw::DrawCountryMinisters(cc);
+							ImGui::EndTabItem();
+						}
+
 						if (ImGui::BeginTabItem("ROE"))
 						{
 							Draw::DrawCountryROE(cc);
@@ -237,34 +243,6 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 							moreoffers = !moreoffers;
 							Base::Execute::SetCheat(Offsets::moreoffers[0]);						 
 						}
-
-						/*static int val = 32;
-						ImGui::InputInt("testval", &val);
-						static int shift = 4;
-						ImGui::InputInt("shift", &shift);
-
-						static bool testTest = false;
-						if (ImGui::Checkbox("Test", &testTest))
-						{
-							//testTest = !testTest;
-
-							//uintptr_t* addr = (uintptr_t*)(g_ownCountryBase + 0x3CBC);
-
-							//*addr = ~*addr & val | *addr & (0xFFFFFFFF-val);
-
-							int pos = shift;
-
-							uintptr_t* addr = (uintptr_t*)(g_ownCountryBase + 0x1F4);
-							int bitmask = (3 << pos); //2 = 00001100
-							*addr = (*addr & (~bitmask)) | (val << pos);
-							//*addr = ~*addr & (uint8_t)val | *addr & (0xFF - (uint8_t)val);
-
-							std::cout << "----" << std::endl;
-							std::cout << std::dec << (DWORD)(*(DWORD*)(g_ownCountryBase + 0x1F4) & 3) << std::endl;
-							std::cout << std::dec << ((DWORD)(*(DWORD*)(g_ownCountryBase + 0x1F4) >> 2) & 3) << std::endl;
-							std::cout << std::dec << ((DWORD)(*(DWORD*)(g_ownCountryBase + 0x1F4) >> 4) & 3) << std::endl;
-							std::cout << std::dec << ((DWORD)(*(DWORD*)(g_ownCountryBase + 0x1F4) >> 6) & 3) << std::endl;
-						}*/
 						
 						ImGui::EndChild();
 					}

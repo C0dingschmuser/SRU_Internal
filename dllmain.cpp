@@ -542,18 +542,6 @@ DWORD WINAPI dllThread(HMODULE hModule) {
     uint16_t* mouseHoverX = (uint16_t*)(g_base + Offsets::mouseHoverXPos);
     uint16_t* mouseHoverY = (uint16_t*)(g_base + Offsets::mouseHoverYPos);
 
-    /*int unitDesingIdShifted = 0x926 << 8;
-    int targetCountryId = 89; //russia
-    int countryIdShifted = targetCountryId >> 5;
-    int unitDesignAddr = 0x1958A620;
-    int unitAddr2 = unitDesignAddr + 196;
-
-    int result = 1 << targetCountryId;
-    int result1 = result | *(int*)(unitAddr2 + countryIdShifted * 4);
-    *(int*)(unitAddr2 + countryIdShifted * 4) = result1;*/
-
-    //*(int*)((unitDesignAddr + 196) + 4 * countryIdShifted + unitDesingIdShifted) |= 1 << 89;
-
     //Main loop
 
     Base::Execute::SetupFunctions();

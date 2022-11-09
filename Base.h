@@ -241,11 +241,27 @@ namespace Base
 			std::string name;
 		};
 
+		struct MinisterProperty
+		{
+			std::string name;
+			unsigned int changeVal = 0;
+			int status = 0;
+		};
+
+		struct Minister
+		{
+			std::string name;
+			std::vector<std::shared_ptr<MinisterProperty>> properties;
+			uintptr_t* propertiesPtr;
+		};
+
 		struct Country
 		{
 			void Init(uintptr_t base);
 			void HandleFreeze();
 			void HandleUnits();
+			void HandleROE();
+			void HandleMinisters();
 			void RefreshResearch();
 			void ChangeName(std::string newName);
 
@@ -270,6 +286,8 @@ namespace Base
 			uint16_t originalFlagId;
 			
 			unsigned int lastSurrenderTime = -1;
+
+			std::vector<std::shared_ptr<Minister>> ministers;
 
 			std::shared_ptr<FloatValue> treasury;
 			std::shared_ptr<FloatValue> domApproval;
@@ -449,6 +467,7 @@ namespace Base
 		void SetupFunctions();
 		void AnnexCountry(int from, int to);
 		void RespawnCountry(int from, int to, int type);
+		void SetCountryAIStance(Base::SRU_Data::Country* cc, int newAIStance);
 		void UnlockDesign(int to, int design, bool lock);
 		void UnlockTech(int to, int tech, bool lock);
 		void CreateTransport(int from, int to, int type, int noConstruction);
@@ -470,6 +489,7 @@ namespace Base
 		void DrawSelectedCountryText(Base::SRU_Data::Country* cc, const char* text);
 		void DrawCountry(Base::SRU_Data::Country* cc);
 		void DrawCountryDiplo(Base::SRU_Data::Country* cc, int& treatyMsg);
+		void DrawCountryMinisters(Base::SRU_Data::Country* cc);
 		void DrawCountryROE(Base::SRU_Data::Country* cc);
 		void DrawCountryTech(Base::SRU_Data::Country* cc);
 		void DrawCountryDesigns(Base::SRU_Data::Country* cc);
@@ -504,6 +524,9 @@ namespace Base
 		unsigned long ColorConverter(int r, int g, int b, int a);
 		unsigned long ColorConverter(float r, float g, float b, float a);
 		bool CMPF(float A, float B, float E = 0.005f);
+		bool GetValueBool(uintptr_t* addr, int value);
+		void SetValueMask(uintptr_t* addr, int offset, int value);
+		void SetValueBool(uintptr_t* addr, int value, bool enable);
 		std::string FloatToPercent(float f, float max, bool simple = false);
 		std::string FloatToPercent2(float f, float max, bool simple = false);
 		bool MemCompare(const BYTE* bData, const BYTE* bMask, const char* szMask);

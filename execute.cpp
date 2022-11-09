@@ -34,6 +34,39 @@ void Base::Execute::RespawnCountry(int from, int to, int type)
 	ExecDipl((DWORD*)buffer, '\x01');
 }
 
+void Base::Execute::SetCountryAIStance(Base::SRU_Data::Country* cc, int newAIStance)
+{
+	uint8_t* stancePtr = (uint8_t*)(cc->base + Offsets::countryAIStance);
+	*stancePtr = (uint8_t)newAIStance;
+
+	int v5282 = 0;
+	int v1733 = v5282;
+	int v1732 = v5282;
+	do
+	{
+		uint8_t v5283;
+		if (*stancePtr)
+		{
+			int v4807 = 100;
+			int v4808 = (45 * *stancePtr) - 35;
+			if (v4808 <= 100)
+				v5283 = v4808;
+			else
+				v5283 = v4807;
+		}
+		else
+		{
+			v5283 = 80;
+		}
+		uintptr_t v1731 = cc->base;
+		v1732 = v5282;
+		v1733 = v5283;
+		*(uint8_t*)(cc->base + v5282 + 0x444) = v5283;
+		*(uint8_t*)(cc->base + v1732 + 0x4128) = v1733;
+		v5282 = v1732 + 1;
+	} while (v1732 + 1 < 3);
+}
+
 void Base::Execute::UnlockTech(int to, int tech, bool lock)
 {
 	using namespace Base::SRU_Data;

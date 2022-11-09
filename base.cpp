@@ -843,6 +843,35 @@ bool Base::Utils::CMPF(float A, float B, float E)
 	return (std::fabs(A - B) < E);
 }
 
+bool Base::Utils::GetValueBool(uintptr_t* addr, int value)
+{
+	unsigned int testVal = ~*addr & value | *addr & (0xFFFFFFFF - value);
+
+	if (testVal > *addr)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+void Base::Utils::SetValueMask(uintptr_t* addr, int offset, int value)
+{
+	int bitmask = (3 << offset);
+	value = value << offset;
+	*addr = (*addr & (~bitmask)) | (value & bitmask);
+}
+
+void Base::Utils::SetValueBool(uintptr_t* addr, int value, bool enable)
+{
+	if (GetValueBool(addr, value) != enable)
+	{
+		*addr = ~*addr & value | *addr & (0xFFFFFFFF - value);
+	}
+}
+
 bool Base::Utils::MemCompare(const BYTE* bData, const BYTE* bMask, const char* szMask)
 {
 	for (; *szMask; ++szMask, ++bData, ++bMask)

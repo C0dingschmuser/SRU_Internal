@@ -1,33 +1,8 @@
 #include "../Base.h";
 
-void SetValue(uintptr_t* addr, int offset, int value)
-{
-	int bitmask = (3 << offset);
-	*addr = (*addr & (~bitmask)) | (value << bitmask);
-}
-
-void SetValueBool(uintptr_t* addr, int value)
-{
-	*addr = ~*addr & value | *addr & (0xFFFFFFFF - value);
-}
-
 int GetValue(uintptr_t* addr, int offset)
 {
 	return ((int)(*addr >> offset) & 3);
-}
-
-bool GetValueBool(uintptr_t* addr, int value)
-{
-	int testVal = ~*addr& value | *addr & (0xFFFFFFFF - value);
-
-	if (testVal > *addr)
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
 }
 
 void Base::Draw::DrawCountryROE(Base::SRU_Data::Country* cc)
@@ -90,7 +65,7 @@ void Base::Draw::DrawCountryROE(Base::SRU_Data::Country* cc)
 						//Change value
 
 						uintptr_t* addr = (uintptr_t*)(cc->base + Offsets::mainROE);
-						SetValue(addr, Offsets::roeSpeed, i - 1);
+						Base::Utils::SetValueMask(addr, Offsets::roeSpeed, i - 1);
 					}
 
 					cc->roeSpeed = i;
@@ -110,7 +85,7 @@ void Base::Draw::DrawCountryROE(Base::SRU_Data::Country* cc)
 					if (cc->roeRoute != i && i > 0)
 					{
 						uintptr_t* addr = (uintptr_t*)(cc->base + Offsets::mainROE);
-						SetValue(addr, Offsets::roeRoute, i - 1);
+						Base::Utils::SetValueMask(addr, Offsets::roeRoute, i - 1);
 					}
 
 					cc->roeRoute = i;
@@ -130,8 +105,10 @@ void Base::Draw::DrawCountryROE(Base::SRU_Data::Country* cc)
 					if (cc->roeInitiative != i && i > 0)
 					{
 						uintptr_t* addr = (uintptr_t*)(cc->base + Offsets::mainROE);
-						SetValue(addr, Offsets::roeInitiative, i - 1);
+						Base::Utils::SetValueMask(addr, Offsets::roeInitiative, i - 1);
 					}
+
+					cc->roeInitiative = i;
 				}
 			}
 			ImGui::EndCombo();
@@ -148,8 +125,10 @@ void Base::Draw::DrawCountryROE(Base::SRU_Data::Country* cc)
 					if (cc->roeContactOptions != i && i > 0)
 					{
 						uintptr_t* addr = (uintptr_t*)(cc->base + Offsets::mainROE);
-						SetValue(addr, Offsets::roeContactOptions, i - 1);
+						Base::Utils::SetValueMask(addr, Offsets::roeContactOptions, i - 1);
 					}
+
+					cc->roeContactOptions = i;
 				}
 			}
 			ImGui::EndCombo();
@@ -166,8 +145,10 @@ void Base::Draw::DrawCountryROE(Base::SRU_Data::Country* cc)
 					if (cc->roeLossTolerance != i && i > 0)
 					{
 						uintptr_t* addr = (uintptr_t*)(cc->base + Offsets::mainROE);
-						SetValue(addr, Offsets::roeLossTolerance, i - 1);
+						Base::Utils::SetValueMask(addr, Offsets::roeLossTolerance, i - 1);
 					}
+
+					cc->roeLossTolerance = i;
 				}
 			}
 			ImGui::EndCombo();
@@ -196,10 +177,7 @@ void Base::Draw::DrawCountryROE(Base::SRU_Data::Country* cc)
 						uintptr_t* addr = (uintptr_t*)(cc->base + Offsets::secondROE);
 						bool enable = i - 1;
 
-						if (GetValueBool(addr, Offsets::roeOpportunityFire) != enable)
-						{
-							SetValueBool(addr, Offsets::roeOpportunityFire);
-						}
+						Base::Utils::SetValueBool(addr, Offsets::roeOpportunityFire, enable);
 					}
 
 					cc->roeOpportunityFire = i;
@@ -227,10 +205,7 @@ void Base::Draw::DrawCountryROE(Base::SRU_Data::Country* cc)
 						uintptr_t* addr = (uintptr_t*)(cc->base + Offsets::secondROE);
 						bool enable = i - 1;
 
-						if (GetValueBool(addr, Offsets::roeApproach) != enable)
-						{
-							SetValueBool(addr, Offsets::roeApproach);	
-						}
+						Base::Utils::SetValueBool(addr, Offsets::roeApproach, enable);
 					}
 
 					cc->roeApproach = i;
@@ -239,4 +214,5 @@ void Base::Draw::DrawCountryROE(Base::SRU_Data::Country* cc)
 			ImGui::EndCombo();
 		}
 	}
+	ImGui::EndChild();
 }
