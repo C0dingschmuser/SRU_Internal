@@ -278,6 +278,8 @@ namespace Base
 
 			int selectedTechnologyId = -1;
 			int selectedUnitDesignId = -1;
+			
+			std::vector<int> defenseMinisterInitiative = { 0, 0, 0 };
 
 			uintptr_t* populationPtr;
 			uintptr_t* colorPtr;

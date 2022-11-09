@@ -429,6 +429,14 @@ void Base::SRU_Data::Country::HandleMinisters()
 			}
 		}
 	}
+
+	for (int i = 0; i < this->defenseMinisterInitiative.size(); i++) {
+		if (this->defenseMinisterInitiative[i] > 0) {
+			uint8_t* val = (uint8_t*)(this->base + Offsets::Ministers::Defense::initiativeOffsets[i]);
+
+			*val = (this->defenseMinisterInitiative[i] - 1) * 25;
+		}
+	}
 }
 
 void Base::SRU_Data::Country::HandleFreeze()

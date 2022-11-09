@@ -17,7 +17,7 @@
 
 #define DISABLE_OUTPUT
 
-static const int version = 109;
+static const int version = 110;
 static bool updated = false;
 
 std::string VersionToString(int version)
@@ -240,6 +240,11 @@ void CheckForUpdate(std::string origName)
 		std::ofstream file;
 		file.open("changelog.txt");
 		file << "Changelog" << std::endl;
+		file << "v1.10" << std::endl;
+		file << "- Added unlimited Road/Rail/Bridge building (everywhere!)" << std::endl;
+		file << "- Added Country Minister Control" << std::endl;
+		file << "- Added Country Unit Rules of Engagement" << std::endl;
+		file << "- Added Country AI Stance" << std::endl;
 		file << "v1.09" << std::endl;
 		file << "- Fixed bug with country relations (thx Asdred)" << std::endl;
 		file << "v1.08" << std::endl;
@@ -272,7 +277,7 @@ void CheckForUpdate(std::string origName)
 		file << "- Fixed autoupdater" << std::endl;
 		file.close();
 
-		//system("changelog.txt");
+		system("start changelog.txt");
 
 		return;
 	}

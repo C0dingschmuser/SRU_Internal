@@ -30,7 +30,7 @@ void Base::Draw::DrawCountryMinisters(Base::SRU_Data::Country* cc)
 
 	DrawSelectedCountryText(cc, "Selected country: %s");
 
-	ImGui::BeginChild("##ministersleft", ImVec2(275, 225));
+	ImGui::BeginChild("##ministersleft", ImVec2(250, 225));
 	{
 		for (int i = 0; i < cc->ministers.size(); i++)
 		{
@@ -45,6 +45,13 @@ void Base::Draw::DrawCountryMinisters(Base::SRU_Data::Country* cc)
 						uint8_t* val = (uint8_t*)(cc->base + Offsets::Ministers::Defense::initiativeOffsets[b]);
 						int subVal = *val / 25;
 
+						bool color = false;
+
+						if (cc->defenseMinisterInitiative[b] > 0) {
+							subVal = cc->defenseMinisterInitiative[b] - 1;
+							color = true;
+						}
+
 						std::string iname = "Land Initiative";
 
 						if (b == 1)
@@ -56,7 +63,15 @@ void Base::Draw::DrawCountryMinisters(Base::SRU_Data::Country* cc)
 							iname = "Sea Initiative";
 						}
 
+						if (color) {
+							ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255)); //red
+						}
+
 						ImGui::Text(iname.c_str());
+
+						if (color) {
+							ImGui::PopStyleColor();
+						}
 
 						std::string preview = GetInitiativeString(subVal);
 						std::string label = "##init" + std::to_string(b);
@@ -68,6 +83,12 @@ void Base::Draw::DrawCountryMinisters(Base::SRU_Data::Country* cc)
 								const bool isSelected = (subVal == c);
 								if (ImGui::Selectable(name.c_str(), isSelected))
 								{
+									if (!g_shift) {
+										cc->defenseMinisterInitiative[b] = c + 1;
+									}
+									else {
+										cc->defenseMinisterInitiative[b] = 0;
+									}
 									*val = c * 25;
 								}
 							}
