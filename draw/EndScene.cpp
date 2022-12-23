@@ -160,6 +160,13 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 					ImGui::EndTabItem();
 				}
 
+				if (ImGui::BeginTabItem("Facilities"))
+				{
+					Base::Draw::DrawFacilities(cc);
+
+					ImGui::EndTabItem();
+				}
+
 				if (ImGui::BeginTabItem("Units"))
 				{
 					ImGui::BeginTabBar("##unittabs");

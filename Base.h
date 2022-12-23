@@ -370,7 +370,24 @@ namespace Base
 			std::string name;
 		};
 
+		struct Facility
+		{
+			enum Type
+			{
+				Industrial,
+				Military,
+				Urban
+			};
+
+			int id;
+			bool flag = false;
+			std::vector<int> variantIDs;
+			Type type;
+			std::string name;
+		};
+
 		extern std::vector<std::shared_ptr<UnitDefault>> g_defaultUnitList;
+		extern std::vector<std::shared_ptr<Facility>> g_facilityList;
 		extern std::vector<Unit> g_selectedUnitList;
 		extern std::vector<Unit> g_unitList;
 		extern std::vector<DiplTreaty> g_diplTreatyList;
@@ -395,6 +412,7 @@ namespace Base
 		extern int g_paintSelectedComboGround;
 		
 		extern int g_unitSpawnSelectedUnitDesign;
+		extern int g_facilitySpawnSelectedFacility;
 
 		extern int g_surrenderEventCount;
 
@@ -460,11 +478,13 @@ namespace Base
 		typedef void(__thiscall* _UnlockTechFunc)(unsigned __int8*, int);
 		typedef int(__fastcall* _SpawnUnitFunc)(int, int, int, int, int, int, int, int*, int);
 		typedef int(__stdcall* _CreateTransportFuncEvent)(int, int, int, int, int, int);
+		typedef int(__thiscall* _CreateFactoryFunc)(int, __int8, int, int, int, float, int, float, int);
 		
 		extern _DiplFunc diplFunc;
 		extern _UnlockTechFunc unlockTechFunc;
 		extern _SpawnUnitFunc spawnUnitFunc;
 		extern _CreateTransportFuncEvent createTransportFuncEvent;
+		extern _CreateFactoryFunc createFactoryFunc;
 
 		void SetupFunctions();
 		void AnnexCountry(int from, int to);
@@ -474,6 +494,7 @@ namespace Base
 		void UnlockTech(int to, int tech, bool lock);
 		void CreateTransport(int from, int to, int type, int noConstruction);
 		void CreateTransport(__int16 fromX, __int16 fromY, __int16 toX, __int16 toY, int country, int type, int noConstruction);
+		void CreateFacility(__int16 posX, __int16 posY, int countryOId, int facilityId, float constructionState);
 		void SetRelations(int relationType, uintptr_t country, uintptr_t oCountry, int add);
 		void SpawnUnit(int unitDesign, int amount, uintptr_t country, int spread = 1, bool reserve = true, uint16_t xPos = 0, uint16_t yPos = 0);
 		void SetCheat(uint8_t cheat);
@@ -495,7 +516,9 @@ namespace Base
 		void DrawCountryROE(Base::SRU_Data::Country* cc);
 		void DrawCountryTech(Base::SRU_Data::Country* cc);
 		void DrawCountryDesigns(Base::SRU_Data::Country* cc);
+		void DrawCountryFacilities(Base::SRU_Data::Country* cc);
 		void DrawMap(Base::SRU_Data::Country* cc);
+		void DrawFacilities(Base::SRU_Data::Country* cc);
 		void DrawUnitSpawn(Base::SRU_Data::Country* cc);
 		void DrawUnitModifiers(Base::SRU_Data::Country* cc);
 		void DrawUnitSelected(Base::SRU_Data::Country* cc);

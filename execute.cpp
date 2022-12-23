@@ -4,6 +4,54 @@ Base::Execute::_DiplFunc Base::Execute::diplFunc = 0;
 Base::Execute::_UnlockTechFunc Base::Execute::unlockTechFunc = 0;
 Base::Execute::_SpawnUnitFunc Base::Execute::spawnUnitFunc = 0;
 Base::Execute::_CreateTransportFuncEvent Base::Execute::createTransportFuncEvent = 0;
+Base::Execute::_CreateFactoryFunc Base::Execute::createFactoryFunc = 0;
+
+void Base::Execute::CreateFacility(__int16 posX, __int16 posY, int countryOId, int facilityId, float constructionState)
+{
+	__int16 realX = posX;
+	__int16 realY = posY;
+
+	if (realX < 0)
+	{
+		realX = Base::SRU_Data::g_mapSizeX + posX;
+	}
+
+	if (realY < 0) realY = 0;
+
+	DWORD posData = MAKELONG(realX, realY);
+
+	__int16 v9 = (__int16)posData;
+	if (v9 >= Base::SRU_Data::g_mapSizeX)
+	{
+		v9 = (__int16)posData % Base::SRU_Data::g_mapSizeX;
+	}
+	else if ((posData & 0x8000) != 0)
+	{
+		v9 = Base::SRU_Data::g_mapSizeX + (__int16)posData % Base::SRU_Data::g_mapSizeX;
+	}
+
+	long temp = v9 + Base::SRU_Data::g_mapSizeX * HIWORD(posData);
+	long mult = 16 * temp;
+
+	DWORD base1 = *(DWORD*)(Base::SRU_Data::g_base + Offsets::allHexStart);
+	DWORD base2 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 0xC) + mult;
+	DWORD base3 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 16) + (4 * temp);
+	DWORD base4 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 20) + (4 * temp);
+
+	DWORD* buffer = (DWORD*)calloc(0x20, sizeof(DWORD));
+	buffer[0] = posData;
+	buffer[1] = base1;
+	buffer[2] = base2;
+	buffer[3] = base3;
+	buffer[4] = base4;
+	buffer[5] = temp;
+
+	Base::SRU_Data::Asm::g_ownAllocs.push_back((uintptr_t)buffer);
+
+	//Dont ask me why 2 times, its called 2 times in the original function
+	Base::Execute::createFactoryFunc((int)buffer, 0, 0, countryOId, facilityId, 1.0f, 0, constructionState, 0);
+	Base::Execute::createFactoryFunc((int)buffer, 1, 0, countryOId, facilityId, 1.0f, 0, constructionState, 0);
+}
 
 void Base::Execute::SetupFunctions()
 {
@@ -13,6 +61,7 @@ void Base::Execute::SetupFunctions()
 	unlockTechFunc = (_UnlockTechFunc)(Base::SRU_Data::g_base + Offsets::unlockTechFunc);
 	spawnUnitFunc = (_SpawnUnitFunc)(Base::SRU_Data::g_base + Offsets::unitFunc);
 	createTransportFuncEvent = (_CreateTransportFuncEvent)(Base::SRU_Data::g_base + Offsets::transportFuncEvent);
+	createFactoryFunc = (_CreateFactoryFunc)(Base::SRU_Data::g_base + Offsets::createFactoryFunc);
 }
 
 void Base::Execute::ExecDipl(DWORD* buffer, char c)

@@ -100,6 +100,7 @@ uintptr_t Base::SRU_Data::Asm::g_aiSurrBase;
 //SRU Vars
 
 std::vector<std::shared_ptr<Base::SRU_Data::UnitDefault>> Base::SRU_Data::g_defaultUnitList;
+std::vector< std::shared_ptr<Base::SRU_Data::Facility>> Base::SRU_Data::g_facilityList;
 std::vector<Base::SRU_Data::Unit> Base::SRU_Data::g_selectedUnitList;
 std::vector<Base::SRU_Data::Country> Base::SRU_Data::g_countryList;
 std::vector<std::shared_ptr<Base::SRU_Data::Tech>> Base::SRU_Data::g_techList;
@@ -143,6 +144,7 @@ int Base::SRU_Data::g_paintSelectedComboLoyalty = 0;
 int Base::SRU_Data::g_paintSelectedComboGround = -1;
 
 int Base::SRU_Data::g_unitSpawnSelectedUnitDesign = -1;
+int Base::SRU_Data::g_facilitySpawnSelectedFacility = -1;
 
 int Base::SRU_Data::g_unitRefreshMaxTime = 500;
 int Base::SRU_Data::g_mainRefreshTime = 25;
@@ -649,6 +651,7 @@ void Base::SRU_Data::LoadUnits(bool refresh)
 void Base::SRU_Data::LoadDefaultUnits()
 {
 	g_defaultUnitList.clear();
+	g_facilityList.clear();
 	g_paintUnitModes.clear();
 
 	for (int i = 0; i < Unit::Property::MAX; i++)
@@ -693,18 +696,65 @@ void Base::SRU_Data::LoadDefaultUnits()
 			}
 		}
 
-		/*if (Base::Utils::CanReadPtr(check1))
+		if (Base::Utils::CanReadPtr(check1))
 		{
 			char* namePtr = (char*)*(uintptr_t*)i;
 			if (Base::Utils::CanReadPtr(namePtr))
 			{
 				int classVal = *(uint8_t*)(i + Offsets::unitDefaultClass);
 
-				std::cout << std::hex << i << " " << std::dec << count << " " << classVal << " " << std::string(namePtr) << std::endl;
+				if (classVal == 21)
+				{
+					//Check for duplicates
+					
+					std::string fName = std::string(namePtr);
+
+					bool found = false;
+
+					for (int i = 0; i < g_facilityList.size(); i++)
+					{
+						if (g_facilityList[i]->name == fName)
+						{
+							found = true;
+
+							g_facilityList[i]->variantIDs.push_back(count);
+							break;
+						}
+					}
+
+					//add
+
+					if (!found)
+					{
+						std::shared_ptr<Facility> newFacility(new Facility);
+
+						newFacility->id = count;
+						newFacility->name = fName;
+
+						g_facilityList.push_back(newFacility);
+					}
+
+					//std::cout << std::hex << i << " " << std::dec << count << " " << classVal << " " << std::string(namePtr) << std::endl;
+
+				}
 			}
-		}*/
+		}
 
 		count++;
+	}
+
+	//Sort facilities by name
+	for (int i = 1; i < g_facilityList.size(); i++)
+	{
+		std::shared_ptr<Facility> tmp = g_facilityList[i];
+		int n = i - 1;
+
+		while (n >= 0 && g_facilityList[n]->name > tmp->name)
+		{
+			g_facilityList[n + 1] = g_facilityList[n];
+			n--;
+		}
+		g_facilityList[n + 1] = tmp;
 	}
 
 	//auto clockEnd = std::chrono::high_resolution_clock::now();
