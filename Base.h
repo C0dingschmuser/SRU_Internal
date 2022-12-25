@@ -283,6 +283,7 @@ namespace Base
 
 			uintptr_t* populationPtr;
 			uintptr_t* colorPtr;
+			uint8_t* govPtr;
 			uint16_t* flagIdPtr;
 
 			uint16_t originalFlagId;
@@ -410,6 +411,9 @@ namespace Base
 		extern int g_paintSelectedComboCountry;
 		extern int g_paintSelectedComboLoyalty;
 		extern int g_paintSelectedComboGround;
+
+		extern int g_paintSelectedResource;
+		extern int g_paintSelectedResourceAmount;
 		
 		extern int g_unitSpawnSelectedUnitDesign;
 		extern int g_facilitySpawnSelectedFacility;
@@ -432,6 +436,11 @@ namespace Base
 		extern int g_unitSpawnYPos;
 		extern bool g_unitSpawnReserve;
 
+		extern int g_facilitySpawnXPos;
+		extern int g_facilitySpawnYPos;
+		extern int g_facilitySpawnCount;
+		extern bool g_facilitySpawnConstruction;
+
 		extern bool g_ingame;
 		extern bool g_addOk;
 		extern bool g_shift;
@@ -441,6 +450,7 @@ namespace Base
 		extern bool g_paintActive;
 		extern bool g_paintEnabled;
 		extern bool g_paintUnitSpawn;
+		extern bool g_paintFacilitySpawn;
 
 		extern bool g_disco;
 		extern bool g_productionAdjustment;
@@ -496,6 +506,7 @@ namespace Base
 		void CreateTransport(__int16 fromX, __int16 fromY, __int16 toX, __int16 toY, int country, int type, int noConstruction);
 		void CreateFacility(__int16 posX, __int16 posY, int countryOId, int facilityId, float constructionState);
 		void SetRelations(int relationType, uintptr_t country, uintptr_t oCountry, int add);
+		void SetMapResource(uint8_t* byte, int resource, int level);
 		void SpawnUnit(int unitDesign, int amount, uintptr_t country, int spread = 1, bool reserve = true, uint16_t xPos = 0, uint16_t yPos = 0);
 		void SetCheat(uint8_t cheat);
 		int ExecuteTreaty(int diplTreatyIndex);
@@ -516,7 +527,6 @@ namespace Base
 		void DrawCountryROE(Base::SRU_Data::Country* cc);
 		void DrawCountryTech(Base::SRU_Data::Country* cc);
 		void DrawCountryDesigns(Base::SRU_Data::Country* cc);
-		void DrawCountryFacilities(Base::SRU_Data::Country* cc);
 		void DrawMap(Base::SRU_Data::Country* cc);
 		void DrawFacilities(Base::SRU_Data::Country* cc);
 		void DrawUnitSpawn(Base::SRU_Data::Country* cc);

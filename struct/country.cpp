@@ -20,6 +20,7 @@ void Base::SRU_Data::Country::Init(uintptr_t base)
 	this->oId = oId;
 
 	this->populationPtr = (uintptr_t*)(base + Offsets::countryPopulation);
+	this->govPtr = (uint8_t*)(base + Offsets::countryGovernment);
 	this->colorPtr = (uintptr_t*)(base + Offsets::countryColor);
 	this->flagIdPtr = (uint16_t*)(base + Offsets::countryFlagId);
 

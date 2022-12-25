@@ -17,7 +17,7 @@
 
 #define DISABLE_OUTPUT
 
-static const int version = 111;
+static const int version = 112;
 static bool updated = false;
 
 std::string VersionToString(int version)
@@ -240,9 +240,12 @@ void CheckForUpdate(std::string origName)
 		std::ofstream file;
 		file.open("changelog.txt");
 		file << "--- INFORMATION ---" << std::endl;
-		file << "Currently working on adding resource spawning (Petroleum spots etc.) for the next big update." << std::endl;
 		file << "Merry Christmas and a happy new year!" << std::endl << std::endl;
 		file << "--- CHANGELOG ---" << std::endl;
+		file << "v1.12" << std::endl;
+		file << "- Added Resource spawning (Petroleum etc.)" << std::endl;
+		file << "- Added Government type change" << std::endl;
+		file << "- Added Facility painting" << std::endl;
 		file << "v1.11" << std::endl;
 		file << "- Added Facility spawning" << std::endl;
 		file << "  Info: If a facility does not spawn, there's probably a prerequisite missing." << std::endl;

@@ -6,19 +6,16 @@ void Base::Draw::DrawFacilities(Base::SRU_Data::Country* cc)
 
 	DrawSelectedCountryText(cc, "Selected country: %s");
 
-	static int facilitySpawnXpos = 0;
-	static int facilitySpawnYpos = 0;
-	static int facilityAmount = 1;
-	static bool facilityConstruction = true; //true = 100% constructed
+	g_paintFacilitySpawn = true;
 
 	ImGui::BeginChild("##FacilitySpawnData", ImVec2(225, 240));
 	{
 		static bool useClickedPos = true;
 
-		ImGui::Checkbox("Spawn fully constructed", &facilityConstruction);
+		ImGui::Checkbox("Spawn fully constructed", &g_facilitySpawnConstruction);
 
 		ImGui::Text("Amount\n (Only for supported facilities)");
-		ImGui::SliderInt("##facilityamount", &facilityAmount, 1, 6);
+		ImGui::SliderInt("##facilityamount", &g_facilitySpawnCount, 1, 6);
 
 		if (ImGui::TreeNode("Position"))
 		{
@@ -33,20 +30,20 @@ void Base::Draw::DrawFacilities(Base::SRU_Data::Country* cc)
 
 			if (useClickedPos)
 			{
-				facilitySpawnXpos = *g_clickedXPtr;
-				facilitySpawnYpos = *g_clickedYPtr;
+				g_facilitySpawnXPos = *g_clickedXPtr;
+				g_facilitySpawnYPos = *g_clickedYPtr;
 			}
 
 			ImGui::PushItemWidth(50);
-			if (ImGui::InputInt("##inputX", &facilitySpawnXpos, 0, 0))
+			if (ImGui::InputInt("##inputX", &g_facilitySpawnXPos, 0, 0))
 			{
-				facilitySpawnXpos = std::clamp(facilitySpawnXpos, 0, 9999);
+				g_facilitySpawnXPos = std::clamp(g_facilitySpawnXPos, 0, 9999);
 			}
 			ImGui::SameLine();
 			ImGui::PushItemWidth(50);
-			if (ImGui::InputInt("##inputY", &facilitySpawnYpos, 0, 0))
+			if (ImGui::InputInt("##inputY", &g_facilitySpawnYPos, 0, 0))
 			{
-				facilitySpawnYpos = std::clamp(facilitySpawnYpos, 0, 9999);
+				g_facilitySpawnYPos = std::clamp(g_facilitySpawnYPos, 0, 9999);
 			}
 
 			if (useClickedPos)
@@ -60,8 +57,8 @@ void Base::Draw::DrawFacilities(Base::SRU_Data::Country* cc)
 		{
 			if (useClickedPos)
 			{
-				facilitySpawnXpos = *g_clickedXPtr;
-				facilitySpawnYpos = *g_clickedYPtr;
+				g_facilitySpawnXPos = *g_clickedXPtr;
+				g_facilitySpawnYPos = *g_clickedYPtr;
 			}
 		}
 
@@ -74,12 +71,12 @@ void Base::Draw::DrawFacilities(Base::SRU_Data::Country* cc)
 		{
 			float constructionState = 0;
 
-			if (facilityConstruction)
+			if (g_facilitySpawnConstruction)
 				constructionState = 1.0f;
 
-			for (int i = 0; i < facilityAmount; i++)
+			for (int i = 0; i < g_facilitySpawnCount; i++)
 			{
-				Base::Execute::CreateFacility(facilitySpawnXpos, facilitySpawnYpos, cc->oId, g_facilityList[g_facilitySpawnSelectedFacility]->id, constructionState);
+				Base::Execute::CreateFacility(g_facilitySpawnXPos, g_facilitySpawnYPos, cc->oId, g_facilityList[g_facilitySpawnSelectedFacility]->id, constructionState);
 			}
 		}
 
@@ -121,7 +118,7 @@ void Base::Draw::DrawFacilities(Base::SRU_Data::Country* cc)
 			}
 			ImGui::EndListBox();
 		}
-		
+
 		static char* searchVal = (char*)malloc(sizeof(char) * 256);
 		static bool searchCleared = false;
 
@@ -169,4 +166,6 @@ void Base::Draw::DrawFacilities(Base::SRU_Data::Country* cc)
 		}
 	}
 	ImGui::EndChild();
+
+	ImGui::Text("Or toggle paint mode with capslock and hold ctrl");
 }

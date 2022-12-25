@@ -213,6 +213,46 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 	ImGui::PopItemWidth();
 
 	//-----------------------------------------------------------------------------------
+	//--- Government --------------------------------------------------------------------
+	//-----------------------------------------------------------------------------------
+
+	static std::vector<std::string> govTypes = {
+		"Democracy",
+		"Monarchy",
+		"Communism",
+		"Dictatorship",
+		"Theocracy",
+		"Colony",
+		"Read Error"
+	};
+
+	int govType = *cc->govPtr - 1;
+
+	ImGui::Text("Government Type");
+	
+	ImGui::PushItemWidth(inputWidth + 27);
+	if (ImGui::BeginCombo("##govtypecombo", govTypes[govType].c_str()))
+	{
+		for (int i = 0; i < govTypes.size() - 1; i++)
+		{
+			bool isSelected = (govType == i);
+			if (ImGui::Selectable(govTypes[i].c_str(), isSelected))
+			{
+				*cc->govPtr = i + 1;
+				govType = i + 1;
+			}
+
+			if (isSelected)
+			{
+				ImGui::SetItemDefaultFocus();
+			}
+		}
+
+		ImGui::EndCombo();
+	}
+	ImGui::PopItemWidth();
+
+	//-----------------------------------------------------------------------------------
 	//--- Color -------------------------------------------------------------------------
 	//-----------------------------------------------------------------------------------
 

@@ -8,6 +8,7 @@ void Base::Draw::DrawMap(Base::SRU_Data::Country* cc)
 	Country* target = &g_countryList[g_selectedTargetCountry];
 
 	g_paintUnitSpawn = false;
+	g_paintFacilitySpawn = false;
 
 	Draw::DrawSelectedCountryText(target, "Target country: %s");
 	ImGui::Text("Shift-Click to change");
@@ -244,6 +245,50 @@ void Base::Draw::DrawMap(Base::SRU_Data::Country* cc)
 			{
 				ImGui::EndDisabled();
 			}
+			ImGui::EndTabItem();
+		}
+
+		if (ImGui::BeginTabItem("Resource"))
+		{
+			g_paintMode = 2;
+			
+			static std::vector<std::string> resourceList = {
+				"Agriculture",
+				"Rubber",
+				"Timber",
+				"Petroleum",
+				"Coal",
+				"Metal Ore",
+				"Uranium",
+				"Electricity"
+			};
+
+			static std::vector<std::string> amountList = {
+				"None",
+				"Low",
+				"Medium",
+				"High"
+			};
+
+			std::string resourceText = resourceList[g_paintSelectedResource];
+
+			ImGui::Text("Type");
+			if (ImGui::BeginCombo("##resourcecombo", resourceText.c_str()))
+			{
+				for (int i = 0; i < resourceList.size(); i++)
+				{
+					const bool isSelected = (g_paintSelectedResource == i);
+					if (ImGui::Selectable(resourceList[i].c_str(), isSelected))
+					{
+						g_paintSelectedResource = i;
+					}
+				}
+				ImGui::EndCombo();
+			}
+
+			ImGui::Text("Amount");
+			ImGui::SliderInt("##resourceamount", &g_paintSelectedResourceAmount, 0, 3, amountList[g_paintSelectedResourceAmount].c_str());
+
 			ImGui::EndTabItem();
 		}
 

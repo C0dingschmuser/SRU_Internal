@@ -299,6 +299,20 @@ void Base::Execute::SetRelations(int relationType, uintptr_t country, uintptr_t 
 	//std::cout << std::hex << relationAddr << " " << relationType << std::endl;
 }
 
+void Base::Execute::SetMapResource(uint8_t* byte, int resource, int level)
+{
+	// Shift the resource level by 2 bits to the left (multiply by 4)
+	int resource_level = level << (2 * resource);
+	// Clear the existing resource level in the byte
+	int mask = ~(0x3 << (2 * resource));
+	*byte &= mask;
+	// Set the new resource level in the byte
+	if (level > 0)
+	{
+		*byte |= resource_level;
+	}
+}
+
 void Base::Execute::SpawnUnit(int unitDesign, int amount, uintptr_t country, int spread, bool reserve, uint16_t xPos, uint16_t yPos)
 {
 	//std::cout << std::dec << unitDesign << " " << amount << std::hex << " " << country << " " << std::dec << spread << " " << reserve << " " << xPos << " " << yPos << std::endl;

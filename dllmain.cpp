@@ -129,38 +129,6 @@ void CheckCurrentCountry(uintptr_t* clickedCountryPtr)
     {
         g_mouseClicked = false;
 
-        /*__int16 realX = *g_clickedXPtr;
-        __int16 realY = *g_clickedYPtr;
-
-        if (realX < 0)
-        {
-            //realX = Base::SRU_Data::g_mapSizeX + posX;
-        }
-
-        if (realY < 0) realY = 0;
-
-        DWORD posData = MAKELONG(realX, realY);
-
-        __int16 v9 = (__int16)posData;
-        if (v9 >= Base::SRU_Data::g_mapSizeX)
-        {
-            v9 = (__int16)posData % Base::SRU_Data::g_mapSizeX;
-        }
-        else if ((posData & 0x8000) != 0)
-        {
-            v9 = Base::SRU_Data::g_mapSizeX + (__int16)posData % Base::SRU_Data::g_mapSizeX;
-        }
-
-        long temp = v9 + Base::SRU_Data::g_mapSizeX * HIWORD(posData);
-        long mult = 16 * temp;
-
-        DWORD base1 = *(DWORD*)(Base::SRU_Data::g_base + Offsets::allHexStart);
-        DWORD base2 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 0xC) + mult;
-        DWORD base3 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 16) + (4 * temp);
-        DWORD base4 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 20) + (4 * temp);
-
-		std::cout << std::hex << base2 << " " << base3 << " " << base4 << std::endl;*/
-
         //if (g_lastClickedCountry != *clickedCountryPtr)
         {
             g_lastClickedCountry = *clickedCountryPtr;
@@ -377,6 +345,8 @@ void PaintMap(uintptr_t mouseHoverHex, uint16_t xPos, uint16_t yPos)
 {
     if (g_paintUnitSpawn)
     {
+        if (g_unitSpawnSelectedUnitDesign == -1) return;
+
         //Paint spawn unit(s)
 
         static uintptr_t lastSpawnTile = 0;
@@ -392,6 +362,22 @@ void PaintMap(uintptr_t mouseHoverHex, uint16_t xPos, uint16_t yPos)
             Base::Execute::SpawnUnit(unitDesign, g_unitSpawnCount, country, 1, g_unitSpawnReserve, xPos, yPos);
         }
 
+        return;
+    }
+
+    if (g_paintFacilitySpawn)
+    {
+        if (g_facilitySpawnSelectedFacility == -1) return;
+
+        float constructionState = 0;
+
+        if (g_facilitySpawnConstruction)
+            constructionState = 1.0f;
+
+        for (int i = 0; i < g_facilitySpawnCount; i++)
+        {
+            Base::Execute::CreateFacility(xPos, yPos, clickedCountry->oId, g_facilityList[g_facilitySpawnSelectedFacility]->id, constructionState);
+        }
         return;
     }
 
@@ -494,6 +480,49 @@ void PaintMap(uintptr_t mouseHoverHex, uint16_t xPos, uint16_t yPos)
             }
         }
     }
+    else if (g_paintMode == 2) //resource
+    {
+        //Calculate other base addr
+
+        if (xPos < 0)
+        {
+            xPos = Base::SRU_Data::g_mapSizeX + xPos;
+        }
+
+        if (yPos < 0) yPos = 0;
+
+        DWORD posData = MAKELONG(xPos, yPos);
+
+        __int16 v9 = (__int16)posData;
+        if (v9 >= Base::SRU_Data::g_mapSizeX)
+        {
+            v9 = (__int16)posData % Base::SRU_Data::g_mapSizeX;
+        }
+        else if ((posData & 0x8000) != 0)
+        {
+            v9 = Base::SRU_Data::g_mapSizeX + (__int16)posData % Base::SRU_Data::g_mapSizeX;
+        }
+
+        long temp = v9 + Base::SRU_Data::g_mapSizeX * HIWORD(posData);
+        long mult = 16 * temp;
+
+        //DWORD base1 = *(DWORD*)(Base::SRU_Data::g_base + Offsets::allHexStart);
+        //DWORD base2 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 0xC) + mult;
+        DWORD base3 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 16) + (4 * temp);
+        //DWORD base4 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 20) + (4 * temp);
+
+        int tempResourceId = g_paintSelectedResource;
+
+        uint8_t* resAddr = (uint8_t*)base3 + 2;
+
+        if (g_paintSelectedResource > 3)
+        {
+            resAddr = (uint8_t*)base3 + 3;
+			tempResourceId -= 4;
+        }
+
+        Base::Execute::SetMapResource(resAddr, tempResourceId, g_paintSelectedResourceAmount);
+    }
 }
 
 void PaintMapBrush(uintptr_t* mouseHoverHex, uint16_t* xPos, uint16_t* yPos)
@@ -501,7 +530,7 @@ void PaintMapBrush(uintptr_t* mouseHoverHex, uint16_t* xPos, uint16_t* yPos)
     if (mouseHoverHex == nullptr) return;
     if (*mouseHoverHex == 0) return;
 
-    if (g_paintBrushSize == 1 || g_paintUnitSpawn)
+    if (g_paintBrushSize == 1 || g_paintUnitSpawn || g_paintFacilitySpawn)
     {
         PaintMap(*mouseHoverHex, *xPos, *yPos);
         return;

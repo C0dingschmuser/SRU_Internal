@@ -143,6 +143,9 @@ int Base::SRU_Data::g_paintSelectedComboCountry = 0;
 int Base::SRU_Data::g_paintSelectedComboLoyalty = 0;
 int Base::SRU_Data::g_paintSelectedComboGround = -1;
 
+int Base::SRU_Data::g_paintSelectedResource = 0;
+int Base::SRU_Data::g_paintSelectedResourceAmount = 1;
+
 int Base::SRU_Data::g_unitSpawnSelectedUnitDesign = -1;
 int Base::SRU_Data::g_facilitySpawnSelectedFacility = -1;
 
@@ -162,6 +165,11 @@ int Base::SRU_Data::g_unitSpawnXPos = 0;
 int Base::SRU_Data::g_unitSpawnYPos = 0;
 bool Base::SRU_Data::g_unitSpawnReserve = false;
 
+int Base::SRU_Data::g_facilitySpawnXPos = 0;
+int Base::SRU_Data::g_facilitySpawnYPos = 0;
+int Base::SRU_Data::g_facilitySpawnCount = 1;
+bool Base::SRU_Data::g_facilitySpawnConstruction = true;
+
 byte Base::SRU_Data::Asm::g_currentHexSupply = 0;
 byte Base::SRU_Data::Asm::g_lowestHexSupply = 0x1A;
 
@@ -173,6 +181,7 @@ bool Base::SRU_Data::g_mouseClicked = false;
 bool Base::SRU_Data::g_paintActive = false;
 bool Base::SRU_Data::g_paintEnabled = false;
 bool Base::SRU_Data::g_paintUnitSpawn = false;
+bool Base::SRU_Data::g_paintFacilitySpawn = false;
 
 bool Base::SRU_Data::g_disco = false;
 bool Base::SRU_Data::g_productionAdjustment = false;
