@@ -20,6 +20,22 @@ void Base::SRU_Data::LoadGroundTypes()
 	grnd.name = "Dense Forest";
 	g_groundTypeList.push_back(grnd);
 
+	grnd.id = 4;
+	grnd.name = "Jungle";
+	g_groundTypeList.push_back(grnd);
+
+	grnd.id = 5;
+	grnd.name = "Swamp";
+	g_groundTypeList.push_back(grnd);
+
+	grnd.id = 7;
+	grnd.name = "Rough Desert";
+	g_groundTypeList.push_back(grnd);
+
+	grnd.id = 9;
+	grnd.name = "Tundra";
+	g_groundTypeList.push_back(grnd);
+
 	grnd.id = 14;
 	grnd.name = "Ocean";
 	g_groundTypeList.push_back(grnd);

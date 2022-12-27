@@ -5,6 +5,7 @@ Base::Execute::_UnlockTechFunc Base::Execute::unlockTechFunc = 0;
 Base::Execute::_SpawnUnitFunc Base::Execute::spawnUnitFunc = 0;
 Base::Execute::_CreateTransportFuncEvent Base::Execute::createTransportFuncEvent = 0;
 Base::Execute::_CreateFactoryFunc Base::Execute::createFactoryFunc = 0;
+Base::Execute::_DestroyFactoryFunc Base::Execute::destroyFactoryFunc = 0;
 
 void Base::Execute::CreateFacility(__int16 posX, __int16 posY, int countryOId, int facilityId, float constructionState)
 {
@@ -53,6 +54,64 @@ void Base::Execute::CreateFacility(__int16 posX, __int16 posY, int countryOId, i
 	Base::Execute::createFactoryFunc((int)buffer, 1, 0, countryOId, facilityId, 1.0f, 0, constructionState, 0);
 }
 
+void Base::Execute::DestroyFacility(__int16 posX, __int16 posY, int facilityId)
+{
+	__int16 realX = posX;
+	__int16 realY = posY;
+	if (realX < 0)
+	{
+		realX = Base::SRU_Data::g_mapSizeX + posX;
+	}
+	if (realY < 0) realY = 0;
+	DWORD posData = MAKELONG(realX, realY);
+	__int16 v9 = (__int16)posData;
+	if (v9 >= Base::SRU_Data::g_mapSizeX)
+	{
+		v9 = (__int16)posData % Base::SRU_Data::g_mapSizeX;
+	}
+	else if ((posData & 0x8000) != 0)
+	{
+		v9 = Base::SRU_Data::g_mapSizeX + (__int16)posData % Base::SRU_Data::g_mapSizeX;
+	}
+	long temp = v9 + Base::SRU_Data::g_mapSizeX * HIWORD(posData);
+	long mult = 16 * temp;
+	DWORD base1 = *(DWORD*)(Base::SRU_Data::g_base + Offsets::allHexStart);
+	DWORD base2 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 0xC) + mult;
+	DWORD base3 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 20) + (4 * temp);
+
+	uintptr_t* addr = (uintptr_t*)base3;
+	DWORD val = *addr;
+
+	//std::cout << "----------" << std::endl;
+
+	bool ok = true;
+	while (ok)
+	{
+		uint8_t* ptr1 = (uint8_t*)(val + 177);
+		DWORD* ptr2 = (DWORD*)(val + 356);
+		WORD* ptr3 = (WORD*)(val + 12);
+		BYTE* ptr4 = (BYTE*)(val + 179);
+
+		if (!Base::Utils::CanReadPtr(ptr1) || !Base::Utils::CanReadPtr(ptr2) || !Base::Utils::CanReadPtr(ptr3) || !Base::Utils::CanReadPtr(ptr4))
+		{
+			break;
+		}
+
+		uint8_t v1870 = *(uint8_t*)(val + 177);
+		DWORD v5012 = *(DWORD*)(val + 356);
+
+		if ((v1870 & 0x20) != 0 && (v1870 & 0x80) == 0 && *(WORD*)(val + 12) && (*(BYTE*)(val + 179) & 0x40) == 0)
+		{
+			//std::cout << std::hex << val << " " << v5012 << std::endl;
+			destroyFactoryFunc(val, 5, 6);
+		}
+		else break;
+
+		val = v5012;
+		if (!v5012) break;
+	}
+}
+
 void Base::Execute::SetupFunctions()
 {
 	using namespace Base::Execute;
@@ -62,6 +121,7 @@ void Base::Execute::SetupFunctions()
 	spawnUnitFunc = (_SpawnUnitFunc)(Base::SRU_Data::g_base + Offsets::unitFunc);
 	createTransportFuncEvent = (_CreateTransportFuncEvent)(Base::SRU_Data::g_base + Offsets::transportFuncEvent);
 	createFactoryFunc = (_CreateFactoryFunc)(Base::SRU_Data::g_base + Offsets::createFactoryFunc);
+	destroyFactoryFunc = (_DestroyFactoryFunc)(Base::SRU_Data::g_base + Offsets::destroyFactoryFunc);
 }
 
 void Base::Execute::ExecDipl(DWORD* buffer, char c)

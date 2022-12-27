@@ -489,12 +489,14 @@ namespace Base
 		typedef int(__fastcall* _SpawnUnitFunc)(int, int, int, int, int, int, int, int*, int);
 		typedef int(__stdcall* _CreateTransportFuncEvent)(int, int, int, int, int, int);
 		typedef int(__thiscall* _CreateFactoryFunc)(int, __int8, int, int, int, float, int, float, int);
+		typedef int(__thiscall* _DestroyFactoryFunc)(int, int, int);
 		
 		extern _DiplFunc diplFunc;
 		extern _UnlockTechFunc unlockTechFunc;
 		extern _SpawnUnitFunc spawnUnitFunc;
 		extern _CreateTransportFuncEvent createTransportFuncEvent;
 		extern _CreateFactoryFunc createFactoryFunc;
+		extern _DestroyFactoryFunc destroyFactoryFunc;
 
 		void SetupFunctions();
 		void AnnexCountry(int from, int to);
@@ -505,6 +507,7 @@ namespace Base
 		void CreateTransport(int from, int to, int type, int noConstruction);
 		void CreateTransport(__int16 fromX, __int16 fromY, __int16 toX, __int16 toY, int country, int type, int noConstruction);
 		void CreateFacility(__int16 posX, __int16 posY, int countryOId, int facilityId, float constructionState);
+		void DestroyFacility(__int16 posX, __int16 posY, int facilityId);
 		void SetRelations(int relationType, uintptr_t country, uintptr_t oCountry, int add);
 		void SetMapResource(uint8_t* byte, int resource, int level);
 		void SpawnUnit(int unitDesign, int amount, uintptr_t country, int spread = 1, bool reserve = true, uint16_t xPos = 0, uint16_t yPos = 0);

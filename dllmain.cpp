@@ -129,6 +129,33 @@ void CheckCurrentCountry(uintptr_t* clickedCountryPtr)
     {
         g_mouseClicked = false;
 
+       __int16 realX = *g_clickedXPtr;
+       __int16 realY = *g_clickedYPtr;
+       if (realX < 0)
+       {
+           //realX = Base::SRU_Data::g_mapSizeX + posX;
+       }
+       if (realY < 0) realY = 0;
+       DWORD posData = MAKELONG(realX, realY);
+       __int16 v9 = (__int16)posData;
+       if (v9 >= Base::SRU_Data::g_mapSizeX)
+       {
+           v9 = (__int16)posData % Base::SRU_Data::g_mapSizeX;
+       }
+       else if ((posData & 0x8000) != 0)
+       {
+           v9 = Base::SRU_Data::g_mapSizeX + (__int16)posData % Base::SRU_Data::g_mapSizeX;
+       }
+       long temp = v9 + Base::SRU_Data::g_mapSizeX * HIWORD(posData);
+       long mult = 16 * temp;
+       DWORD base1 = *(DWORD*)(Base::SRU_Data::g_base + Offsets::allHexStart);
+       DWORD base2 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 0xC) + mult;
+       DWORD base3 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 16) + (4 * temp);
+       DWORD base4 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 20) + (4 * temp);
+       DWORD base5 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 24) + (4 * temp);
+
+       std::cout << std::hex << base2 << " " << base3 << " " << base4 << " " << base5 << std::endl;
+
         //if (g_lastClickedCountry != *clickedCountryPtr)
         {
             g_lastClickedCountry = *clickedCountryPtr;
@@ -582,10 +609,10 @@ DWORD WINAPI dllThread(HMODULE hModule) {
 
     Base::Init(true);
 
-    //AllocConsole();
-    //FILE* f;
-	//freopen_s(&f, "CONOUT$", "w", stdout);
-    //freopen_s(&f, "CONIN$", "r", stdin);
+    AllocConsole();
+    FILE* f;
+	freopen_s(&f, "CONOUT$", "w", stdout);
+    freopen_s(&f, "CONIN$", "r", stdin);
 
     //Ptr setup
 
