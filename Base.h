@@ -567,6 +567,7 @@ namespace Base
 		void SetValueBool(uintptr_t* addr, int value, bool enable);
 		std::string FloatToPercent(float f, float max, bool simple = false);
 		std::string FloatToPercent2(float f, float max, bool simple = false);
+		std::string FloatToPercent3(float f, float max, bool simple = false);
 		bool MemCompare(const BYTE* bData, const BYTE* bMask, const char* szMask);
 		bool CanReadPtr(void* ptr);
 		uintptr_t PointerChain(uintptr_t ptr, std::vector<unsigned int> offsets);
