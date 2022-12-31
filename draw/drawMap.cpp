@@ -9,6 +9,7 @@ void Base::Draw::DrawMap(Base::SRU_Data::Country* cc)
 
 	g_paintUnitSpawn = false;
 	g_paintFacilitySpawn = false;
+	g_paintFacilityDestroy = false;
 
 	Draw::DrawSelectedCountryText(target, "Target country: %s");
 	ImGui::Text("Shift-Click to change");
@@ -20,7 +21,7 @@ void Base::Draw::DrawMap(Base::SRU_Data::Country* cc)
 	uint8_t* hexSupply = (uint8_t*)(hexBase + Offsets::hexSupply);
 	uint8_t* hexGround = (uint8_t*)(hexBase + Offsets::hexGround);
 
-	ImGui::BeginChild("##MapHexData", ImVec2(225, 225));
+	ImGui::BeginChild("##MapHexData", ImVec2(225, 240));
 	{
 		ImGui::Text("Hex Owner:");
 
@@ -54,6 +55,42 @@ void Base::Draw::DrawMap(Base::SRU_Data::Country* cc)
 		else
 		{
 			ImGui::Text("None");
+		}
+
+		ImGui::Text("Set Hex Population (0-250M)");
+
+		uintptr_t* hexPop = (uintptr_t*)(g_base + Offsets::mouseClickHexPopulation);
+
+		static char* newPopValStr = (char*)malloc(sizeof(char) * 256);
+		static bool searchCleared = false;
+
+		if (!searchCleared)
+		{
+			for (int i = 0; i < 256; i++)
+			{
+				memcpy((newPopValStr + i), "", 1);
+			}
+			searchCleared = true;
+		}
+
+		if (*hexPop) {
+
+			ImGui::PushItemWidth(225);
+			if (ImGui::InputText("##newhexpop", newPopValStr, 256, ImGuiInputTextFlags_CharsDecimal | ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				int newPopVal = atoi(newPopValStr);
+				
+				if (newPopVal <= 0) {
+					newPopVal = 0;
+				}
+				else if (newPopVal > 250000000) {
+					newPopVal = 250000000;
+				}
+
+				unsigned short newPop = Base::Utils::GetShortPopulationValue(newPopVal);
+				*(unsigned short*)*hexPop = newPop;
+			}
+			ImGui::PopItemWidth();
 		}
 
 		ImGui::Text("Hex Supply");

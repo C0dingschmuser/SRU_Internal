@@ -162,7 +162,11 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 
 				if (ImGui::BeginTabItem("Facilities"))
 				{
-					Base::Draw::DrawFacilities(cc);
+					ImGui::BeginTabBar("##facilitytabs");
+					{
+						Base::Draw::DrawFacilities(cc);
+					}
+					ImGui::EndTabBar();
 
 					ImGui::EndTabItem();
 				}

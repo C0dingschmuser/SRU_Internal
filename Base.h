@@ -441,6 +441,7 @@ namespace Base
 		extern int g_facilitySpawnCount;
 		extern bool g_facilitySpawnConstruction;
 
+		extern bool g_newClick;
 		extern bool g_ingame;
 		extern bool g_addOk;
 		extern bool g_shift;
@@ -451,6 +452,7 @@ namespace Base
 		extern bool g_paintEnabled;
 		extern bool g_paintUnitSpawn;
 		extern bool g_paintFacilitySpawn;
+		extern bool g_paintFacilityDestroy;
 
 		extern bool g_disco;
 		extern bool g_productionAdjustment;
@@ -565,6 +567,8 @@ namespace Base
 		bool GetValueBool(uintptr_t* addr, int value);
 		void SetValueMask(uintptr_t* addr, int offset, int value);
 		void SetValueBool(uintptr_t* addr, int value, bool enable);
+		unsigned short GetShortPopulationValue(unsigned int newPopulation);
+		unsigned int GetFullPopulationValue(unsigned short populationValue);
 		std::string FloatToPercent(float f, float max, bool simple = false);
 		std::string FloatToPercent2(float f, float max, bool simple = false);
 		std::string FloatToPercent3(float f, float max, bool simple = false);

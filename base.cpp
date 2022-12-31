@@ -173,6 +173,7 @@ bool Base::SRU_Data::g_facilitySpawnConstruction = true;
 byte Base::SRU_Data::Asm::g_currentHexSupply = 0;
 byte Base::SRU_Data::Asm::g_lowestHexSupply = 0x1A;
 
+bool Base::SRU_Data::g_newClick = false;
 bool Base::SRU_Data::g_addOk = false;
 bool Base::SRU_Data::g_shift = false;
 bool Base::SRU_Data::g_mapSizeLoaded = false;
@@ -182,6 +183,7 @@ bool Base::SRU_Data::g_paintActive = false;
 bool Base::SRU_Data::g_paintEnabled = false;
 bool Base::SRU_Data::g_paintUnitSpawn = false;
 bool Base::SRU_Data::g_paintFacilitySpawn = false;
+bool Base::SRU_Data::g_paintFacilityDestroy = false;
 
 bool Base::SRU_Data::g_disco = false;
 bool Base::SRU_Data::g_productionAdjustment = false;
@@ -948,6 +950,67 @@ void Base::Utils::SetValueBool(uintptr_t* addr, int value, bool enable)
 	{
 		*addr = ~*addr & value | *addr & (0xFFFFFFFF - value);
 	}
+}
+
+unsigned short Base::Utils::GetShortPopulationValue(unsigned int newPopulation)
+{
+	unsigned short v3827 = 0;
+
+	if ((newPopulation & 0xFFFF0000) != 0)
+	{
+		newPopulation >>= 4;
+		v3827 = 1;
+	}
+	else
+	{
+		v3827 = 0;
+	}
+	if ((newPopulation & 0xFFFF0000) != 0)
+	{
+		newPopulation >>= 4;
+		++v3827;
+	}
+	if ((newPopulation & 0xFFFF0000) != 0)
+	{
+		newPopulation >>= 4;
+		++v3827;
+	}
+
+	int data = v3827 | newPopulation & 0xFFFC;
+	return (unsigned short)data;
+}
+
+unsigned int Base::Utils::GetFullPopulationValue(unsigned short populationValue)
+{
+	// Check if the original value was smaller than 4 bytes
+	if ((populationValue & 0x0003) == 0)
+	{
+		// Return the input value unchanged
+		return populationValue;
+	}
+
+	unsigned int newPopulation = populationValue & 0xFFFC;
+	int shiftCount = populationValue & 0x0003;
+	int shiftsPerformed = 0;
+	while (shiftCount > 0)
+	{
+		if (shiftCount & 0x0001)
+		{
+			newPopulation <<= 4;
+			++shiftsPerformed;
+		}
+		shiftCount >>= 1;
+	}
+	if (shiftCount > 3)
+	{
+		shiftsPerformed += shiftCount - 3;
+	}
+	while (shiftsPerformed > 0)
+	{
+		newPopulation <<= 4;
+		--shiftsPerformed;
+	}
+	return newPopulation;
 }
 
 bool Base::Utils::MemCompare(const BYTE* bData, const BYTE* bMask, const char* szMask)

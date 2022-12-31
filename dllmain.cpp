@@ -128,8 +128,9 @@ void CheckCurrentCountry(uintptr_t* clickedCountryPtr)
     if (g_mouseClicked && g_ingame && g_countryList.size() > 0)
     {
         g_mouseClicked = false;
+        g_newClick = true;
 
-        __int16 realX = *g_clickedXPtr;
+        /*__int16 realX = *g_clickedXPtr;
         __int16 realY = *g_clickedYPtr;
         if (realX < 0)
         {
@@ -150,12 +151,17 @@ void CheckCurrentCountry(uintptr_t* clickedCountryPtr)
         long mult = 16 * temp;
         DWORD base1 = *(DWORD*)(Base::SRU_Data::g_base + Offsets::allHexStart);
         DWORD base2 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 0xC) + mult;
+        DWORD base5 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 12) + (4 * temp);
+        DWORD base4 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 16) + (4 * temp);
         DWORD base3 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 20) + (4 * temp);
 
         uintptr_t* addr = (uintptr_t*)base3;
         DWORD val = *addr;
 
-        std::cout << "----------" << std::endl;
+        std::cout << "------------" << std::endl;
+		std::cout << std::hex << base2 << " " << base5 << " " << base4 << " " << base3 << " " << val << std::endl;
+
+        std::cout << "F:" << std::endl;
 
         bool ok = true;
         while (ok)
@@ -183,7 +189,7 @@ void CheckCurrentCountry(uintptr_t* clickedCountryPtr)
 
             val = v5012;
             if (!v5012) break;
-        }
+        }*/
 
         //if (g_lastClickedCountry != *clickedCountryPtr)
         {
@@ -436,6 +442,12 @@ void PaintMap(uintptr_t mouseHoverHex, uint16_t xPos, uint16_t yPos)
         }
         return;
     }
+    else if (g_paintFacilityDestroy) {
+        //Destroy all Facilities on hex
+
+        Base::Execute::DestroyFacility(xPos, yPos, 0);
+        return;
+    }
 
     if (g_paintMode == 0)
     {
@@ -586,7 +598,7 @@ void PaintMapBrush(uintptr_t* mouseHoverHex, uint16_t* xPos, uint16_t* yPos)
     if (mouseHoverHex == nullptr) return;
     if (*mouseHoverHex == 0) return;
 
-    if (g_paintBrushSize == 1 || g_paintUnitSpawn || g_paintFacilitySpawn)
+    if (g_paintBrushSize == 1 || g_paintUnitSpawn || g_paintFacilitySpawn || g_paintFacilityDestroy)
     {
         PaintMap(*mouseHoverHex, *xPos, *yPos);
         return;
@@ -638,10 +650,10 @@ DWORD WINAPI dllThread(HMODULE hModule) {
 
     Base::Init(true);
 
-    AllocConsole();
-    FILE* f;
-	freopen_s(&f, "CONOUT$", "w", stdout);
-    freopen_s(&f, "CONIN$", "r", stdin);
+    //AllocConsole();
+    //FILE* f;
+	//freopen_s(&f, "CONOUT$", "w", stdout);
+    //freopen_s(&f, "CONIN$", "r", stdin);
 
     //Ptr setup
 

@@ -30,12 +30,18 @@ __/\\\\\\\\\\\__________________\///////////_____\///________\///_____\/////////
 - Force treaties between countries like declaration of war, formal alliances, etc.
 - Change diplomatic relations between countries
 - Spawn Units (Customizable amount, owner, location, deployement type etc.)
+- Spawn Facilities (Cities, Bases, Factories etc.)
 - Edit Map (Change Borders, Loyalty, Annex/Colonize/Liberate etc.)
-- Paint your own Islands and/or Land connections
+- Paint your own Islands, Land connections and/or Resources (Petroleum etc.)
 - Lock/Unlock Technologies and Unit Designs for each country
 - Per country unit modifiers (Invincibility, Lightspeed movement, Max Supply/Morale/Fuel/etc.)
+- Modify every Minister of a Country
+- Modify all Rules of Engagement of a Country
+- Change AI Stance of a Country
+- Change Hex Population
 - Mouse Hover unit modifiers (Changing owner country, health, etc.)
 - Adjustable global minimum hex supply, so units don't get stuck in the middle of nowhere
+- Build Roads/Rails/Bridges everywhere! (no limits)
 - Default AI can create colonies insted of just annexing everything
 - Change Country colors, names and flags
 - Much more!
