@@ -6,6 +6,20 @@ Base::Execute::_SpawnUnitFunc Base::Execute::spawnUnitFunc = 0;
 Base::Execute::_CreateTransportFuncEvent Base::Execute::createTransportFuncEvent = 0;
 Base::Execute::_CreateFactoryFunc Base::Execute::createFactoryFunc = 0;
 Base::Execute::_DestroyFactoryFunc Base::Execute::destroyFactoryFunc = 0;
+Base::Execute::_TreatyFunc Base::Execute::treatyFunc = 0;
+
+void Base::Execute::SetupFunctions()
+{
+	using namespace Base::Execute;
+
+	diplFunc = (_DiplFunc)(Base::SRU_Data::g_base + Offsets::diplFunc);
+	unlockTechFunc = (_UnlockTechFunc)(Base::SRU_Data::g_base + Offsets::unlockTechFunc);
+	spawnUnitFunc = (_SpawnUnitFunc)(Base::SRU_Data::g_base + Offsets::unitFunc);
+	createTransportFuncEvent = (_CreateTransportFuncEvent)(Base::SRU_Data::g_base + Offsets::transportFuncEvent);
+	createFactoryFunc = (_CreateFactoryFunc)(Base::SRU_Data::g_base + Offsets::createFactoryFunc);
+	destroyFactoryFunc = (_DestroyFactoryFunc)(Base::SRU_Data::g_base + Offsets::destroyFactoryFunc);
+	treatyFunc = (_TreatyFunc)(Base::SRU_Data::g_base + Offsets::treatyFunc);
+}
 
 void Base::Execute::CreateFacility(__int16 posX, __int16 posY, int countryOId, int facilityId, float constructionState)
 {
@@ -112,18 +126,6 @@ void Base::Execute::DestroyFacility(__int16 posX, __int16 posY, int facilityId)
 	}
 }
 
-void Base::Execute::SetupFunctions()
-{
-	using namespace Base::Execute;
-
-	diplFunc = (_DiplFunc)(Base::SRU_Data::g_base + Offsets::diplFunc);
-	unlockTechFunc = (_UnlockTechFunc)(Base::SRU_Data::g_base + Offsets::unlockTechFunc);
-	spawnUnitFunc = (_SpawnUnitFunc)(Base::SRU_Data::g_base + Offsets::unitFunc);
-	createTransportFuncEvent = (_CreateTransportFuncEvent)(Base::SRU_Data::g_base + Offsets::transportFuncEvent);
-	createFactoryFunc = (_CreateFactoryFunc)(Base::SRU_Data::g_base + Offsets::createFactoryFunc);
-	destroyFactoryFunc = (_DestroyFactoryFunc)(Base::SRU_Data::g_base + Offsets::destroyFactoryFunc);
-}
-
 void Base::Execute::ExecDipl(DWORD* buffer, char c)
 {
 	Base::SRU_Data::Asm::g_ownAllocs.push_back((uintptr_t)buffer);
@@ -215,7 +217,7 @@ void Base::Execute::UnlockTech(int to, int tech, bool lock)
 		int countryIdShiftedR = to >> 5;
 		//int countryIdShiftedL = 1 << to;
 
-		*(int*)(main + countryIdShiftedR * 4) = 0;
+		*(int*)(main + countryIdShiftedR * 4) &= ~(1 << to);
 	}
 
 	if (cc != nullptr)
@@ -299,7 +301,7 @@ void Base::Execute::UnlockDesign(int to, int design, bool lock)
 	{
 		//Lock
 
-		*addr = 0;
+		*addr &= ~(1 << to);
 
 		int search = -1;
 		for (int i = 0; i < ud->countryIds.size(); i++)
@@ -465,7 +467,7 @@ void Base::Execute::SetCheat(uint8_t cheat)
 	}
 }
 
-int Base::Execute::ExecuteTreaty(int diplTreatyIndex)
+int Base::Execute::ExecuteTreaty(int diplTreatyIndex, int set)
 {
 	using namespace Base::SRU_Data;
 
@@ -486,6 +488,11 @@ int Base::Execute::ExecuteTreaty(int diplTreatyIndex)
 		//War
 
 		diplType = Offsets::warDiplo;
+	}
+	else {
+		treatyFunc(clickedCountry->base, 0, treaty.treatyId, set, g_countryList[g_selectedTargetCountry].id, 0, 0, 0, 0);
+		treatyFunc(clickedCountry->base, 1, treaty.treatyId, set, g_countryList[g_selectedTargetCountry].id, 0, 0, 0, 0);
+		return 1;
 	}
 
 	long currentDay = *(uintptr_t*)(g_base + Offsets::currentDay);

@@ -86,7 +86,18 @@ void Base::Draw::DrawCountryDiplo(Base::SRU_Data::Country* cc, int& treatyMsg)
 			ImGui::EndListBox();
 		}
 
-		ImGui::Dummy(ImVec2(1, 1));
+		if (g_diplTreatyList[currentTreatyId].treatyId == -1) {
+			ImGui::BeginDisabled();
+		}
+
+		if (ImGui::Button("Cancel Treaty", ImVec2(115, 25))) {
+			treatyMsg = Base::Execute::ExecuteTreaty(currentTreatyId, 0);
+		}
+		
+		if (g_diplTreatyList[currentTreatyId].treatyId == -1) {
+			ImGui::EndDisabled();
+		}
+
 		ImGui::SameLine(135);
 		if (ImGui::Button("Force Treaty", ImVec2(115, 25)))
 		{

@@ -281,7 +281,9 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 	}
 	ImGui::PopItemWidth();
 
-	//Flag
+	//-----------------------------------------------------------------------------------
+	//--- Flag --------------------------------------------------------------------------
+	//-----------------------------------------------------------------------------------
 
 	static std::string flagOptions[3]{
 		"Unchanged",
@@ -368,6 +370,100 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 
 	if (cc->flagOption == 1 || cc->flagOption == 0)
 	{
+		ImGui::EndDisabled();
+	}
+
+	//-----------------------------------------------------------------------------------
+	//--- Leader ------------------------------------------------------------------------
+	//-----------------------------------------------------------------------------------
+
+	static std::string leaderOptions[4]{
+		"Unchanged",
+		"Leader from Name List",
+		"Leader from Id",
+	};
+
+	static Country* leaderCountry = cc;
+	static std::shared_ptr<Leader> leader = cc->currentLeader;
+
+	ImGui::Text("Leader");
+	ImGui::PushItemWidth(inputWidth + 27);
+	if (ImGui::BeginCombo("##countryleadercombo", leaderOptions[cc->leaderOption].c_str()))
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			bool isSelected = (cc->leaderOption == i);
+			if (ImGui::Selectable(leaderOptions[i].c_str(), isSelected))
+			{
+				cc->leaderOption = i;
+			}
+
+			if (isSelected)
+			{
+				ImGui::SetItemDefaultFocus();
+			}
+		}
+		ImGui::EndCombo();
+	}
+	ImGui::PopItemWidth();
+
+	if (cc->leaderOption != 1) { //Name list
+		ImGui::BeginDisabled();
+	}
+
+	if (!g_countryColorLoaded)
+	{
+		leaderCountry = cc;
+		leader = cc->currentLeader;
+
+		if (*cc->leaderIdPtr != cc->originalLeaderId)
+		{
+			for (int i = 0; i < g_countryList.size(); i++)
+			{
+				if (g_countryList[i].base != cc->base)
+				{
+					if (*g_countryList[i].leaderIdPtr == *cc->leaderIdPtr)
+					{
+						leaderCountry = &g_countryList[i];
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	ImGui::PushItemWidth(inputWidth + 27);
+	if (ImGui::BeginCombo("##leaderlistcombo", leader->name.c_str()))
+	{
+		for (int i = 0; i < g_leaderList.size(); i++) {
+			const bool isSelected = (leader->id == g_leaderList[i]->id);
+			if (ImGui::Selectable(g_leaderList[i]->name.c_str(), isSelected))
+			{
+				leader = g_leaderList[i];
+				*cc->leaderIdPtr = leader->id;
+				cc->currentLeader = leader;
+			}
+		}
+		ImGui::EndCombo();
+	}
+	ImGui::PopItemWidth();
+
+	if (cc->leaderOption != 1) { //Name list
+		ImGui::EndDisabled();
+	}
+
+	if (cc->leaderOption != 2) { //Id
+		ImGui::BeginDisabled(); 
+	}
+	
+	ImGui::PushItemWidth(inputWidth + 27);
+	if (ImGui::InputUInt16("##countryleaderid", cc->leaderIdPtr, 1U, 0)) {
+		cc->RefreshLeader();
+		leader = cc->currentLeader;
+	}
+	ImGui::PopItemWidth();
+
+	if (cc->leaderOption != 2) { //Id
 		ImGui::EndDisabled();
 	}
 

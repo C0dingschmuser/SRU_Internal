@@ -4,6 +4,8 @@ void Base::Draw::DrawFacilities(Base::SRU_Data::Country* cc)
 {
 	using namespace Base::SRU_Data;
 
+	g_paintUnitSpawn = false;
+
 	if (ImGui::BeginTabItem("Spawn"))
 	{
 		DrawSelectedCountryText(cc, "Selected country: %s");

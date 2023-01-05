@@ -23,8 +23,10 @@ void Base::SRU_Data::Country::Init(uintptr_t base)
 	this->govPtr = (uint8_t*)(base + Offsets::countryGovernment);
 	this->colorPtr = (uintptr_t*)(base + Offsets::countryColor);
 	this->flagIdPtr = (uint16_t*)(base + Offsets::countryFlagId);
+	this->leaderIdPtr = (uint16_t*)(base + Offsets::countryLeader);
 
 	this->originalFlagId = *this->flagIdPtr;
+	this->originalLeaderId = *this->leaderIdPtr;
 
 	this->alive = 0;
 	if (Base::Utils::CanReadPtr(this->populationPtr))
@@ -503,6 +505,18 @@ void Base::SRU_Data::Country::RefreshResearch()
 		if (HasTechUnlocked(this->oId, g_techList[i]->id))
 		{
 			this->technologies.push_back(g_techList[i]);
+		}
+	}
+}
+
+void Base::SRU_Data::Country::RefreshLeader()
+{
+	using namespace Base::SRU_Data;
+
+	for (int i = 0; i < g_leaderList.size(); i++) {
+		if (g_leaderList[i]->id == *this->leaderIdPtr) {
+			this->currentLeader = g_leaderList[i];
+			break;
 		}
 	}
 }

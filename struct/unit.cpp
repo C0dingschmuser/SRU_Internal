@@ -35,6 +35,7 @@ void Base::SRU_Data::UnitDefault::Init(uintptr_t base)
 	this->name = std::string(namePtr);
 
 	this->unitClass = *(uint8_t*)(base + Offsets::unitDefaultClass);
+	this->unitOrigin = *(uintptr_t*)(base + Offsets::unitDefaultOrigin);
 
 	std::shared_ptr<IntValue> moveSpeed(new IntValue);
 	moveSpeed->valPtr = (uintptr_t*)(base + Offsets::unitDefaultMoveSpeed);
@@ -104,7 +105,20 @@ void Base::SRU_Data::UnitDefault::Init(uintptr_t base)
 		propertyChanges.push_back(change);
 	}
 
-	//Load all user countries
+	//Load origin countries
+
+	this->originCountryIds.clear();
+	for (int i = 0; i < g_countryList.size(); i++)
+	{
+		int ownData = *(uintptr_t*)(g_countryList[i].base + 0x88);
+
+		if ((this->unitOrigin & ownData) != 0) {
+
+			this->originCountryIds.push_back(g_countryList[i].oId);
+		}
+	}
+
+	//Load all user countries (unlocked)
 
 	RefreshUserCountrys();
 }
@@ -116,6 +130,21 @@ bool Base::SRU_Data::UnitDefault::HasUser(int countryId)
 	for (int i = 0; i < this->countryIds.size(); i++)
 	{
 		if (this->countryIds[i] == countryId)
+		{
+			contains = true;
+			break;
+		}
+	}
+
+	return contains;
+}
+
+bool Base::SRU_Data::UnitDefault::HasOrigin(int countryId)
+{
+	bool contains = false;
+
+	for (int i = 0; i < this->originCountryIds.size(); i++) {
+		if (this->originCountryIds[i] == countryId)
 		{
 			contains = true;
 			break;

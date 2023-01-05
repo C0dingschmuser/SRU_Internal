@@ -100,7 +100,8 @@ uintptr_t Base::SRU_Data::Asm::g_aiSurrBase;
 //SRU Vars
 
 std::vector<std::shared_ptr<Base::SRU_Data::UnitDefault>> Base::SRU_Data::g_defaultUnitList;
-std::vector< std::shared_ptr<Base::SRU_Data::Facility>> Base::SRU_Data::g_facilityList;
+std::vector<std::shared_ptr<Base::SRU_Data::Facility>> Base::SRU_Data::g_facilityList;
+std::vector< std::shared_ptr<Base::SRU_Data::Leader>> Base::SRU_Data::g_leaderList;
 std::vector<Base::SRU_Data::Unit> Base::SRU_Data::g_selectedUnitList;
 std::vector<Base::SRU_Data::Country> Base::SRU_Data::g_countryList;
 std::vector<std::shared_ptr<Base::SRU_Data::Tech>> Base::SRU_Data::g_techList;
@@ -702,6 +703,8 @@ void Base::SRU_Data::LoadDefaultUnits()
 					newDefaultUnit->spawnId = count;
 					newDefaultUnit->Init(i);
 
+					//std::cout << std::hex << i << " " << newDefaultUnit->name << " " << newDefaultUnit->spawnId << std::endl;
+
 					g_defaultUnitList.push_back(newDefaultUnit);
 				}
 			}
@@ -744,9 +747,6 @@ void Base::SRU_Data::LoadDefaultUnits()
 
 						g_facilityList.push_back(newFacility);
 					}
-
-					//std::cout << std::hex << i << " " << std::dec << count << " " << classVal << " " << std::string(namePtr) << std::endl;
-
 				}
 			}
 		}
@@ -828,6 +828,56 @@ void Base::SRU_Data::LoadTechnologies()
 	for (int i = 0; i < g_countryList.size(); i++)
 	{
 		g_countryList[i].RefreshResearch();
+	}
+}
+
+void Base::SRU_Data::LoadLeaders()
+{
+	g_leaderList.clear();
+
+	uintptr_t leaderStart = *(uintptr_t*)(g_base + Offsets::allLeaderStart);
+	int leaderMax = *(int*)(g_base + Offsets::leaderMax);
+
+	for (int i = 1; i < leaderMax; i++) {
+		int offset = 196 * i;
+
+		uintptr_t base = leaderStart + offset;
+
+		if (*(uintptr_t*)base) {
+
+			char* namePtr = (char*)*(uintptr_t*)(base + 0x8);
+			char* surnamePtr = (char*)*(uintptr_t*)(base + 0xC);
+
+			if (namePtr != nullptr && surnamePtr != nullptr) {
+				
+				std::shared_ptr<Leader> newLeader(new Leader);
+
+				newLeader->id = *(uintptr_t*)base;
+				newLeader->name = std::string(namePtr) + " " + std::string(surnamePtr);
+
+				g_leaderList.push_back(newLeader);
+			}
+		}
+	}
+
+	//Sort leaders by name
+	for (int i = 1; i < g_leaderList.size(); i++)
+	{
+		std::shared_ptr<Leader> tmp = g_leaderList[i];
+		int n = i - 1;
+
+		while (n >= 0 && g_leaderList[n]->name > tmp->name)
+		{
+			g_leaderList[n + 1] = g_leaderList[n];
+			n--;
+		}
+		g_leaderList[n + 1] = tmp;
+	}
+
+	//Assign leaders to countries
+
+	for (int i = 0; i < g_countryList.size(); i++) {
+		g_countryList[i].RefreshLeader();
 	}
 }
 

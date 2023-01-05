@@ -7,6 +7,8 @@ void Base::Draw::DrawUnitSpawn(Base::SRU_Data::Country* cc)
 	if (ImGui::BeginTabItem("Spawn"))
 	{
 		g_paintUnitSpawn = true;
+		g_paintFacilityDestroy = false;
+		g_paintFacilitySpawn = false;
 
 		static int showCategory = 0;
 
@@ -162,6 +164,28 @@ void Base::Draw::DrawUnitSpawn(Base::SRU_Data::Country* cc)
 				}
 			}
 
+			static bool onlyUseOriginDesigns = true;
+			enter = ImGui::Checkbox("Only Country Designs", &onlyUseOriginDesigns);
+
+			if (g_unitSpawnSelectedUnitDesign == -1 || enter)
+			{
+				//default-> init
+				for (int i = 0; i < g_defaultUnitList.size(); i++)
+				{
+					if (g_defaultUnitList[i]->HasOrigin(unitSpawnCountry->oId))
+					{
+						g_unitSpawnSelectedUnitDesign = i;
+						break;
+					}
+				}
+
+				if (g_unitSpawnSelectedUnitDesign == -1)
+				{
+					//Backup
+					g_unitSpawnSelectedUnitDesign = 0;
+				}
+			}
+
 			ImGui::Text("Amount");
 			if (ImGui::InputInt("##spawnunitamount", &g_unitSpawnCount))
 			{
@@ -251,6 +275,14 @@ void Base::Draw::DrawUnitSpawn(Base::SRU_Data::Country* cc)
 							if (g_defaultUnitList[i]->HasUser(unitSpawnCountry->oId))
 							{
 								ok = true;
+							}
+						}
+
+						if (ok && onlyUseOriginDesigns) {
+							//Only use origin country designs
+							if (!g_defaultUnitList[i]->HasOrigin(unitSpawnCountry->oId))
+							{
+								ok = false;
 							}
 						}
 

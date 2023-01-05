@@ -130,6 +130,7 @@ namespace Base
 		};
 
 		struct Country; //fwd declare
+		struct Leader; //fwd declare
 
 		struct UnitDefault
 		{
@@ -170,12 +171,15 @@ namespace Base
 			void RefreshUserCountrys();
 			void AddUserCountry(int countryId);
 			bool HasUser(int countryId);
+			bool HasOrigin(int countryId);
 
 			std::string name;
 			uintptr_t base = 0;
 			std::vector<int> countryIds;
+			std::vector<int> originCountryIds;
 			int spawnId = -1;
 			int unitClass = 0;
+			unsigned int unitOrigin = 0;
 			
 			uintptr_t* customDefault = nullptr;
 
@@ -263,6 +267,7 @@ namespace Base
 			void HandleROE();
 			void HandleMinisters();
 			void RefreshResearch();
+			void RefreshLeader();
 			void ChangeName(std::string newName);
 
 			uintptr_t base;
@@ -271,6 +276,7 @@ namespace Base
 			int oId;
 			int alive;
 			int flagOption = 0;
+			int leaderOption = 0;
 			std::string name;
 
 			unsigned long originalColor = 0;
@@ -285,8 +291,10 @@ namespace Base
 			uintptr_t* colorPtr;
 			uint8_t* govPtr;
 			uint16_t* flagIdPtr;
+			uint16_t* leaderIdPtr;
 
 			uint16_t originalFlagId;
+			uint16_t originalLeaderId;
 			
 			unsigned int lastSurrenderTime = -1;
 
@@ -315,6 +323,8 @@ namespace Base
 			std::shared_ptr<FloatValue> lawEnforcementState;
 			std::shared_ptr<FloatValue> culturalSubState;
 			std::shared_ptr<FloatValue> socialAssistanceState;
+
+			std::shared_ptr<Base::SRU_Data::Leader> currentLeader;
 
 			int* defconPtrs[2] = {0, 0};
 			int defconState = -1;
@@ -387,8 +397,15 @@ namespace Base
 			std::string name;
 		};
 
+		struct Leader {
+			int id;
+			std::string name;
+			std::string prefix;
+		};
+
 		extern std::vector<std::shared_ptr<UnitDefault>> g_defaultUnitList;
 		extern std::vector<std::shared_ptr<Facility>> g_facilityList;
+		extern std::vector<std::shared_ptr<Leader>> g_leaderList;
 		extern std::vector<Unit> g_selectedUnitList;
 		extern std::vector<Unit> g_unitList;
 		extern std::vector<DiplTreaty> g_diplTreatyList;
@@ -482,6 +499,7 @@ namespace Base
 		void LoadDiplTreaties();
 		void LoadGroundTypes();
 		void LoadTechnologies();
+		void LoadLeaders();
 	}
 
 	namespace Execute
@@ -492,6 +510,7 @@ namespace Base
 		typedef int(__stdcall* _CreateTransportFuncEvent)(int, int, int, int, int, int);
 		typedef int(__thiscall* _CreateFactoryFunc)(int, __int8, int, int, int, float, int, float, int);
 		typedef int(__thiscall* _DestroyFactoryFunc)(int, int, int);
+		typedef void(__thiscall* _TreatyFunc)(int, int, unsigned int, int, int, int, int, int, int);
 		
 		extern _DiplFunc diplFunc;
 		extern _UnlockTechFunc unlockTechFunc;
@@ -499,6 +518,7 @@ namespace Base
 		extern _CreateTransportFuncEvent createTransportFuncEvent;
 		extern _CreateFactoryFunc createFactoryFunc;
 		extern _DestroyFactoryFunc destroyFactoryFunc;
+		extern _TreatyFunc treatyFunc;
 
 		void SetupFunctions();
 		void AnnexCountry(int from, int to);
@@ -514,7 +534,7 @@ namespace Base
 		void SetMapResource(uint8_t* byte, int resource, int level);
 		void SpawnUnit(int unitDesign, int amount, uintptr_t country, int spread = 1, bool reserve = true, uint16_t xPos = 0, uint16_t yPos = 0);
 		void SetCheat(uint8_t cheat);
-		int ExecuteTreaty(int diplTreatyIndex);
+		int ExecuteTreaty(int diplTreatyIndex, int set = 1);
 		void ExecDipl(DWORD* buffer, char c);
 		bool HasTechUnlocked(int countryId, int techId);
 		bool HasDesignUnlocked(int countryId, int designId);

@@ -95,6 +95,7 @@ void SetupSessionPtr(uintptr_t base = NULL)
     Base::SRU_Data::LoadDiplTreaties();
     Base::SRU_Data::LoadGroundTypes();	
     Base::SRU_Data::LoadTechnologies();
+    Base::SRU_Data::LoadLeaders();
 
     Base::SRU_Data::Asm::g_ownAllocs.clear();
 
