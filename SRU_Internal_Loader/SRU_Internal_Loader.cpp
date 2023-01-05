@@ -17,7 +17,7 @@
 
 #define DISABLE_OUTPUT
 
-static const int version = 114;
+static const int version = 115;
 static bool updated = false;
 
 std::string VersionToString(int version)
@@ -242,6 +242,8 @@ void CheckForUpdate(std::string origName)
 		file << "--- INFORMATION ---" << std::endl;
 		file << "Happy new year!" << std::endl << std::endl;
 		file << "--- CHANGELOG ---" << std::endl;
+		file << "v1.15 [NEW]" << std::endl;
+		file << "- Fixed treaties being one way only" << std::endl;
 		file << "v1.14 [NEW]" << std::endl;
 		file << "- Added ability to cancel treaties" << std::endl;
 		file << "- Added country leader change" << std::endl;

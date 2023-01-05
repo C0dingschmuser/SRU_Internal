@@ -490,9 +490,13 @@ int Base::Execute::ExecuteTreaty(int diplTreatyIndex, int set)
 		diplType = Offsets::warDiplo;
 	}
 	else {
-		treatyFunc(clickedCountry->base, 0, treaty.treatyId, set, g_countryList[g_selectedTargetCountry].id, 0, 0, 0, 0);
-		treatyFunc(clickedCountry->base, 1, treaty.treatyId, set, g_countryList[g_selectedTargetCountry].id, 0, 0, 0, 0);
-		return 1;
+		if (set == 0) {
+			treatyFunc(clickedCountry->base, 0, treaty.treatyId, set, g_countryList[g_selectedTargetCountry].id, 0, 0, 0, 0);
+			treatyFunc(clickedCountry->base, 1, treaty.treatyId, set, g_countryList[g_selectedTargetCountry].id, 0, 0, 0, 0);
+			treatyFunc(g_countryList[g_selectedTargetCountry].base, 0, treaty.treatyId, set, clickedCountry->id, 0, 0, 0, 0);
+			treatyFunc(g_countryList[g_selectedTargetCountry].base, 1, treaty.treatyId, set, clickedCountry->id, 0, 0, 0, 0);
+			return 1;
+		}
 	}
 
 	long currentDay = *(uintptr_t*)(g_base + Offsets::currentDay);
