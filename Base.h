@@ -50,6 +50,10 @@ namespace Base
 
 			extern uintptr_t g_buildCheckJumpBackAddr;
 
+			extern uintptr_t g_hexNameBigJumpBackAddr;
+			extern uintptr_t g_hexNameBigJumpBackAddrNone;
+			extern uintptr_t g_hexNameBigJumpBackAddrData;
+
 			void SetupFunctionHooks();
 			void SetProductionAdjustment(bool enabled);
 		}
@@ -69,6 +73,7 @@ namespace Base
 			extern unsigned int g_diplFreeReg0, g_diplFreeReg1, g_diplFreeReg2, g_diplFreeReg3, g_diplFreeReg4, g_diplFreeReg5, g_diplFreeReg6;
 			extern unsigned int g_mapSizeReg0, g_mapSizeReg1, g_mapSizeReg2, g_mapSizeReg3, g_mapSizeReg4, g_mapSizeReg5, g_mapSizeReg6;
 			extern unsigned int g_buildCheckReg0, g_buildCheckReg1, g_buildCheckReg2, g_buildCheckReg3, g_buildCheckReg4, g_buildCheckReg5, g_buildCheckReg6, g_buildCheckReg7;
+			extern unsigned int g_hexNameReg0, g_hexNameReg1, g_hexNameReg2, g_hexNameReg3, g_hexNameReg4, g_hexNameReg5, g_hexNameReg6, g_hexNameReg7;
 			extern uintptr_t g_aiSurrBase;
 
 			extern std::vector<uintptr_t> g_ownAllocs;
@@ -403,9 +408,16 @@ namespace Base
 			std::string prefix;
 		};
 
+		struct Hex {
+			uintptr_t base;
+			int defaultName;
+			std::string newName;
+		};
+
 		extern std::vector<std::shared_ptr<UnitDefault>> g_defaultUnitList;
 		extern std::vector<std::shared_ptr<Facility>> g_facilityList;
 		extern std::vector<std::shared_ptr<Leader>> g_leaderList;
+		extern std::vector<std::shared_ptr<Hex>> g_hexNameList;
 		extern std::vector<Unit> g_selectedUnitList;
 		extern std::vector<Unit> g_unitList;
 		extern std::vector<DiplTreaty> g_diplTreatyList;
@@ -470,6 +482,9 @@ namespace Base
 		extern bool g_paintUnitSpawn;
 		extern bool g_paintFacilitySpawn;
 		extern bool g_paintFacilityDestroy;
+		extern bool g_paintHexOwner;
+		extern bool g_paintHexLoyalty;
+		extern bool g_paintHexOnlySelected;
 
 		extern bool g_disco;
 		extern bool g_productionAdjustment;

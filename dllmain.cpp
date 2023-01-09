@@ -98,6 +98,7 @@ void SetupSessionPtr(uintptr_t base = NULL)
     Base::SRU_Data::LoadLeaders();
 
     Base::SRU_Data::Asm::g_ownAllocs.clear();
+    Base::SRU_Data::g_hexNameList.clear();
 
     g_mapSizeLoaded = false;
 
@@ -152,17 +153,27 @@ void CheckCurrentCountry(uintptr_t* clickedCountryPtr)
         long mult = 16 * temp;
         DWORD base1 = *(DWORD*)(Base::SRU_Data::g_base + Offsets::allHexStart);
         DWORD base2 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 0xC) + mult;
+        DWORD base6 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 8) + (4 * temp);
         DWORD base5 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 12) + (4 * temp);
         DWORD base4 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 16) + (4 * temp);
         DWORD base3 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 20) + (4 * temp);
+        DWORD base7 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 24) + (4 * temp);
+        DWORD base8 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 28) + (4 * temp);
 
         uintptr_t* addr = (uintptr_t*)base3;
         DWORD val = *addr;
 
         std::cout << "------------" << std::endl;
-		std::cout << std::hex << base2 << " " << base5 << " " << base4 << " " << base3 << " " << val << std::endl;
+		std::cout << std::hex << base2 << " " << base5 << " " << base4 << " " << base3 << " " << base6 << " " << base7 << " " << base8 << std::endl;
 
-        std::cout << "F:" << std::endl;
+        uint8_t* inf1 = (uint8_t*)(base2 + 0x8);
+        uint8_t* inf2 = (uint8_t*)(base2 + 0x9);
+        uint8_t* inf3 = (uint8_t*)(base2 + 0xA);
+        uint8_t* inf4 = (uint8_t*)(base2 + 0xB);
+
+		std::cout << std::dec << (int)*inf1 << " " << (int)*inf2 << " " << (int)*inf3 << " " << (int)*inf4 << std::endl;
+
+        /*std::cout << "F:" << std::endl;
 
         bool ok = true;
         while (ok)
@@ -450,147 +461,175 @@ void PaintMap(uintptr_t mouseHoverHex, uint16_t xPos, uint16_t yPos)
         return;
     }
 
-    if (g_paintMode == 0)
-    {
-        //Paint Land
+    uint8_t* ownerPtr = (uint8_t*)(mouseHoverHex);
 
-        uint8_t* ownerPtr = (uint8_t*)(mouseHoverHex);
-        uint8_t* loyaltyPtr = (uint8_t*)(mouseHoverHex + Offsets::hexLoyalty);
-        uint8_t* groundPtr = (uint8_t*)(mouseHoverHex + Offsets::hexGround);
+    bool ok = false;
 
-        *ownerPtr = (uint8_t)g_countryList[g_paintSelectedComboCountry].oId;
-        *loyaltyPtr = (uint8_t)g_countryList[g_paintSelectedComboLoyalty].oId;
-
-        if (g_paintSelectedComboGround > -1)
-        {
-            uint8_t newGround = (uint8_t)g_groundTypeList[g_paintSelectedComboGround].id;
-
-            if (*groundPtr == 14)
-            {
-                //If Ocean override second style attrib
-                uint8_t* groundPtr2 = (uint8_t*)(mouseHoverHex + 0x2);
-                *groundPtr2 = 240;
-            }
-            else if (newGround == 14)
-            {
-                uint8_t* groundPtr2 = (uint8_t*)(mouseHoverHex + 0x2);
-                *groundPtr2 = 243;
-            }
-
-            *groundPtr = newGround;
+    if (!g_paintHexOnlySelected) {
+        ok = true;
+    }
+    else {
+        if (clickedCountry->oId == *ownerPtr) {
+            ok = true;
         }
     }
-    else if (g_paintMode == 1)
-    {
-        //Paint Unit(s) stats
 
-        Country* cc = &g_countryList[g_paintSelectedComboCountry];
-
-        uint8_t newOwner = (uint8_t)cc->oId;
-
-        Country* newcc = nullptr;
-
-        for (int i = 0; i < g_countryList.size(); i++)
+    if (ok) {
+        if (g_paintMode == 0)
         {
-            if ((uint8_t)g_countryList[i].oId == newOwner)
+            //Paint Land
+
+            uint8_t* loyaltyPtr = (uint8_t*)(mouseHoverHex + Offsets::hexLoyalty);
+            uint8_t* groundPtr = (uint8_t*)(mouseHoverHex + Offsets::hexGround);
+
+            if (g_paintHexOwner) {
+                *ownerPtr = (uint8_t)g_countryList[g_paintSelectedComboCountry].oId;
+            }
+            if (g_paintHexLoyalty) {
+                *loyaltyPtr = (uint8_t)g_countryList[g_paintSelectedComboLoyalty].oId;
+            }
+
+            if (g_paintSelectedComboGround > -1)
             {
-                newcc = &g_countryList[i];
-                break;
+                uint8_t newGround = (uint8_t)g_groundTypeList[g_paintSelectedComboGround].id;
+
+                if (*groundPtr == 14)
+                {
+                    //If Ocean override second style attrib
+                    uint8_t* groundPtr2 = (uint8_t*)(mouseHoverHex + 0x2);
+                    *groundPtr2 = 240;
+                }
+                else if (newGround == 14)
+                {
+                    uint8_t* groundPtr2 = (uint8_t*)(mouseHoverHex + 0x2);
+                    *groundPtr2 = 243;
+                }
+
+                *groundPtr = newGround;
             }
         }
-
-        if (newcc == nullptr) return;
-
-        Base::SRU_Data::Unit* tmpUnit = nullptr;
-
-        int size = g_unitList.size();
-        for (int i = 0; i < size; i++)
+        else if (g_paintMode == 1)
         {
-            tmpUnit = &g_unitList[i];
+            //Paint Unit(s) stats
 
-            if (!*tmpUnit->deployedState)
+            Country* cc = &g_countryList[g_paintSelectedComboCountry];
+
+            uint8_t newOwner = (uint8_t)cc->oId;
+
+            Country* newcc = nullptr;
+
+            for (int i = 0; i < g_countryList.size(); i++)
             {
-                //Deployed
-                if (*tmpUnit->xPos == xPos && *tmpUnit->yPos == yPos)
+                if ((uint8_t)g_countryList[i].oId == newOwner)
                 {
-                    if (*tmpUnit->countryId != newOwner)
+                    newcc = &g_countryList[i];
+                    break;
+                }
+            }
+
+            if (newcc == nullptr) return;
+
+            Base::SRU_Data::Unit* tmpUnit = nullptr;
+
+            int size = g_unitList.size();
+            for (int i = 0; i < size; i++)
+            {
+                tmpUnit = &g_unitList[i];
+
+                if (!*tmpUnit->deployedState)
+                {
+                    //Deployed
+                    if (*tmpUnit->xPos == xPos && *tmpUnit->yPos == yPos)
                     {
-                        //Country change only to units with other country then original
-
-                        *tmpUnit->countryId = newOwner;
-
-                        for (int a = 0; a < cc->allUnits.size(); a++)
+                        if (*tmpUnit->countryId != newOwner)
                         {
-                            if (cc->allUnits[a].base == tmpUnit->base)
+                            //Country change only to units with other country then original
+
+                            *tmpUnit->countryId = newOwner;
+
+                            for (int a = 0; a < cc->allUnits.size(); a++)
                             {
-                                cc->allUnits.erase(cc->allUnits.begin() + a);
-                                break;
+                                if (cc->allUnits[a].base == tmpUnit->base)
+                                {
+                                    cc->allUnits.erase(cc->allUnits.begin() + a);
+                                    break;
+                                }
                             }
+
+                            newcc->allUnits.push_back(*tmpUnit);
                         }
 
-                        newcc->allUnits.push_back(*tmpUnit);
-                    }
-
-                    if ((g_paintUnitTargetCountry && *tmpUnit->countryId == cc->oId) ||
-                        !g_paintUnitTargetCountry)
-                    {
-                        for (int i = 0; i < g_paintUnitModes.size(); i++)
+                        if ((g_paintUnitTargetCountry && *tmpUnit->countryId == cc->oId) ||
+                            !g_paintUnitTargetCountry)
                         {
-                            if (g_paintUnitModes[i] > -1 && i != Unit::MaxHalth)
+                            for (int i = 0; i < g_paintUnitModes.size(); i++)
                             {
-                                float newVal =
-                                    (g_paintUnitModes[i] / 100.0f) * tmpUnit->properties[i]->origVal;
+                                if (g_paintUnitModes[i] > -1 && i != Unit::MaxHalth)
+                                {
+                                    float newVal =
+                                        (g_paintUnitModes[i] / 100.0f) * tmpUnit->properties[i]->origVal;
 
-                                *tmpUnit->properties[i]->valPtr = newVal;
+                                    *tmpUnit->properties[i]->valPtr = newVal;
+                                }
                             }
                         }
                     }
                 }
             }
         }
-    }
-    else if (g_paintMode == 2) //resource
-    {
-        //Calculate other base addr
-
-        if (xPos < 0)
+        else if (g_paintMode == 2) //resource
         {
-            xPos = Base::SRU_Data::g_mapSizeX + xPos;
+            //Calculate other base addr
+
+            if (xPos < 0)
+            {
+                xPos = Base::SRU_Data::g_mapSizeX + xPos;
+            }
+
+            if (yPos < 0) yPos = 0;
+
+            DWORD posData = MAKELONG(xPos, yPos);
+
+            __int16 v9 = (__int16)posData;
+            if (v9 >= Base::SRU_Data::g_mapSizeX)
+            {
+                v9 = (__int16)posData % Base::SRU_Data::g_mapSizeX;
+            }
+            else if ((posData & 0x8000) != 0)
+            {
+                v9 = Base::SRU_Data::g_mapSizeX + (__int16)posData % Base::SRU_Data::g_mapSizeX;
+            }
+
+            long temp = v9 + Base::SRU_Data::g_mapSizeX * HIWORD(posData);
+            long mult = 16 * temp;
+
+            //DWORD base1 = *(DWORD*)(Base::SRU_Data::g_base + Offsets::allHexStart);
+            //DWORD base2 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 0xC) + mult;
+            DWORD base3 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 16) + (4 * temp);
+            //DWORD base4 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 20) + (4 * temp);
+
+            int tempResourceId = g_paintSelectedResource;
+
+            uint8_t* resAddr = (uint8_t*)base3 + 2;
+
+            if (g_paintSelectedResource > 3)
+            {
+                resAddr = (uint8_t*)base3 + 3;
+                tempResourceId -= 4;
+            }
+
+            Base::Execute::SetMapResource(resAddr, tempResourceId, g_paintSelectedResourceAmount);
         }
-
-        if (yPos < 0) yPos = 0;
-
-        DWORD posData = MAKELONG(xPos, yPos);
-
-        __int16 v9 = (__int16)posData;
-        if (v9 >= Base::SRU_Data::g_mapSizeX)
+        else if (g_paintMode == 3) //infrastructure
         {
-            v9 = (__int16)posData % Base::SRU_Data::g_mapSizeX;
+            for (int i = 0; i < 4; i++)
+            {
+                if (*(uint8_t*)(mouseHoverHex + 0x8 + i) != 0)
+                {
+                    *(uint8_t*)(mouseHoverHex + 0x8 + i) = 0;
+                }
+            }
         }
-        else if ((posData & 0x8000) != 0)
-        {
-            v9 = Base::SRU_Data::g_mapSizeX + (__int16)posData % Base::SRU_Data::g_mapSizeX;
-        }
-
-        long temp = v9 + Base::SRU_Data::g_mapSizeX * HIWORD(posData);
-        long mult = 16 * temp;
-
-        //DWORD base1 = *(DWORD*)(Base::SRU_Data::g_base + Offsets::allHexStart);
-        //DWORD base2 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 0xC) + mult;
-        DWORD base3 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 16) + (4 * temp);
-        //DWORD base4 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 20) + (4 * temp);
-
-        int tempResourceId = g_paintSelectedResource;
-
-        uint8_t* resAddr = (uint8_t*)base3 + 2;
-
-        if (g_paintSelectedResource > 3)
-        {
-            resAddr = (uint8_t*)base3 + 3;
-			tempResourceId -= 4;
-        }
-
-        Base::Execute::SetMapResource(resAddr, tempResourceId, g_paintSelectedResourceAmount);
     }
 }
 

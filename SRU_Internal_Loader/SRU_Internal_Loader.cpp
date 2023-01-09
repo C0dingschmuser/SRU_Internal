@@ -17,7 +17,7 @@
 
 #define DISABLE_OUTPUT
 
-static const int version = 115;
+static const int version = 116;
 static bool updated = false;
 
 std::string VersionToString(int version)
@@ -242,9 +242,16 @@ void CheckForUpdate(std::string origName)
 		file << "--- INFORMATION ---" << std::endl;
 		file << "Happy new year!" << std::endl << std::endl;
 		file << "--- CHANGELOG ---" << std::endl;
-		file << "v1.15 [NEW]" << std::endl;
+		file << "v1.16 [NEW]" << std::endl;
+		file << "- Added Hex/City renaming" << std::endl;
+		file << "- Added Infrastructure remover" << std::endl;
+		file << "- Improved map painting: " << std::endl;
+		file << "  - You can limit all painting to a single country" << std::endl;
+		file << "  - You can choose whether to paint only ownership/loyalty/etc." << std::endl;
+		file << "  - Increased brush size to 15" << std::endl;
+		file << "v1.15" << std::endl;
 		file << "- Fixed treaties being one way only" << std::endl;
-		file << "v1.14 [NEW]" << std::endl;
+		file << "v1.14" << std::endl;
 		file << "- Added ability to cancel treaties" << std::endl;
 		file << "- Added country leader change" << std::endl;
 		file << "- Added country origin filter for unit spawn" << std::endl;

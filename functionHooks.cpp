@@ -57,6 +57,63 @@ void __declspec(naked) GetSelectedUnits()
     }
 }
 
+void CheckHexNameBigIntern()
+{
+    if (g_hexNameReg2 == 65123) {
+        //trigger for custom
+
+        std::shared_ptr<Hex> ptr = nullptr;
+
+        for (int i = 0; i < g_hexNameList.size(); i++) {
+            if (g_hexNameList[i]->base == g_hexNameReg0) {
+                ptr = g_hexNameList[i];
+                break;
+            }
+        }
+
+        if (ptr != nullptr) {
+			g_hexNameReg1 = (uintptr_t)ptr->newName.c_str();
+            g_hexNameBigJumpBackAddr = g_hexNameBigJumpBackAddrData;
+        }
+        else {
+            g_hexNameBigJumpBackAddr = g_hexNameBigJumpBackAddrNone;
+        }
+    }
+    else {
+        g_hexNameBigJumpBackAddr = g_hexNameBigJumpBackAddrNone;
+    }
+}
+
+void __declspec(naked) CheckHexNameBig()
+{
+    __asm {
+        mov eax, [esp + 0x1FEC]        //load hex base addr
+        movzx edx, word ptr[eax + 0xC] //load town string id
+        mov[g_hexNameReg0], eax
+        mov[g_hexNameReg1], ecx
+        mov[g_hexNameReg2], edx
+        mov[g_hexNameReg3], ebp
+        mov[g_hexNameReg4], edi
+        mov[g_hexNameReg5], esi
+        mov[g_hexNameReg6], ebx
+        mov[g_hexNameReg7], esp
+    }
+
+    CheckHexNameBigIntern();
+
+    __asm {
+        mov eax, g_hexNameReg0
+        mov ecx, g_hexNameReg1
+        mov edx, g_hexNameReg2
+        mov ebp, g_hexNameReg3
+        mov edi, g_hexNameReg4
+        mov esi, g_hexNameReg5
+        mov ebx, g_hexNameReg6
+		mov esp, g_hexNameReg7
+        jmp [g_hexNameBigJumpBackAddr]
+    }
+}
+
 void CreateUnit(uintptr_t base)
 {
     Unit newUnit{};
@@ -662,6 +719,14 @@ void Base::SRU_Data::Hooks::SetupFunctionHooks()
 
     uintptr_t addr = g_base + Offsets::buildTransportHook;
     Utils::Nop((BYTE*)addr, 6);
+
+    //hex name hook
+
+    hookLength = 11;
+	hookAddress = g_base + Offsets::hexNameHookBig;
+    Base::SRU_Data::Hooks::g_hexNameBigJumpBackAddrNone = hookAddress + hookLength; //jump here if no custom name
+    Base::SRU_Data::Hooks::g_hexNameBigJumpBackAddrData = g_base + 0xC8E25; //jump here if custom name
+	Base::Hooks::FunctionHook((void*)hookAddress, CheckHexNameBig, hookLength);
 }
 
 void Base::SRU_Data::Hooks::SetProductionAdjustment(bool enabled)

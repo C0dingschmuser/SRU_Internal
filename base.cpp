@@ -93,6 +93,15 @@ unsigned int Base::SRU_Data::Asm::g_buildCheckReg5;
 unsigned int Base::SRU_Data::Asm::g_buildCheckReg6;
 unsigned int Base::SRU_Data::Asm::g_buildCheckReg7;
 
+unsigned int Base::SRU_Data::Asm::g_hexNameReg0;
+unsigned int Base::SRU_Data::Asm::g_hexNameReg1;
+unsigned int Base::SRU_Data::Asm::g_hexNameReg2;
+unsigned int Base::SRU_Data::Asm::g_hexNameReg3;
+unsigned int Base::SRU_Data::Asm::g_hexNameReg4;
+unsigned int Base::SRU_Data::Asm::g_hexNameReg5;
+unsigned int Base::SRU_Data::Asm::g_hexNameReg6;
+unsigned int Base::SRU_Data::Asm::g_hexNameReg7;
+
 std::vector<uintptr_t> Base::SRU_Data::Asm::g_ownAllocs;
 
 uintptr_t Base::SRU_Data::Asm::g_aiSurrBase;
@@ -101,7 +110,8 @@ uintptr_t Base::SRU_Data::Asm::g_aiSurrBase;
 
 std::vector<std::shared_ptr<Base::SRU_Data::UnitDefault>> Base::SRU_Data::g_defaultUnitList;
 std::vector<std::shared_ptr<Base::SRU_Data::Facility>> Base::SRU_Data::g_facilityList;
-std::vector< std::shared_ptr<Base::SRU_Data::Leader>> Base::SRU_Data::g_leaderList;
+std::vector<std::shared_ptr<Base::SRU_Data::Leader>> Base::SRU_Data::g_leaderList;
+std::vector<std::shared_ptr<Base::SRU_Data::Hex>> Base::SRU_Data::g_hexNameList;
 std::vector<Base::SRU_Data::Unit> Base::SRU_Data::g_selectedUnitList;
 std::vector<Base::SRU_Data::Country> Base::SRU_Data::g_countryList;
 std::vector<std::shared_ptr<Base::SRU_Data::Tech>> Base::SRU_Data::g_techList;
@@ -127,6 +137,10 @@ uintptr_t Base::SRU_Data::Hooks::g_diplFreeJmpBackAddrDefault = 0;
 uintptr_t Base::SRU_Data::Hooks::g_mapSizeJumpBackAddr = 0;
 
 uintptr_t Base::SRU_Data::Hooks::g_buildCheckJumpBackAddr = 0;
+
+uintptr_t Base::SRU_Data::Hooks::g_hexNameBigJumpBackAddr = 0;
+uintptr_t Base::SRU_Data::Hooks::g_hexNameBigJumpBackAddrNone = 0;
+uintptr_t Base::SRU_Data::Hooks::g_hexNameBigJumpBackAddrData = 0;
 
 uintptr_t Base::SRU_Data::g_nextUnitEntity = 0;
 
@@ -185,6 +199,9 @@ bool Base::SRU_Data::g_paintEnabled = false;
 bool Base::SRU_Data::g_paintUnitSpawn = false;
 bool Base::SRU_Data::g_paintFacilitySpawn = false;
 bool Base::SRU_Data::g_paintFacilityDestroy = false;
+bool Base::SRU_Data::g_paintHexOwner = true;
+bool Base::SRU_Data::g_paintHexLoyalty = true;
+bool Base::SRU_Data::g_paintHexOnlySelected = false;
 
 bool Base::SRU_Data::g_disco = false;
 bool Base::SRU_Data::g_productionAdjustment = false;
