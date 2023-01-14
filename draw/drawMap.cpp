@@ -288,6 +288,27 @@ void Base::Draw::DrawMap(Base::SRU_Data::Country* cc)
 					ImGui::SliderInt("##paintbrushsuze", &g_paintBrushSize, 1, 15);
 				}
 
+				static std::vector<std::string> paintStyleList = {
+					"Square",
+					"Checkerboard",
+				};
+
+				std::string styleText = paintStyleList[g_paintStyle];
+
+				/*ImGui::Text("Paint style");
+				if (ImGui::BeginCombo("##resourcecombo", styleText.c_str()))
+				{
+					for (int i = 0; i < paintStyleList.size(); i++)
+					{
+						const bool isSelected = (g_paintStyle == i);
+						if (ImGui::Selectable(paintStyleList[i].c_str(), isSelected))
+						{
+							g_paintStyle = i;
+						}
+					}
+					ImGui::EndCombo();
+				}*/
+
 				ImGui::Checkbox("Only paint on territory of\nselected country", &g_paintHexOnlySelected);
 			}
 			ImGui::EndChild();

@@ -252,6 +252,31 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 	}
 	ImGui::PopItemWidth();
 
+	ImGui::Text("Spheres (Left = Red, Right = Blue)");
+	if (ImGui::Checkbox("###cb_spheregov", &cc->sphereGov->freeze))
+	{
+		cc->sphereGov->freezeVal = *cc->sphereGov->valPtr;
+	}
+	ImGui::SameLine();
+	ImGui::PushItemWidth(inputWidth);
+	if (ImGui::SliderFloat("Government", cc->sphereGov->valPtr, -2, 2))
+	{
+		cc->sphereGov->freezeVal = *cc->sphereGov->valPtr;
+	}
+	ImGui::PopItemWidth();
+	
+	if (ImGui::Checkbox("###cb_sphereciv", &cc->sphereCiv->freeze))
+	{
+		cc->sphereCiv->freezeVal = *cc->sphereCiv->valPtr;
+	}
+	ImGui::SameLine();
+	ImGui::PushItemWidth(inputWidth);
+	if (ImGui::SliderFloat("Civilian", cc->sphereCiv->valPtr, -2, 2))
+	{
+		cc->sphereCiv->freezeVal = *cc->sphereCiv->valPtr;
+	}
+	ImGui::PopItemWidth();
+
 	//-----------------------------------------------------------------------------------
 	//--- Color -------------------------------------------------------------------------
 	//-----------------------------------------------------------------------------------

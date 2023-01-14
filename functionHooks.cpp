@@ -57,6 +57,54 @@ void __declspec(naked) GetSelectedUnits()
     }
 }
 
+void CheckSphereNameIntern()
+{
+    int sphereType = *(int*)(g_sphereNameReg7 + 0x18);
+    //char* namePtr = (char*)g_sphereNameReg0;
+    
+    //if (namePtr != nullptr)
+    {
+        if (sphereType <= 1 && g_sphereNames[0].length() > 0)
+        {
+            g_sphereNameReg0 = (unsigned int)g_sphereNames[0].c_str();
+        }
+        else if (sphereType >= 2 && g_sphereNames[1].length() > 0)
+        {
+            g_sphereNameReg0 = (unsigned int)g_sphereNames[1].c_str();
+        }
+    }
+}
+
+void __declspec(naked) CheckSphereName()
+{
+    __asm {
+        mov[g_sphereNameReg0], eax            //char* pointer to sphere name
+        mov[g_sphereNameReg1], ecx
+        mov[g_sphereNameReg2], edx
+        mov[g_sphereNameReg3], ebp
+        mov[g_sphereNameReg4], edi
+        mov[g_sphereNameReg5], esi
+        mov[g_sphereNameReg6], ebx
+        mov[g_sphereNameReg7], esp
+    }
+
+    CheckSphereNameIntern();
+
+    __asm {
+        mov eax, g_sphereNameReg0
+        mov ecx, g_sphereNameReg1
+        mov edx, g_sphereNameReg2
+        mov ebp, g_sphereNameReg3
+        mov edi, g_sphereNameReg4
+        mov esi, g_sphereNameReg5
+        mov ebx, g_sphereNameReg6
+        mov esp, g_sphereNameReg7
+        mov[esp], ebp
+		mov[esp + 0x4], eax
+		jmp[g_sphereNameJumpBackAddr]
+    }
+}
+
 void CheckHexNameBigIntern()
 {
     if (g_hexNameReg2 == 65123) {
@@ -727,6 +775,13 @@ void Base::SRU_Data::Hooks::SetupFunctionHooks()
     Base::SRU_Data::Hooks::g_hexNameBigJumpBackAddrNone = hookAddress + hookLength; //jump here if no custom name
     Base::SRU_Data::Hooks::g_hexNameBigJumpBackAddrData = g_base + 0xC8E25; //jump here if custom name
 	Base::Hooks::FunctionHook((void*)hookAddress, CheckHexNameBig, hookLength);
+
+    //sphere name hook
+
+    hookLength = 7;
+    hookAddress = g_base + Offsets::sphereNameHook;
+    Base::SRU_Data::Hooks::g_sphereNameJumpBackAddr = hookAddress + hookLength;
+	Base::Hooks::FunctionHook((void*)hookAddress, CheckSphereName, hookLength);
 }
 
 void Base::SRU_Data::Hooks::SetProductionAdjustment(bool enabled)

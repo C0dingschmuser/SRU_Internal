@@ -54,6 +54,8 @@ namespace Base
 			extern uintptr_t g_hexNameBigJumpBackAddrNone;
 			extern uintptr_t g_hexNameBigJumpBackAddrData;
 
+			extern uintptr_t g_sphereNameJumpBackAddr;
+
 			void SetupFunctionHooks();
 			void SetProductionAdjustment(bool enabled);
 		}
@@ -74,6 +76,8 @@ namespace Base
 			extern unsigned int g_mapSizeReg0, g_mapSizeReg1, g_mapSizeReg2, g_mapSizeReg3, g_mapSizeReg4, g_mapSizeReg5, g_mapSizeReg6;
 			extern unsigned int g_buildCheckReg0, g_buildCheckReg1, g_buildCheckReg2, g_buildCheckReg3, g_buildCheckReg4, g_buildCheckReg5, g_buildCheckReg6, g_buildCheckReg7;
 			extern unsigned int g_hexNameReg0, g_hexNameReg1, g_hexNameReg2, g_hexNameReg3, g_hexNameReg4, g_hexNameReg5, g_hexNameReg6, g_hexNameReg7;
+			extern unsigned int g_sphereNameReg0, g_sphereNameReg1, g_sphereNameReg2, g_sphereNameReg3, g_sphereNameReg4, g_sphereNameReg5, g_sphereNameReg6, g_sphereNameReg7;
+
 			extern uintptr_t g_aiSurrBase;
 
 			extern std::vector<uintptr_t> g_ownAllocs;
@@ -316,6 +320,8 @@ namespace Base
 			std::shared_ptr<FloatValue> unemployment;
 			std::shared_ptr<FloatValue> worldMarketOpinion;
 			std::shared_ptr<FloatValue> treatyIntegrity;
+			std::shared_ptr<FloatValue> sphereGov;
+			std::shared_ptr<FloatValue> sphereCiv;
 
 			std::vector<Resource> resources;
 			std::vector<std::shared_ptr<Tech>> technologies;
@@ -402,6 +408,13 @@ namespace Base
 			std::string name;
 		};
 
+		struct AddressHolder
+		{
+			uintptr_t addr;
+			int id;
+			std::string name;
+		};
+
 		struct Leader {
 			int id;
 			std::string name;
@@ -456,6 +469,7 @@ namespace Base
 
 		extern int g_paintMode;
 		extern int g_paintBrushSize;
+		extern int g_paintStyle;
 		extern bool g_paintUnitTargetCountry;
 		extern std::vector<int> g_paintUnitModes;
 		
@@ -503,6 +517,8 @@ namespace Base
 		
 		extern uintptr_t g_base;
 
+		extern std::string g_sphereNames[];
+
 		std::shared_ptr<UnitDefault> FindUnitDefault(uintptr_t base, int countryId);
 		uint32_t ResolveUnitCountry(uint32_t country, int dir = 0);
 		void HandleFreezes();
@@ -544,7 +560,10 @@ namespace Base
 		void CreateTransport(int from, int to, int type, int noConstruction);
 		void CreateTransport(__int16 fromX, __int16 fromY, __int16 toX, __int16 toY, int country, int type, int noConstruction);
 		void CreateFacility(__int16 posX, __int16 posY, int countryOId, int facilityId, float constructionState);
-		void DestroyFacility(__int16 posX, __int16 posY, int facilityId);
+		uintptr_t* GetFacilityRoot(uint16_t xPos, uint16_t yPos);
+		std::vector<struct Base::SRU_Data::AddressHolder> GetFacilities(uintptr_t* root);
+		void DestroyFacility(uintptr_t* rootAddr, std::vector<Base::SRU_Data::AddressHolder> facilities, int index);
+		void DestroyAllFacilities(uint16_t xPos, uint16_t yPos);
 		void SetRelations(int relationType, uintptr_t country, uintptr_t oCountry, int add);
 		void SetMapResource(uint8_t* byte, int resource, int level);
 		void SpawnUnit(int unitDesign, int amount, uintptr_t country, int spread = 1, bool reserve = true, uint16_t xPos = 0, uint16_t yPos = 0);
@@ -572,6 +591,7 @@ namespace Base
 		void DrawUnitSpawn(Base::SRU_Data::Country* cc);
 		void DrawUnitModifiers(Base::SRU_Data::Country* cc);
 		void DrawUnitSelected(Base::SRU_Data::Country* cc);
+		void DrawSpheres(Base::SRU_Data::Country* cc);
 	}
 
 	namespace Hooks

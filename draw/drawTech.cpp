@@ -404,6 +404,8 @@ void Base::Draw::DrawCountryDesigns(Base::SRU_Data::Country* cc)
 	static bool checkedUnlock = false;
 	static bool unlocked = false;
 
+	static bool onlyUseOriginDesigns = true;
+
 	static std::shared_ptr<UnitDefault> selectedPtr;
 
 	Draw::DrawSelectedCountryText(cc, "Selected country: %s");
@@ -554,6 +556,25 @@ void Base::Draw::DrawCountryDesigns(Base::SRU_Data::Country* cc)
 		{
 			//Disable on all
 			ImGui::EndDisabled();
+		}
+		
+		if (ImGui::Checkbox("Only Country Designs", &onlyUseOriginDesigns))
+		{
+			//default-> init
+			for (int i = 0; i < g_defaultUnitList.size(); i++)
+			{
+				if (g_defaultUnitList[i]->HasOrigin(cc->oId))
+				{
+					cc->selectedUnitDesignId = i;
+					break;
+				}
+			}
+
+			if (cc->selectedUnitDesignId == -1)
+			{
+				//Backup
+				cc->selectedUnitDesignId = 0;
+			}
 		}
 
 		if (!checkedUnlock)
@@ -730,6 +751,14 @@ void Base::Draw::DrawCountryDesigns(Base::SRU_Data::Country* cc)
 				if (textSearch && ok)
 				{
 					if (!g_defaultUnitList[i]->flag)
+					{
+						ok = false;
+					}
+				}
+
+				if (ok && onlyUseOriginDesigns)
+				{
+					if (!g_defaultUnitList[i]->HasOrigin(cc->oId))
 					{
 						ok = false;
 					}

@@ -95,6 +95,16 @@ void Base::SRU_Data::Country::Init(uintptr_t base)
 	this->unemployment = unemployment;
 	this->allFloatValues.push_back(unemployment);
 
+	std::shared_ptr<FloatValue> sphereGov(new FloatValue);
+	sphereGov->valPtr = (float*)(base + Offsets::countrySphereGov);
+	this->sphereGov = sphereGov;
+	this->allFloatValues.push_back(sphereGov);
+
+	std::shared_ptr<FloatValue> sphereCiv(new FloatValue);
+	sphereCiv->valPtr = (float*)(base + Offsets::countrySphereCiv);
+	this->sphereCiv = sphereCiv;
+	this->allFloatValues.push_back(sphereCiv);
+
 	//-----------------------------------------------------------------------------------
 	//--- Goods -------------------------------------------------------------------------
 	//-----------------------------------------------------------------------------------

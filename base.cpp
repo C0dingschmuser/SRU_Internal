@@ -102,6 +102,15 @@ unsigned int Base::SRU_Data::Asm::g_hexNameReg5;
 unsigned int Base::SRU_Data::Asm::g_hexNameReg6;
 unsigned int Base::SRU_Data::Asm::g_hexNameReg7;
 
+unsigned int Base::SRU_Data::Asm::g_sphereNameReg0;
+unsigned int Base::SRU_Data::Asm::g_sphereNameReg1;
+unsigned int Base::SRU_Data::Asm::g_sphereNameReg2;
+unsigned int Base::SRU_Data::Asm::g_sphereNameReg3;
+unsigned int Base::SRU_Data::Asm::g_sphereNameReg4;
+unsigned int Base::SRU_Data::Asm::g_sphereNameReg5;
+unsigned int Base::SRU_Data::Asm::g_sphereNameReg6;
+unsigned int Base::SRU_Data::Asm::g_sphereNameReg7;
+
 std::vector<uintptr_t> Base::SRU_Data::Asm::g_ownAllocs;
 
 uintptr_t Base::SRU_Data::Asm::g_aiSurrBase;
@@ -142,6 +151,8 @@ uintptr_t Base::SRU_Data::Hooks::g_hexNameBigJumpBackAddr = 0;
 uintptr_t Base::SRU_Data::Hooks::g_hexNameBigJumpBackAddrNone = 0;
 uintptr_t Base::SRU_Data::Hooks::g_hexNameBigJumpBackAddrData = 0;
 
+uintptr_t Base::SRU_Data::Hooks::g_sphereNameJumpBackAddr = 0;
+
 uintptr_t Base::SRU_Data::g_nextUnitEntity = 0;
 
 int Base::SRU_Data::g_unitEntityCountSelected = 0;
@@ -171,6 +182,7 @@ int Base::SRU_Data::g_mapSizeX = 0;
 
 int Base::SRU_Data::g_paintMode = 0;
 int Base::SRU_Data::g_paintBrushSize = 1;
+int Base::SRU_Data::g_paintStyle = 0;
 bool Base::SRU_Data::g_paintUnitTargetCountry = false;
 std::vector<int> Base::SRU_Data::g_paintUnitModes;
 
@@ -227,6 +239,8 @@ uintptr_t Base::SRU_Data::g_base = 0;
 uintptr_t Base::SRU_Data::g_ownCountryBase = 0;
 uintptr_t g_currentCountryBase = 0;
 uintptr_t* g_currentCountryNamePtr = 0;
+
+std::string Base::SRU_Data::g_sphereNames[2] = { };
 
 unsigned int ntthreads = std::thread::hardware_concurrency();
 

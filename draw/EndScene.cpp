@@ -184,6 +184,12 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 					ImGui::EndTabItem();
 				}
 				
+				if (ImGui::BeginTabItem("Spheres"))
+				{
+					Draw::DrawSpheres(cc);
+					ImGui::EndTabItem();
+				}
+
 				if (ImGui::BeginTabItem("Settings"))
 				{
 					ImGui::BeginChild("##settingscheats", ImVec2(225, 250));

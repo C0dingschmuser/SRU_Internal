@@ -68,16 +68,22 @@ void Base::Execute::CreateFacility(__int16 posX, __int16 posY, int countryOId, i
 	Base::Execute::createFactoryFunc((int)buffer, 1, 0, countryOId, facilityId, 1.0f, 0, constructionState, 0);
 }
 
-void Base::Execute::DestroyFacility(__int16 posX, __int16 posY, int facilityId)
+uintptr_t* Base::Execute::GetFacilityRoot(uint16_t xPos, uint16_t yPos)
 {
-	__int16 realX = posX;
-	__int16 realY = posY;
+	using namespace Base::SRU_Data;
+
+	std::vector<Base::SRU_Data::AddressHolder> facilities;
+
+	__int16 realX = xPos;
+	__int16 realY = yPos;
 	if (realX < 0)
 	{
-		realX = Base::SRU_Data::g_mapSizeX + posX;
+		realX = Base::SRU_Data::g_mapSizeX + realX;
 	}
 	if (realY < 0) realY = 0;
+
 	DWORD posData = MAKELONG(realX, realY);
+
 	__int16 v9 = (__int16)posData;
 	if (v9 >= Base::SRU_Data::g_mapSizeX)
 	{
@@ -87,16 +93,24 @@ void Base::Execute::DestroyFacility(__int16 posX, __int16 posY, int facilityId)
 	{
 		v9 = Base::SRU_Data::g_mapSizeX + (__int16)posData % Base::SRU_Data::g_mapSizeX;
 	}
+
 	long temp = v9 + Base::SRU_Data::g_mapSizeX * HIWORD(posData);
 	long mult = 16 * temp;
-	DWORD base1 = *(DWORD*)(Base::SRU_Data::g_base + Offsets::allHexStart);
-	DWORD base2 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 0xC) + mult;
+
 	DWORD base3 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 20) + (4 * temp);
 
 	uintptr_t* addr = (uintptr_t*)base3;
-	DWORD val = *addr;
+	
+	return addr;
+}
 
-	//std::cout << "----------" << std::endl;
+std::vector<struct Base::SRU_Data::AddressHolder> Base::Execute::GetFacilities(uintptr_t* root)
+{
+	using namespace Base::SRU_Data;
+
+	std::vector<Base::SRU_Data::AddressHolder> facilities;
+
+	DWORD val = *root;
 
 	bool ok = true;
 	while (ok)
@@ -116,14 +130,92 @@ void Base::Execute::DestroyFacility(__int16 posX, __int16 posY, int facilityId)
 
 		if ((v1870 & 0x20) != 0 && (v1870 & 0x80) == 0 && *(WORD*)(val + 12) && (*(BYTE*)(val + 179) & 0x40) == 0)
 		{
-			//std::cout << std::hex << val << " " << v5012 << std::endl;
-			destroyFactoryFunc(val, 5, 6);
+			int id = *(uintptr_t*)(val + 0xC);
+
+			for (int i = 0; i < g_facilityList.size(); i++)
+			{
+				if (g_facilityList[i]->id == id)
+				{
+					AddressHolder temp;
+					temp.addr = val;
+					temp.id = id;
+					temp.name = g_facilityList[i]->name;
+					facilities.push_back(temp);
+					break;
+				}
+			}
 		}
 		else break;
 
 		val = v5012;
 		if (!v5012) break;
 	}
+
+	return facilities;
+}
+
+void Base::Execute::DestroyAllFacilities(uint16_t xPos, uint16_t yPos)
+{
+	uintptr_t* root = Base::Execute::GetFacilityRoot(xPos, yPos);
+	std::vector<Base::SRU_Data::AddressHolder> facilities = Base::Execute::GetFacilities(root);
+
+	for (int i = 0; i < facilities.size(); i++)
+	{
+		destroyFactoryFunc(facilities[i].addr, 0, 0);
+	}
+}
+
+void Base::Execute::DestroyFacility(uintptr_t* rootAddr, std::vector<Base::SRU_Data::AddressHolder> facilities, int index)
+{
+	if (facilities[index].addr == *rootAddr)
+	{
+		for (int a = 0; a < facilities.size(); a++)
+		{
+			if (a != index)
+			{
+				*rootAddr = facilities[a].addr;
+				break;
+			}
+		}
+	}
+
+	for (int a = 0; a < facilities.size(); a++)
+	{
+		if (a != index)
+		{
+			uintptr_t addr = facilities[a].addr;
+
+			//Fix previous
+			if (*(uintptr_t*)(addr + 8) == facilities[index].addr)
+			{
+				if (index > 0)
+				{
+					*(uintptr_t*)(addr + 8) = facilities[index - 1].addr;
+				}
+				else
+				{
+					*(uintptr_t*)(addr + 8) = 0;
+				}
+			}
+
+			//Fix next
+			if (*(uintptr_t*)(addr + 356) == facilities[index].addr)
+			{
+				if (index < facilities.size() - 1)
+				{
+					*(uintptr_t*)(addr + 356) = facilities[index + 1].addr;
+					*(uintptr_t*)(addr + 4) = facilities[index + 1].addr;
+				}
+				else
+				{
+					*(uintptr_t*)(addr + 356) = 0;
+					*(uintptr_t*)(addr + 4) = 0;
+				}
+			}
+		}
+	}
+
+	destroyFactoryFunc(facilities[index].addr, 0, 0);
 }
 
 void Base::Execute::ExecDipl(DWORD* buffer, char c)

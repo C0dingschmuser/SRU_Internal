@@ -19,7 +19,7 @@ void SetupSessionPtr(uintptr_t base = NULL)
 	//Load Countries
 
     g_ownCountryBase = *(uintptr_t*)(base + Offsets::ownCountry);
-
+    
 	//reset so re-initialized for new country
     Base::SRU_Data::g_unitSpawnSelectedUnitDesign = -1;
 
@@ -457,7 +457,7 @@ void PaintMap(uintptr_t mouseHoverHex, uint16_t xPos, uint16_t yPos)
     else if (g_paintFacilityDestroy) {
         //Destroy all Facilities on hex
 
-        Base::Execute::DestroyFacility(xPos, yPos, 0);
+        Base::Execute::DestroyAllFacilities(xPos, yPos);
         return;
     }
 
@@ -629,8 +629,54 @@ void PaintMap(uintptr_t mouseHoverHex, uint16_t xPos, uint16_t yPos)
                     *(uint8_t*)(mouseHoverHex + 0x8 + i) = 0;
                 }
             }
+
+            //Check for Bridges since they act like facilities
+
+            uintptr_t* rootAddr = Base::Execute::GetFacilityRoot(xPos, yPos);
+            std::vector<Base::SRU_Data::AddressHolder> facilities =
+                Base::Execute::GetFacilities(rootAddr);
+            
+            for (int i = 0; i < facilities.size(); i++)
+            {
+                if (facilities[i].id == 21902) //Bridge
+                {
+                    Base::Execute::DestroyFacility(rootAddr, facilities, i);
+                }
+            }
         }
     }
+}
+
+void PaintCoords(int x, int y)
+{
+    __int16 realX = x;
+    __int16 realY = y;
+
+    if (realX < 0)
+    {
+        realX = g_mapSizeX + x;
+    }
+
+    if (realY < 0) realY = 0;
+
+    DWORD posData = MAKELONG(realX, realY);
+
+    __int16 v9 = (__int16)posData;
+    if (v9 >= g_mapSizeX)
+    {
+        v9 = (__int16)posData % g_mapSizeX;
+    }
+    else if ((posData & 0x8000) != 0)
+    {
+        v9 = g_mapSizeX + (__int16)posData % g_mapSizeX;
+    }
+
+    long temp = v9 + g_mapSizeX * HIWORD(posData);
+    long mult = 16 * temp;
+
+    DWORD base = *(uintptr_t*)((*(uintptr_t*)(g_base + Offsets::allHexStart)) + 0xC) + mult;
+
+    PaintMap((uintptr_t)base, realX, realY);
 }
 
 void PaintMapBrush(uintptr_t* mouseHoverHex, uint16_t* xPos, uint16_t* yPos)
@@ -644,45 +690,21 @@ void PaintMapBrush(uintptr_t* mouseHoverHex, uint16_t* xPos, uint16_t* yPos)
         return;
     }
 
-	int xMin = *xPos - g_paintBrushSize / 2;
-	int xMax = *xPos + g_paintBrushSize / 2;
-	int yMin = *yPos - g_paintBrushSize / 2;
-	int yMax = *yPos + g_paintBrushSize / 2;
+    //if (g_paintStyle == 0) //Square
+    {
+        int xMin = *xPos - g_paintBrushSize / 2;
+        int xMax = *xPos + g_paintBrushSize / 2;
+        int yMin = *yPos - g_paintBrushSize / 2;
+        int yMax = *yPos + g_paintBrushSize / 2;
 
-	for (int x = xMin; x < xMax; x++)
-	{
-		for (int y = yMin; y < yMax; y++)
-		{
-            __int16 realX = x;
-            __int16 realY = y;
-			
-            if (realX < 0)
+        for (int x = xMin; x < xMax; x++)
+        {
+            for (int y = yMin; y < yMax; y++)
             {
-                realX = g_mapSizeX + x;
+                PaintCoords(x, y);
             }
-
-            if (realY < 0) realY = 0;
-
-            DWORD posData = MAKELONG(realX, realY);
-
-            __int16 v9 = (__int16)posData;
-            if (v9 >= g_mapSizeX)
-            {
-                v9 = (__int16)posData % g_mapSizeX;
-            }
-            else if ((posData & 0x8000) != 0)
-            {
-                v9 = g_mapSizeX + (__int16)posData % g_mapSizeX;
-            }
-
-            long temp = v9 + g_mapSizeX * HIWORD(posData);
-            long mult = 16 * temp;
-
-            DWORD base = *(uintptr_t*)((*(uintptr_t*)(g_base + Offsets::allHexStart)) + 0xC) + mult;
-
-            PaintMap((uintptr_t)base, realX, realY);
-		}
-	}
+        }
+    }
 }
 
 DWORD WINAPI dllThread(HMODULE hModule) {
