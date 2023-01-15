@@ -206,14 +206,22 @@ bool Base::SRU_Data::Unit::Init(uintptr_t base)
 
 	std::shared_ptr<FloatValue> fuel(new FloatValue);
 	fuel->valPtr = (float*)(base + Offsets::unitFuel);
-	fuel->origVal = 
-		*this->properties[(int)Property::MaxHalth]->valPtr * *this->defaultStats->fuelCapacity->valPtr;
+	if (this->properties[(int)Property::MaxHalth]->valPtr != nullptr && this->defaultStats->fuelCapacity->valPtr != nullptr)
+	{
+		fuel->origVal =
+			*this->properties[(int)Property::MaxHalth]->valPtr * *this->defaultStats->fuelCapacity->valPtr;
+	}
+
 	this->properties.push_back(fuel);
 
 	std::shared_ptr<FloatValue> supply(new FloatValue);
 	supply->valPtr = (float*)(base + Offsets::unitSupply);
-	supply->origVal = 
-		*this->properties[(int)Property::MaxHalth]->valPtr * *this->defaultStats->supplyCapacity->valPtr;
+	if (this->properties[(int)Property::MaxHalth]->valPtr != nullptr && this->defaultStats->supplyCapacity->valPtr != nullptr)
+	{
+		supply->origVal =
+			*this->properties[(int)Property::MaxHalth]->valPtr * *this->defaultStats->supplyCapacity->valPtr;
+	}
+
 	this->properties.push_back(supply);
 
 	std::shared_ptr<FloatValue> efficiency(new FloatValue);

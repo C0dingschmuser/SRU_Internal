@@ -52,7 +52,7 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 			ImGui::PopStyleColor();
 		}
 
-		if (g_ingame)
+		if (g_ingame == 2)
 		{
 			ImGui::SetWindowSize(ImVec2(525, 350));
 		}
@@ -61,7 +61,7 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 			ImGui::SetWindowSize(ImVec2(350, 50));
 		}
 
-		if (g_ingame && clickedCountry)
+		if (g_ingame == 2 && clickedCountry)
 		{
 			ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
 			if (ImGui::BeginTabBar("##tabs", tab_bar_flags))
@@ -331,14 +331,18 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 		}
 		else
 		{
-			if (!g_ingame)
+			std::string text = "Waiting for active Game...";
+			
+			if (g_ingame == 1)
 			{
-				ImGui::Text("Waiting for active Game...");
+				text = "Loading...";
 			}
-			else
+			else if (g_ingame == 2)
 			{
-				ImGui::Text("Click on Map to initialize...");
+				text = "Click on Map to initialize...";
 			}
+
+			ImGui::Text(text.c_str());
 		}
 		ImGui::End();
 	}

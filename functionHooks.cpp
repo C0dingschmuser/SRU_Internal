@@ -59,7 +59,11 @@ void __declspec(naked) GetSelectedUnits()
 
 void CheckSphereNameIntern()
 {
-    int sphereType = *(int*)(g_sphereNameReg7 + 0x18);
+    int* sphereTypeAddr = (int*)(g_sphereNameReg7 + 0x18);
+    
+    if (sphereTypeAddr == nullptr) return;
+
+    int sphereType = *sphereTypeAddr;
     //char* namePtr = (char*)g_sphereNameReg0;
     
     //if (namePtr != nullptr)
@@ -166,7 +170,7 @@ void CreateUnit(uintptr_t base)
 {
     Unit newUnit{};
     newUnit.Init(base);
-
+ 
     g_selectedUnitList.push_back(newUnit);
 }
 

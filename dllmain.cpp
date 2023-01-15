@@ -16,6 +16,8 @@ void SetupSessionPtr(uintptr_t base = NULL)
         base = (uintptr_t)GetModuleHandle(NULL);
     }
 
+    Sleep(500);
+
 	//Load Countries
 
     g_ownCountryBase = *(uintptr_t*)(base + Offsets::ownCountry);
@@ -107,27 +109,29 @@ void SetupSessionPtr(uintptr_t base = NULL)
 
 void CheckGameState(uintptr_t* gameStatePtr)
 {
-    bool ok = false;
     if (Base::Utils::CanReadPtr(gameStatePtr))
     {
         if (*gameStatePtr == 2)
         {
             if (!g_ingame)
             {
+                g_ingame = 1;
                 SetupSessionPtr();
+                g_ingame = 2;
             }
-            ok = true;
+        }
+        else
+        {
+            g_ingame = 0;
         }
     }
-
-    g_ingame = ok;
 }
 
 void CheckCurrentCountry(uintptr_t* clickedCountryPtr)
 {
     //std::cout << g_mouseClicked << " " << g_ingame << g_countryList.size() << std::endl; 
 
-    if (g_mouseClicked && g_ingame && g_countryList.size() > 0)
+    if (g_mouseClicked && g_ingame == 2 && g_countryList.size() > 0)
     {
         g_mouseClicked = false;
         g_newClick = true;
@@ -758,7 +762,7 @@ DWORD WINAPI dllThread(HMODULE hModule) {
 
             CheckGameState(gameStatePtr);
 
-            if (g_ingame)
+            if (g_ingame == 2)
             {
                 if (GetAsyncKeyState(VK_LSHIFT) & 0x8000)
                 {
@@ -834,7 +838,7 @@ DWORD WINAPI dllThread(HMODULE hModule) {
             }
         }
         
-        if (g_ingame)
+        if (g_ingame == 2)
         {
             Base::SRU_Data::HandleFreezes();
         }

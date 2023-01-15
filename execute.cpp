@@ -616,7 +616,14 @@ bool Base::Execute::HasTechUnlocked(int countryId, int techId)
 	uint32_t countryIdShiftedR = countryId >> 5;
 	uint32_t countryIdShiftedL = 1 << countryId;
 
-	uint32_t currentVal = *(uintptr_t*)(main + countryIdShiftedR * 4);
+	uintptr_t* addr = (uintptr_t*)(main + countryIdShiftedR * 4);
+
+	if (addr == nullptr)
+	{
+		return false;
+	}
+
+	uint32_t currentVal = *addr;
 	uint32_t testVal = currentVal | countryIdShiftedL;
 
 	if (testVal > currentVal)
@@ -646,6 +653,8 @@ bool Base::Execute::HasDesignUnlocked(int countryId, uintptr_t base)
 	uintptr_t unitAddr2 = base + 196;
 
 	uintptr_t* addr = (uintptr_t*)(unitAddr2 + countryIdShiftedR * 4);
+
+	if (addr == nullptr) return false;
 
 	uint32_t currentVal = *addr;
 	uint32_t testVal = currentVal | countryIdShiftedL;

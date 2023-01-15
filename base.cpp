@@ -234,7 +234,7 @@ uint16_t* Base::SRU_Data::g_clickedXPtr = nullptr;
 uint16_t* Base::SRU_Data::g_clickedYPtr = nullptr;
 
 //SRU Game Vars
-bool Base::SRU_Data::g_ingame = false;
+int Base::SRU_Data::g_ingame = 0;
 uintptr_t Base::SRU_Data::g_base = 0;
 uintptr_t Base::SRU_Data::g_ownCountryBase = 0;
 uintptr_t g_currentCountryBase = 0;

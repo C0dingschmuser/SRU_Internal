@@ -529,6 +529,11 @@ void Base::SRU_Data::Country::RefreshLeader()
 			break;
 		}
 	}
+
+	if (this->currentLeader == nullptr)
+	{
+		this->currentLeader = g_leaderList[0];
+	}
 }
 
 void Base::SRU_Data::Country::ChangeName(std::string newName)

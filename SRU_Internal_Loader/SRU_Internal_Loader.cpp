@@ -17,7 +17,7 @@
 
 #define DISABLE_OUTPUT
 
-static const int version = 116;
+static const int version = 118;
 static bool updated = false;
 
 std::string VersionToString(int version)
@@ -241,8 +241,15 @@ void CheckForUpdate(std::string origName)
 		file.open("changelog.txt");
 		file << "--- INFORMATION ---" << std::endl;
 		file << "Happy new year!" << std::endl << std::endl;
-		file << "--- CHANGELOG ---" << std::endl;
-		file << "v1.16 [NEW]" << std::endl;
+		file << "--- CHANGELOG ---" << std::endl; 
+		file << "v1.18 [NEW]" << std::endl;
+		file << "- Fixed several possible crashes" << std::endl;
+		file << "v1.17 [NEW]" << std::endl;
+		file << "- Added Sphere of influence changing" << std::endl;
+		file << "- Added Sphere of influence renaming" << std::endl;
+		file << "- Added Unit Design sorting by country" << std::endl;
+		file << "- Infrastructure remover will now also remove bridges" << std::endl;
+		file << "v1.16" << std::endl;
 		file << "- Added Hex/City renaming" << std::endl;
 		file << "- Added Infrastructure remover" << std::endl;
 		file << "- Improved map painting: " << std::endl;

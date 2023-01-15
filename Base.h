@@ -441,6 +441,8 @@ namespace Base
 		extern SurrenderEvent surrenderEvents[];
 		extern uintptr_t g_nextUnitEntity;
 		
+		extern int g_ingame;
+
 		extern int g_unitEntityCountSelected;
 		extern int g_clickedCountry;
 		extern int g_clickedCountryRaw;
@@ -485,7 +487,6 @@ namespace Base
 		extern bool g_facilitySpawnConstruction;
 
 		extern bool g_newClick;
-		extern bool g_ingame;
 		extern bool g_addOk;
 		extern bool g_shift;
 		extern bool g_mapSizeLoaded;
