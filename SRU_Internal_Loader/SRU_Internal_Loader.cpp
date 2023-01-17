@@ -17,7 +17,7 @@
 
 #define DISABLE_OUTPUT
 
-static const int version = 118;
+static const int version = 119;
 static bool updated = false;
 
 std::string VersionToString(int version)
@@ -242,6 +242,8 @@ void CheckForUpdate(std::string origName)
 		file << "--- INFORMATION ---" << std::endl;
 		file << "Happy new year!" << std::endl << std::endl;
 		file << "--- CHANGELOG ---" << std::endl; 
+		file << "v1.19 [NEW]" << std::endl;
+		file << "- Fixed building infrastructure not working in colonies" << std::endl;
 		file << "v1.18 [NEW]" << std::endl;
 		file << "- Fixed several possible crashes" << std::endl;
 		file << "v1.17 [NEW]" << std::endl;

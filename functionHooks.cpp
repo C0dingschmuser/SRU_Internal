@@ -767,10 +767,29 @@ void Base::SRU_Data::Hooks::SetupFunctionHooks()
     Base::SRU_Data::Hooks::g_buildCheckJumpBackAddr = hookAddress + hookLength;
     Base::Hooks::FunctionHook((void*)hookAddress, BuildCheckOwner, hookLength);
 
-    //overwrite transport build
+    //nop transport build check
 
     uintptr_t addr = g_base + Offsets::buildTransportHook;
     Utils::Nop((BYTE*)addr, 6);
+
+    //nop cmp in sub transport event function
+
+    addr = g_base + Offsets::buildTransportHookSub;
+    Utils::Nop((BYTE*)addr, 2);
+
+    //override transport build colony check
+
+    addr = g_base + Offsets::buildTransportHookColony;
+    DWORD curProtection;
+    VirtualProtect((void*)addr, 2, PAGE_EXECUTE_READWRITE, &curProtection);
+
+    for (int i = 0; i < Offsets::buildTransportColonyNew.size(); i++)
+    {
+		*(BYTE*)(addr + i) = Offsets::buildTransportColonyNew[i];
+    }
+
+    DWORD temp;
+    VirtualProtect((void*)addr, 2, curProtection, &temp);
 
     //hex name hook
 
