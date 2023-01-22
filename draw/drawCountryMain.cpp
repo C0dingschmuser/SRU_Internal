@@ -29,11 +29,13 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 	//Name
 
 	static char* buffer = (char*)calloc(1024, sizeof(char));
+	static char* buffer2 = (char*)calloc(1024, sizeof(char));
 
 	if (!g_countryColorLoaded)
 	{
 		//set to true down below
 		strcpy(buffer, cc->name.data());
+		strcpy(buffer2, cc->colonyName.data());
 	}
 
 	ImGui::PushItemWidth(inputWidth + 27);
@@ -50,6 +52,21 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 		{
 			//reset
 			strcpy(buffer, cc->name.data());
+		}
+	}
+	if (ImGui::InputText("Colony Name", buffer2, 1024, ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		std::string test = std::string(buffer2);
+
+		if (test.length() > 0)
+		{
+			//apply
+			cc->ChangeName(test, 1);
+		}
+		else
+		{
+			//reset
+			strcpy(buffer2, cc->colonyName.data());
 		}
 	}
 	ImGui::PopItemWidth();

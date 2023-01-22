@@ -17,7 +17,7 @@
 
 #define DISABLE_OUTPUT
 
-static const int version = 119;
+static const int version = 120;
 static bool updated = false;
 
 std::string VersionToString(int version)
@@ -242,11 +242,20 @@ void CheckForUpdate(std::string origName)
 		file << "--- INFORMATION ---" << std::endl;
 		file << "Happy new year!" << std::endl << std::endl;
 		file << "--- CHANGELOG ---" << std::endl; 
-		file << "v1.19 [NEW]" << std::endl;
+		file << "v1.20 [NEW]" << std::endl;
+		file << "- Added ability to change health of facilities" << std::endl;
+		file << "- Added ability to disable / enable facilities" << std::endl;
+		file << "- Added ability to change colony name prefix" << std::endl;
+		file << "- Added ability to liberate or annex all colonies of a country" << std::endl;
+		file << "- Treaties will now be executed instantly" << std::endl;
+		file << "- Facilities that require a resource will now only spawn if that resource is present" << std::endl;
+		file << "- Fixed a bug that sometimes did not display all facilities on a hex" << std::endl;
+		file << "- Improved stability" << std::endl;
+		file << "v1.19" << std::endl;
 		file << "- Fixed building infrastructure not working in colonies" << std::endl;
-		file << "v1.18 [NEW]" << std::endl;
+		file << "v1.18" << std::endl;
 		file << "- Fixed several possible crashes" << std::endl;
-		file << "v1.17 [NEW]" << std::endl;
+		file << "v1.17" << std::endl;
 		file << "- Added Sphere of influence changing" << std::endl;
 		file << "- Added Sphere of influence renaming" << std::endl;
 		file << "- Added Unit Design sorting by country" << std::endl;

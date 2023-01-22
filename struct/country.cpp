@@ -16,6 +16,17 @@ void Base::SRU_Data::Country::Init(uintptr_t base)
 
 	this->name = std::string((char*)nameAddr);
 
+	uintptr_t* colonyNameAddr = (uintptr_t*)*(uintptr_t*)(base + Offsets::countryColonyName);
+	
+	if (Base::Utils::CanReadPtr(colonyNameAddr))
+	{
+		this->colonyName = std::string((char*)colonyNameAddr);
+	}
+	else
+	{
+		this->colonyName = "";
+	}
+
 	byte oId = *(uintptr_t*)(base + Offsets::countryOtherId);
 	this->oId = oId;
 
@@ -536,15 +547,42 @@ void Base::SRU_Data::Country::RefreshLeader()
 	}
 }
 
-void Base::SRU_Data::Country::ChangeName(std::string newName)
+void Base::SRU_Data::Country::ChangeName(std::string newName, int type)
 {
 	char* buffer = (char*)calloc(newName.length() + 3, sizeof(char));
 	strcpy(buffer, newName.data());
 
-	*(uintptr_t*)(this->base + Offsets::countryName) = (int)(int*)buffer;
+	if (type == 0)
+	{
+		*(uintptr_t*)(this->base + Offsets::countryName) = (int)(int*)buffer;
+	}
+	else
+	{
+		*(uintptr_t*)(this->base + Offsets::countryColonyName) = (int)(int*)buffer;
+	}
 
-	uint8_t curr = *(uint8_t*)(this->base + Offsets::countryNameOverride);
-	*(uint8_t*)(this->base + Offsets::countryNameOverride) = curr | 0x4;
+	if (type == 0)
+	{
+		uint8_t curr = *(uint8_t*)(this->base + Offsets::countryNameOverride);
+		*(uint8_t*)(this->base + Offsets::countryNameOverride) = curr | 0x4;
 
-	this->name = newName;
+		this->name = newName;
+	}
+	else
+	{
+		uint16_t val = *(uint16_t*)(this->base + 0x8);
+		unsigned int eax = val * 4;
+		unsigned int edi = val;
+		edi = edi << 5;
+		edi = edi - eax;
+
+		uintptr_t* curr = (uintptr_t*)(g_base + Offsets::colonyName + edi);
+
+		if (Base::Utils::CanReadPtr(curr))
+		{
+			*curr = 0;
+		}
+
+		this->colonyName = newName;
+	}
 }

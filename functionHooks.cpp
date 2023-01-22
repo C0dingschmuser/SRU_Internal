@@ -40,6 +40,7 @@ void __declspec(naked) GetSelectedUnits()
         mov[g_selectedReg4], edi
         mov[g_selectedReg5], esi
         mov[g_selectedReg6], ebx
+        mov[g_selectedReg7], esp
     }
 
     HandleSelectedUnits();
@@ -52,6 +53,7 @@ void __declspec(naked) GetSelectedUnits()
 		mov edi, g_selectedReg4
 		mov esi, g_selectedReg5
 		mov ebx, g_selectedReg6
+        mov esp, g_selectedReg7
         cmp byte ptr[ebp + 0x16], 00
         jmp[g_selectedJmpBackAddr]
     }
@@ -174,28 +176,42 @@ void CreateUnit(uintptr_t base)
     g_selectedUnitList.push_back(newUnit);
 }
 
-void __declspec(naked) SetHexSupply()
+void CheckHexSupply()
 {
-    __asm {
-        lea eax, [ebp - 01]
-        mov[Asm::g_currentHexSupply], al
-        mov[g_hexReg0], eax
-        mov[g_hexReg1], ecx
-        mov[g_hexReg2], edx
-        mov[g_hexReg3], ebx
-    }
-
     if (Asm::g_currentHexSupply < g_lowestHexSupply ||
         Asm::g_hexReg0 == 0xFFFFFFFF)
     {
         Asm::g_currentHexSupply = g_lowestHexSupply;
     }
 
+}
+
+void __declspec(naked) SetHexSupply()
+{
+    __asm {
+        lea eax, [ebp - 01]
+        mov[g_hexReg0], eax
+        mov[g_hexReg1], ecx
+        mov[g_hexReg2], edx
+        mov[g_hexReg3], ebx
+        mov[g_hexReg4], edi
+        mov[g_hexReg5], esi
+        mov[g_hexReg6], ebp
+        mov[g_hexReg7], esp
+        mov[Asm::g_currentHexSupply], al
+    }
+
+    CheckHexSupply();
+
     __asm {
         mov eax, g_hexReg0
         mov ecx, g_hexReg1
         mov edx, g_hexReg2
         mov ebx, g_hexReg3
+		mov edi, g_hexReg4
+		mov esi, g_hexReg5
+		mov ebp, g_hexReg6
+		mov esp, g_hexReg7
         mov al, Asm::g_currentHexSupply
         mov[edx + 04], al
         jmp[g_hexSupplyJmpBackAddr]
@@ -214,6 +230,8 @@ void __declspec(naked) HandleAISurrender()
         mov[g_aiSurrReg3], ebp
         mov[g_aiSurrReg4], edi
         mov[g_aiSurrReg5], esi
+        mov[g_aiSurrReg6], ebx
+        mov[g_aiSurrReg7], esp
     }
 
     AddSurrenderEvent(Asm::g_aiSurrFrom, Asm::g_aiSurrTo);
@@ -225,6 +243,8 @@ void __declspec(naked) HandleAISurrender()
         mov ebp, g_aiSurrReg3
         mov edi, g_aiSurrReg4
         mov esi, g_aiSurrReg5
+		mov ebx, g_aiSurrReg6
+		mov esp, g_aiSurrReg7
         jmp [g_aiSurrenderJmpBackAddr]
     }
 }
@@ -248,13 +268,13 @@ void check()
     using namespace Base::SRU_Data;
 	//do not free if own pointer
 
-    bool found = false;
+    int found = -1;
 
     for (int i = 0; i < Asm::g_ownAllocs.size(); i++)
     {
         if (Asm::g_ownAllocs[i] == (uintptr_t)g_diplFreeReg3)
         {
-            found = true;
+            found = i;
             break;
         }
     }
@@ -751,11 +771,11 @@ void Base::SRU_Data::Hooks::SetupFunctionHooks()
     Base::SRU_Data::Hooks::g_defconJmpBackAddr4 = hookAddress + hookLength;
     Base::Hooks::FunctionHook((void*)hookAddress, HandleDefconRaw4, hookLength);
 
-    hookLength = 5;
+    /*hookLength = 5;
     hookAddress = g_base + Offsets::diplFreeHook;
     Base::SRU_Data::Hooks::g_diplFreeJmpBackAddr = hookAddress + hookLength;
     Base::SRU_Data::Hooks::g_diplFreeJmpBackAddrDefault = hookAddress + hookLength;
-    Base::Hooks::FunctionHook((void*)hookAddress, DiplFree, hookLength);
+    Base::Hooks::FunctionHook((void*)hookAddress, DiplFree, hookLength);*/
 
     hookLength = 6;
     hookAddress = g_base + Offsets::mapSizeHook;

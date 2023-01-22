@@ -21,11 +21,16 @@ unsigned int Base::SRU_Data::Asm::g_selectedReg3;
 unsigned int Base::SRU_Data::Asm::g_selectedReg4;
 unsigned int Base::SRU_Data::Asm::g_selectedReg5;
 unsigned int Base::SRU_Data::Asm::g_selectedReg6;
+unsigned int Base::SRU_Data::Asm::g_selectedReg7;
 
 unsigned int Base::SRU_Data::Asm::g_hexReg0;
 unsigned int Base::SRU_Data::Asm::g_hexReg1;
 unsigned int Base::SRU_Data::Asm::g_hexReg2;
 unsigned int Base::SRU_Data::Asm::g_hexReg3;
+unsigned int Base::SRU_Data::Asm::g_hexReg4;
+unsigned int Base::SRU_Data::Asm::g_hexReg5;
+unsigned int Base::SRU_Data::Asm::g_hexReg6;
+unsigned int Base::SRU_Data::Asm::g_hexReg7;
 
 unsigned int Base::SRU_Data::Asm::g_aiSurrReg0;
 unsigned int Base::SRU_Data::Asm::g_aiSurrReg1;
@@ -33,6 +38,8 @@ unsigned int Base::SRU_Data::Asm::g_aiSurrReg2;
 unsigned int Base::SRU_Data::Asm::g_aiSurrReg3;
 unsigned int Base::SRU_Data::Asm::g_aiSurrReg4;
 unsigned int Base::SRU_Data::Asm::g_aiSurrReg5;
+unsigned int Base::SRU_Data::Asm::g_aiSurrReg6;
+unsigned int Base::SRU_Data::Asm::g_aiSurrReg7;
 
 int Base::SRU_Data::Asm::g_aiSurrSize;
 int Base::SRU_Data::Asm::g_aiSurrFrom;
@@ -180,7 +187,7 @@ int Base::SRU_Data::g_mainRefreshTime = 25;
 
 int Base::SRU_Data::g_mapSizeX = 0;
 
-int Base::SRU_Data::g_paintMode = 0;
+int Base::SRU_Data::g_paintMode = Base::SRU_Data::Paint_Land;
 int Base::SRU_Data::g_paintBrushSize = 1;
 int Base::SRU_Data::g_paintStyle = 0;
 bool Base::SRU_Data::g_paintUnitTargetCountry = false;
@@ -208,9 +215,6 @@ bool Base::SRU_Data::g_uiHexSupplySet = false;
 bool Base::SRU_Data::g_mouseClicked = false;
 bool Base::SRU_Data::g_paintActive = false;
 bool Base::SRU_Data::g_paintEnabled = false;
-bool Base::SRU_Data::g_paintUnitSpawn = false;
-bool Base::SRU_Data::g_paintFacilitySpawn = false;
-bool Base::SRU_Data::g_paintFacilityDestroy = false;
 bool Base::SRU_Data::g_paintHexOwner = true;
 bool Base::SRU_Data::g_paintHexLoyalty = true;
 bool Base::SRU_Data::g_paintHexOnlySelected = false;

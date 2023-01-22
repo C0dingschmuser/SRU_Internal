@@ -7,6 +7,7 @@ Base::Execute::_CreateTransportFuncEvent Base::Execute::createTransportFuncEvent
 Base::Execute::_CreateFactoryFunc Base::Execute::createFactoryFunc = 0;
 Base::Execute::_DestroyFactoryFunc Base::Execute::destroyFactoryFunc = 0;
 Base::Execute::_TreatyFunc Base::Execute::treatyFunc = 0;
+Base::Execute::_FacilityStatusFunc Base::Execute::facilityStatusFunc = 0;
 
 void Base::Execute::SetupFunctions()
 {
@@ -19,10 +20,13 @@ void Base::Execute::SetupFunctions()
 	createFactoryFunc = (_CreateFactoryFunc)(Base::SRU_Data::g_base + Offsets::createFactoryFunc);
 	destroyFactoryFunc = (_DestroyFactoryFunc)(Base::SRU_Data::g_base + Offsets::destroyFactoryFunc);
 	treatyFunc = (_TreatyFunc)(Base::SRU_Data::g_base + Offsets::treatyFunc);
+	facilityStatusFunc = (_FacilityStatusFunc)(Base::SRU_Data::g_base + Offsets::facilityStatusFunc);
 }
 
 void Base::Execute::CreateFacility(__int16 posX, __int16 posY, int countryOId, int facilityId, float constructionState)
 {
+	using namespace Base::SRU_Data;
+
 	__int16 realX = posX;
 	__int16 realY = posY;
 
@@ -53,6 +57,63 @@ void Base::Execute::CreateFacility(__int16 posX, __int16 posY, int countryOId, i
 	DWORD base3 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 16) + (4 * temp);
 	DWORD base4 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 20) + (4 * temp);
 
+#pragma region CheckResource
+
+	//Checks if resource exists for facilities that depend on it.
+	//Without this they would pretty much be useless
+
+	int facilResource = -1;
+
+	switch (facilityId)
+	{
+	case 21010: //Industrial Agriculture
+		facilResource = Resource_Agriculture;
+		break;
+	case 21014: //Timber Mill
+		facilResource = Resource_Timber;
+		break;
+	case 21017: //Gas Field
+	case 21018: //Oil Derrick
+		facilResource = Resource_Petroleum;
+		break;
+	case 21025: //Coal Mine
+		facilResource = Resource_Coal;
+		break;
+	case 21028: //Ore Mine
+		facilResource = Resource_MetalOre;
+		break;
+	case 21032: //Uranium Mine
+		facilResource = Resource_Uranium;
+		break;
+	case 21037: //Hydro Sm
+	case 21038: //Hydro
+		facilResource = Resource_Electricity;
+		break;
+	case 21065: //Rubber Plantation
+		facilResource = Resource_Rubber;
+		break;
+	}
+
+	uint8_t* resAddr = (uint8_t*)base3 + 2;
+
+	if (facilResource > 3)
+	{
+		resAddr = (uint8_t*)base3 + 3;
+		facilResource -= 4;
+	}
+
+	if (facilResource > -1)
+	{
+		int lvl = Base::Execute::GetMapResource(resAddr, facilResource);
+
+		if (!lvl)
+		{
+			return;
+		}
+	}
+
+#pragma endregion
+
 	DWORD* buffer = (DWORD*)calloc(0x20, sizeof(DWORD));
 	buffer[0] = posData;
 	buffer[1] = base1;
@@ -61,11 +122,48 @@ void Base::Execute::CreateFacility(__int16 posX, __int16 posY, int countryOId, i
 	buffer[4] = base4;
 	buffer[5] = temp;
 
-	Base::SRU_Data::Asm::g_ownAllocs.push_back((uintptr_t)buffer);
+	//Base::SRU_Data::Asm::g_ownAllocs.push_back((uintptr_t)buffer);
 
 	//Dont ask me why 2 times, its called 2 times in the original function
 	Base::Execute::createFactoryFunc((int)buffer, 0, 0, countryOId, facilityId, 1.0f, 0, constructionState, 0);
 	Base::Execute::createFactoryFunc((int)buffer, 1, 0, countryOId, facilityId, 1.0f, 0, constructionState, 0);
+	free(buffer);
+}
+
+uintptr_t* Base::Execute::GetTileAddr(uint16_t xPos, uint16_t yPos)
+{
+	using namespace Base::SRU_Data;
+
+	std::vector<Base::SRU_Data::AddressHolder> facilities;
+
+	__int16 realX = xPos;
+	__int16 realY = yPos;
+	if (realX < 0)
+	{
+		realX = Base::SRU_Data::g_mapSizeX + realX;
+	}
+	if (realY < 0) realY = 0;
+
+	DWORD posData = MAKELONG(realX, realY);
+
+	__int16 v9 = (__int16)posData;
+	if (v9 >= Base::SRU_Data::g_mapSizeX)
+	{
+		v9 = (__int16)posData % Base::SRU_Data::g_mapSizeX;
+	}
+	else if ((posData & 0x8000) != 0)
+	{
+		v9 = Base::SRU_Data::g_mapSizeX + (__int16)posData % Base::SRU_Data::g_mapSizeX;
+	}
+
+	long temp = v9 + Base::SRU_Data::g_mapSizeX * HIWORD(posData);
+	long mult = 16 * temp;
+
+	DWORD base2 = *(uintptr_t*)((*(uintptr_t*)(Base::SRU_Data::g_base + Offsets::allHexStart)) + 0xC) + mult;
+
+	uintptr_t* addr = (uintptr_t*)base2;
+
+	return addr;
 }
 
 uintptr_t* Base::Execute::GetFacilityRoot(uint16_t xPos, uint16_t yPos)
@@ -131,6 +229,7 @@ std::vector<struct Base::SRU_Data::AddressHolder> Base::Execute::GetFacilities(u
 		if ((v1870 & 0x20) != 0 && (v1870 & 0x80) == 0 && *(WORD*)(val + 12) && (*(BYTE*)(val + 179) & 0x40) == 0)
 		{
 			int id = *(uintptr_t*)(val + 0xC);
+			int id2 = *(uintptr_t*)(val + 0x58);
 
 			for (int i = 0; i < g_facilityList.size(); i++)
 			{
@@ -139,19 +238,55 @@ std::vector<struct Base::SRU_Data::AddressHolder> Base::Execute::GetFacilities(u
 					AddressHolder temp;
 					temp.addr = val;
 					temp.id = id;
+					temp.id2 = id2;
 					temp.name = g_facilityList[i]->name;
 					facilities.push_back(temp);
 					break;
 				}
 			}
 		}
-		else break;
+		else
+		{
+			AddressHolder temp;
+			temp.addr = val;
+			temp.id = -1;
+			facilities.push_back(temp);
+		}
 
 		val = v5012;
 		if (!v5012) break;
 	}
 
 	return facilities;
+}
+
+void Base::Execute::DisableAllFacilities(uint16_t xPos, uint16_t yPos, int disable)
+{
+	uintptr_t* tileAddr = Base::Execute::GetTileAddr(xPos, yPos);
+	uintptr_t* root = Base::Execute::GetFacilityRoot(xPos, yPos);
+	std::vector<Base::SRU_Data::AddressHolder> facilities = Base::Execute::GetFacilities(root);
+
+	for (int i = 0; i < facilities.size(); i++)
+	{
+		Base::Execute::DisableFacility(tileAddr, root, facilities, i, disable);
+	}
+}
+
+void Base::Execute::DisableFacility(uintptr_t* tileAddr, uintptr_t* rootAddr, std::vector<Base::SRU_Data::AddressHolder> facilities, int index, int disable)
+{
+	if (facilities[index].id == -1) return;
+
+	int* buffer = (int*)calloc(16, sizeof(int));
+	buffer[0] = 0xD301B0;
+	buffer[1] = 0;
+	buffer[2] = (int)tileAddr;
+	buffer[3] = 0;
+	buffer[4] = (int)rootAddr;
+
+	int num = facilities[index].id2;
+
+	Base::Execute::facilityStatusFunc((int)buffer, 0, 0x000000B8, num, disable);
+	free(buffer);
 }
 
 void Base::Execute::DestroyAllFacilities(uint16_t xPos, uint16_t yPos)
@@ -163,6 +298,8 @@ void Base::Execute::DestroyAllFacilities(uint16_t xPos, uint16_t yPos)
 	{
 		destroyFactoryFunc(facilities[i].addr, 0, 0);
 	}
+
+	*root = 0;
 }
 
 void Base::Execute::DestroyFacility(uintptr_t* rootAddr, std::vector<Base::SRU_Data::AddressHolder> facilities, int index)
@@ -231,10 +368,50 @@ void Base::Execute::AnnexCountry(int from, int to)
 	Base::Execute::ExecDipl((DWORD*)surrender, '\x01');
 }
 
+void Base::Execute::AnnexAllColonies(Base::SRU_Data::Country* cc)
+{
+	using namespace Base::SRU_Data;
+
+	uint16_t current = *(uint16_t*)(cc->base + 0x8);
+
+	for (int i = 0; i < g_countryList.size(); i++)
+	{
+		uint16_t owner = *(uint16_t*)(g_countryList[i].base + 0x46);
+
+		if (owner > 0)
+		{
+			if (owner == current)
+			{
+				AnnexCountry(g_countryList[i].oId, cc->oId);
+			}
+		}
+	}
+}
+
 void Base::Execute::RespawnCountry(int from, int to, int type)
 {
 	int* buffer = Offsets::CreateAdvancedDiplOffer(Base::SRU_Data::g_base, Offsets::respawnCountry, to, 0, 0, 0, type, from, 0, 0, 0, 0);
 	ExecDipl((DWORD*)buffer, '\x01');
+}
+
+void Base::Execute::RespawnAllColonies(Base::SRU_Data::Country* cc)
+{
+	using namespace Base::SRU_Data;
+
+	uint16_t current = *(uint16_t*)(cc->base + 0x8);
+
+	for (int i = 0; i < g_countryList.size(); i++)
+	{
+		uint16_t owner = *(uint16_t*)(g_countryList[i].base + 0x46);
+
+		if (owner > 0)
+		{
+			if (owner == current)
+			{
+				RespawnCountry(g_countryList[i].oId, cc->oId, 1);
+			}
+		}
+	}
 }
 
 void Base::Execute::SetCountryAIStance(Base::SRU_Data::Country* cc, int newAIStance)
@@ -295,6 +472,7 @@ void Base::Execute::UnlockTech(int to, int tech, bool lock)
 
 		//unlocks tech requirements recursive
 		unlockTechFunc(buffer, tech);
+		free(buffer);
 	}
 	else
 	{
@@ -467,6 +645,11 @@ void Base::Execute::SetMapResource(uint8_t* byte, int resource, int level)
 	}
 }
 
+int Base::Execute::GetMapResource(uint8_t* byte, int resource)
+{
+	return (*byte >> (2 * resource)) & 0x3;
+}
+
 void Base::Execute::SpawnUnit(int unitDesign, int amount, uintptr_t country, int spread, bool reserve, uint16_t xPos, uint16_t yPos)
 {
 	//std::cout << std::dec << unitDesign << " " << amount << std::hex << " " << country << " " << std::dec << spread << " " << reserve << " " << xPos << " " << yPos << std::endl;
@@ -503,6 +686,8 @@ void Base::Execute::SpawnUnit(int unitDesign, int amount, uintptr_t country, int
 		}
 
 		spawnUnitFunc((int)country, (int)buffer, unitDesign, amount, posData, 1, 0, buffer2, 0);
+		free(buffer);
+		free(buffer2);
 	}
 	else
 	{
@@ -532,6 +717,8 @@ void Base::Execute::SpawnUnit(int unitDesign, int amount, uintptr_t country, int
 
 			
 		}
+
+		free(buffer2);
 	}
 }
 
@@ -575,21 +762,21 @@ int Base::Execute::ExecuteTreaty(int diplTreatyIndex, int set)
 
 	int diplType = Offsets::defaultDiplo;
 
-	if (treaty.treatyId == -1)
+	/*if (treaty.treatyId == -1)
 	{
 		//War
 
 		diplType = Offsets::warDiplo;
 	}
 	else {
-		if (set == 0) {
-			treatyFunc(clickedCountry->base, 0, treaty.treatyId, set, g_countryList[g_selectedTargetCountry].id, 0, 0, 0, 0);
-			treatyFunc(clickedCountry->base, 1, treaty.treatyId, set, g_countryList[g_selectedTargetCountry].id, 0, 0, 0, 0);
-			treatyFunc(g_countryList[g_selectedTargetCountry].base, 0, treaty.treatyId, set, clickedCountry->id, 0, 0, 0, 0);
-			treatyFunc(g_countryList[g_selectedTargetCountry].base, 1, treaty.treatyId, set, clickedCountry->id, 0, 0, 0, 0);
-			return 1;
-		}
-	}
+		if (set == 0) {*/
+	treatyFunc(clickedCountry->base, 0, treaty.treatyId, set, g_countryList[g_selectedTargetCountry].id, 1, 0, 1, 0);
+	treatyFunc(clickedCountry->base, 1, treaty.treatyId, set, g_countryList[g_selectedTargetCountry].id, 1, 0, 1, 0);
+	treatyFunc(g_countryList[g_selectedTargetCountry].base, 0, treaty.treatyId, set, clickedCountry->id, 1, 0, 1, 0);
+	treatyFunc(g_countryList[g_selectedTargetCountry].base, 1, treaty.treatyId, set, clickedCountry->id, 1, 0, 1, 0);
+	return 1;
+	//	}
+	//}
 
 	long currentDay = *(uintptr_t*)(g_base + Offsets::currentDay);
 	int currentTime = *(uintptr_t*)(g_base + Offsets::currentDayTime);

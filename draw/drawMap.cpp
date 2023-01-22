@@ -7,9 +7,7 @@ void Base::Draw::DrawMap(Base::SRU_Data::Country* cc)
 {
 	Country* target = &g_countryList[g_selectedTargetCountry];
 
-	g_paintUnitSpawn = false;
-	g_paintFacilitySpawn = false;
-	g_paintFacilityDestroy = false;
+	g_paintMode = Paint_Land;
 
 	uintptr_t hexBase = *g_clickedHexPtr;
 	uint8_t hexOwner = *(uintptr_t*)(hexBase);
@@ -212,58 +210,7 @@ void Base::Draw::DrawMap(Base::SRU_Data::Country* cc)
 			ImGui::SameLine();
 			ImGui::BeginChild("##hexdatabuttons");
 			{
-				bool disabled = true;
 
-				if (loyalCountry)
-				{
-					if (loyalCountry->base != cc->base)
-					{
-						disabled = false;
-					}
-				}
-
-				Country t = g_countryList[g_selectedTargetCountry];
-
-				if (disabled)
-				{
-					ImGui::BeginDisabled();
-				}
-
-				if (ImGui::Button("Create Colony"))
-				{
-					Base::Execute::RespawnCountry(loyalCountry->oId, t.oId, 2);
-				}
-				ImGui::SameLine();
-				if (ImGui::Button("Liberate Country"))
-				{
-					Base::Execute::RespawnCountry(loyalCountry->oId, t.oId, 1);
-				}
-
-				if (disabled)
-				{
-					ImGui::EndDisabled();
-				}
-
-				disabled = true;
-				if (t.base != ownerCountry->base)
-				{
-					disabled = false;
-				}
-
-				if (disabled)
-				{
-					ImGui::BeginDisabled();
-				}
-
-				if (ImGui::Button("Annex Country"))
-				{
-					Base::Execute::AnnexCountry(ownerCountry->oId, t.oId);
-				}
-
-				if (disabled)
-				{
-					ImGui::EndDisabled();
-				}
 			}
 			ImGui::EndChild();
 
@@ -319,7 +266,7 @@ void Base::Draw::DrawMap(Base::SRU_Data::Country* cc)
 
 				if (ImGui::BeginTabItem("Land"))
 				{
-					g_paintMode = 0;
+					g_paintMode = Paint_Land;
 					static bool customTargetCountry = false;
 
 					ImGui::Checkbox("Paint target country", &g_paintHexOwner);
@@ -431,7 +378,7 @@ void Base::Draw::DrawMap(Base::SRU_Data::Country* cc)
 
 				if (ImGui::BeginTabItem("Resource"))
 				{
-					g_paintMode = 2;
+					g_paintMode = Paint_Resource;
 
 					static std::vector<std::string> resourceList = {
 						"Agriculture",
@@ -475,7 +422,7 @@ void Base::Draw::DrawMap(Base::SRU_Data::Country* cc)
 
 				if (ImGui::BeginTabItem("Infrastructure"))
 				{
-					g_paintMode = 3;
+					g_paintMode = Paint_Infrastructure;
 
 					ImGui::Text("Building:\n  Ingame road/rail builder is unlocked.\n  You can build anywhere.");
 					ImGui::Text("Destroying:\n  Enter Paint Mode to reset all\n  infrastructure under mouse cursor.");
@@ -486,7 +433,7 @@ void Base::Draw::DrawMap(Base::SRU_Data::Country* cc)
 				if (ImGui::BeginTabItem("Unit"))
 				{
 					ImGui::Text("Changes unit stats under cursor");
-					g_paintMode = 1;
+					g_paintMode = Paint_UnitStats;
 
 					static bool customUnitCountry = false;
 

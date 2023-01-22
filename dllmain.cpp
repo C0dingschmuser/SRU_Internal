@@ -102,6 +102,28 @@ void SetupSessionPtr(uintptr_t base = NULL)
     Base::SRU_Data::Asm::g_ownAllocs.clear();
     Base::SRU_Data::g_hexNameList.clear();
 
+    for (int i = 0; i < g_countryList.size(); i++)
+    {
+        uint16_t owner = *(uint16_t*)(g_countryList[i].base + 0x46);
+
+        if (owner > 0)
+        {
+            for (int a = 0; a < g_countryList.size(); a++)
+            {
+                if (a != i)
+                {
+                    uint16_t current = *(uint16_t*)(g_countryList[a].base + 0x8);
+                    
+                    if (owner == current)
+                    {
+                        std::cout << "Owner of " << g_countryList[i].name << " is " << g_countryList[a].name << std::endl;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
     g_mapSizeLoaded = false;
 
     unitTimer = 0;
@@ -167,17 +189,23 @@ void CheckCurrentCountry(uintptr_t* clickedCountryPtr)
         uintptr_t* addr = (uintptr_t*)base3;
         DWORD val = *addr;
 
+        int tempResourceId = g_paintSelectedResource;
+
+        uint8_t* resAddr = (uint8_t*)base4 + 2;
+
+        if (g_paintSelectedResource > 3)
+        {
+            resAddr = (uint8_t*)base4 + 3;
+            tempResourceId -= 4;
+        }
+
+        int res = Base::Execute::GetMapResource(resAddr, tempResourceId);
+
         std::cout << "------------" << std::endl;
+        std::cout << std::dec << res << std::endl;
 		std::cout << std::hex << base2 << " " << base5 << " " << base4 << " " << base3 << " " << base6 << " " << base7 << " " << base8 << std::endl;
 
-        uint8_t* inf1 = (uint8_t*)(base2 + 0x8);
-        uint8_t* inf2 = (uint8_t*)(base2 + 0x9);
-        uint8_t* inf3 = (uint8_t*)(base2 + 0xA);
-        uint8_t* inf4 = (uint8_t*)(base2 + 0xB);
-
-		std::cout << std::dec << (int)*inf1 << " " << (int)*inf2 << " " << (int)*inf3 << " " << (int)*inf4 << std::endl;
-
-        /*std::cout << "F:" << std::endl;
+        std::cout << "F:" << std::endl;
 
         bool ok = true;
         while (ok)
@@ -189,6 +217,7 @@ void CheckCurrentCountry(uintptr_t* clickedCountryPtr)
 
             if (!Base::Utils::CanReadPtr(ptr1) || !Base::Utils::CanReadPtr(ptr2) || !Base::Utils::CanReadPtr(ptr3) || !Base::Utils::CanReadPtr(ptr4))
             {
+                std::cout << "break1" << std::endl;
                 break;
             }
 
@@ -199,9 +228,11 @@ void CheckCurrentCountry(uintptr_t* clickedCountryPtr)
             {
                 uintptr_t id = *(uintptr_t*)(val + 0xC);
                 std::cout << std::hex << val << " " << std::dec << id << std::endl;
-                //destroyFactoryFunc(val, 5, 6);
             }
-            else break;
+            else
+            {
+                std::cout << "break2" << std::endl;
+            }
 
             val = v5012;
             if (!v5012) break;
@@ -421,7 +452,7 @@ int FindNewCountryOwner(uint8_t oldOwner, bool weak)
 
 void PaintMap(uintptr_t mouseHoverHex, uint16_t xPos, uint16_t yPos)
 {
-    if (g_paintUnitSpawn)
+    if (g_paintMode == Paint_Unit)
     {
         if (g_unitSpawnSelectedUnitDesign == -1) return;
 
@@ -443,7 +474,7 @@ void PaintMap(uintptr_t mouseHoverHex, uint16_t xPos, uint16_t yPos)
         return;
     }
 
-    if (g_paintFacilitySpawn)
+    if (g_paintMode == Paint_Facility)
     {
         if (g_facilitySpawnSelectedFacility == -1) return;
 
@@ -458,11 +489,19 @@ void PaintMap(uintptr_t mouseHoverHex, uint16_t xPos, uint16_t yPos)
         }
         return;
     }
-    else if (g_paintFacilityDestroy) {
+    else if (g_paintMode == Paint_FacilityDestroy) {
         //Destroy all Facilities on hex
 
         Base::Execute::DestroyAllFacilities(xPos, yPos);
         return;
+    }
+    else if (g_paintMode == Paint_FacilityDisable)
+    {
+        Base::Execute::DisableAllFacilities(xPos, yPos, 1);
+    }
+    else if (g_paintMode == Paint_FacilityEnable)
+    {
+        Base::Execute::DisableAllFacilities(xPos, yPos, 0);
     }
 
     uint8_t* ownerPtr = (uint8_t*)(mouseHoverHex);
@@ -479,7 +518,7 @@ void PaintMap(uintptr_t mouseHoverHex, uint16_t xPos, uint16_t yPos)
     }
 
     if (ok) {
-        if (g_paintMode == 0)
+        if (g_paintMode == Paint_Land)
         {
             //Paint Land
 
@@ -512,7 +551,7 @@ void PaintMap(uintptr_t mouseHoverHex, uint16_t xPos, uint16_t yPos)
                 *groundPtr = newGround;
             }
         }
-        else if (g_paintMode == 1)
+        else if (g_paintMode == Paint_UnitStats)
         {
             //Paint Unit(s) stats
 
@@ -581,7 +620,7 @@ void PaintMap(uintptr_t mouseHoverHex, uint16_t xPos, uint16_t yPos)
                 }
             }
         }
-        else if (g_paintMode == 2) //resource
+        else if (g_paintMode == Paint_Resource) //resource
         {
             //Calculate other base addr
 
@@ -624,7 +663,7 @@ void PaintMap(uintptr_t mouseHoverHex, uint16_t xPos, uint16_t yPos)
 
             Base::Execute::SetMapResource(resAddr, tempResourceId, g_paintSelectedResourceAmount);
         }
-        else if (g_paintMode == 3) //infrastructure
+        else if (g_paintMode == Paint_Infrastructure) //infrastructure
         {
             for (int i = 0; i < 4; i++)
             {
@@ -688,7 +727,8 @@ void PaintMapBrush(uintptr_t* mouseHoverHex, uint16_t* xPos, uint16_t* yPos)
     if (mouseHoverHex == nullptr) return;
     if (*mouseHoverHex == 0) return;
 
-    if (g_paintBrushSize == 1 || g_paintUnitSpawn || g_paintFacilitySpawn || g_paintFacilityDestroy)
+
+    if (g_paintBrushSize == 1 || g_paintMode == Paint_Unit || g_paintMode == Paint_Facility || g_paintMode == Paint_FacilityDestroy)
     {
         PaintMap(*mouseHoverHex, *xPos, *yPos);
         return;
@@ -716,10 +756,10 @@ DWORD WINAPI dllThread(HMODULE hModule) {
 
     Base::Init(true);
 
-    //AllocConsole();
-    //FILE* f;
-	//freopen_s(&f, "CONOUT$", "w", stdout);
-    //freopen_s(&f, "CONIN$", "r", stdin);
+    AllocConsole();
+    FILE* f;
+	freopen_s(&f, "CONOUT$", "w", stdout);
+    freopen_s(&f, "CONIN$", "r", stdin);
 
     //Ptr setup
 

@@ -62,8 +62,104 @@ void Base::Draw::DrawCountryDiplo(Base::SRU_Data::Country* cc, int& treatyMsg)
 
 		ImGui::PopItemWidth();
 
-		ImGui::Dummy(ImVec2(1, 80));
 		ImGui::Text("Relation: Selected -> Target");
+
+		uintptr_t hexBase = *g_clickedHexPtr;
+		uint8_t hexOwner = *(uintptr_t*)(hexBase);
+		uint8_t hexLoyalty = *(uintptr_t*)(hexBase + Offsets::hexLoyalty);
+
+		Country* loyalCountry = nullptr;
+		for (int i = 0; i < g_countryList.size(); i++)
+		{
+			if (g_countryList[i].oId == hexLoyalty)
+			{
+				loyalCountry = &g_countryList[i];
+				break;
+			}
+		}
+
+		Country* ownerCountry = nullptr;
+		for (int i = 0; i < g_countryList.size(); i++)
+		{
+			if (g_countryList[i].oId == hexOwner)
+			{
+				ownerCountry = &g_countryList[i];
+				break;
+			}
+		}
+
+		if (ImGui::TreeNode("Simple Options"))
+		{
+			bool disabled = true;
+
+			if (loyalCountry)
+			{
+				if (loyalCountry->base != cc->base)
+				{
+					disabled = false;
+				}
+			}
+
+			Country t = g_countryList[g_selectedTargetCountry];
+
+			if (disabled)
+			{
+				ImGui::BeginDisabled();
+			}
+
+			if (ImGui::Button("Make Colony (Target=owner)"))
+			{
+				Base::Execute::RespawnCountry(loyalCountry->oId, t.oId, 2);
+			}
+
+			if (ImGui::Button("Liberate Selected"))
+			{
+				Base::Execute::RespawnCountry(loyalCountry->oId, t.oId, 1);
+			}
+
+			if (disabled)
+			{
+				ImGui::EndDisabled();
+			}
+
+			disabled = true;
+			if (t.base != ownerCountry->base)
+			{
+				disabled = false;
+			}
+
+			if (disabled)
+			{
+				ImGui::BeginDisabled();
+			}
+
+			if (ImGui::Button("Annex Selected"))
+			{
+				Base::Execute::AnnexCountry(ownerCountry->oId, t.oId);
+			}
+
+			if (disabled)
+			{
+				ImGui::EndDisabled();
+			}
+
+			ImGui::TreePop;
+		}
+
+		if (ImGui::TreeNode("Advanced Options"))
+		{
+			if (ImGui::Button("Annex Colonies of Selected"))
+			{
+				Base::Execute::AnnexAllColonies(cc);
+			}
+
+			if (ImGui::Button("Liberate Colonies of Selected"))
+			{
+				Base::Execute::RespawnAllColonies(cc);
+			}
+			
+			ImGui::TreePop();
+		}
 	}
 	ImGui::EndChild();
 	ImGui::SameLine();

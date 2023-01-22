@@ -6,9 +6,7 @@ void Base::Draw::DrawUnitSpawn(Base::SRU_Data::Country* cc)
 {
 	if (ImGui::BeginTabItem("Spawn"))
 	{
-		g_paintUnitSpawn = true;
-		g_paintFacilityDestroy = false;
-		g_paintFacilitySpawn = false;
+		g_paintMode = Paint_Unit;
 
 		static int showCategory = 0;
 

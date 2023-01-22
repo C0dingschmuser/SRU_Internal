@@ -62,10 +62,10 @@ namespace Base
 
 		namespace Asm
 		{
-			extern unsigned int g_selectedReg0, g_selectedReg1, g_selectedReg2, g_selectedReg3, g_selectedReg4, g_selectedReg5, g_selectedReg6;
-			extern unsigned int g_hexReg0, g_hexReg1, g_hexReg2, g_hexReg3;
+			extern unsigned int g_selectedReg0, g_selectedReg1, g_selectedReg2, g_selectedReg3, g_selectedReg4, g_selectedReg5, g_selectedReg6, g_selectedReg7;
+			extern unsigned int g_hexReg0, g_hexReg1, g_hexReg2, g_hexReg3, g_hexReg4, g_hexReg5, g_hexReg6, g_hexReg7;
 			extern byte g_lowestHexSupply, g_currentHexSupply;
-			extern unsigned int g_aiSurrReg0, g_aiSurrReg1, g_aiSurrReg2, g_aiSurrReg3, g_aiSurrReg4, g_aiSurrReg5;
+			extern unsigned int g_aiSurrReg0, g_aiSurrReg1, g_aiSurrReg2, g_aiSurrReg3, g_aiSurrReg4, g_aiSurrReg5, g_aiSurrReg6, g_aiSurrReg7;
 			extern int g_aiSurrSize, g_aiSurrFrom, g_aiSurrTo;
 			extern unsigned int g_defconReg0, g_defconReg1, g_defconReg2, g_defconReg3, g_defconReg4, g_defconReg5, g_defconReg6,
 				g_defconReg01, g_defconReg11, g_defconReg21, g_defconReg31, g_defconReg41, g_defconReg51, g_defconReg61,
@@ -277,7 +277,7 @@ namespace Base
 			void HandleMinisters();
 			void RefreshResearch();
 			void RefreshLeader();
-			void ChangeName(std::string newName);
+			void ChangeName(std::string newName, int type = 0);
 
 			uintptr_t base;
 			bool real;
@@ -287,6 +287,7 @@ namespace Base
 			int flagOption = 0;
 			int leaderOption = 0;
 			std::string name;
+			std::string colonyName;
 
 			unsigned long originalColor = 0;
 			bool hasOwnColor = false;
@@ -412,6 +413,7 @@ namespace Base
 		{
 			uintptr_t addr;
 			int id;
+			int id2;
 			std::string name;
 		};
 
@@ -425,6 +427,31 @@ namespace Base
 			uintptr_t base;
 			int defaultName;
 			std::string newName;
+		};
+
+		enum ResourceID : int
+		{
+			Resource_Agriculture,
+			Resource_Rubber,
+			Resource_Timber,
+			Resource_Petroleum,
+			Resource_Coal,
+			Resource_MetalOre,
+			Resource_Uranium,
+			Resource_Electricity
+		};
+
+		enum PaintMode : int
+		{
+			Paint_Land,
+			Paint_UnitStats,
+			Paint_Resource,
+			Paint_Infrastructure,
+			Paint_Unit,
+			Paint_Facility,
+			Paint_FacilityDestroy,
+			Paint_FacilityDisable,
+			Paint_FacilityEnable,
 		};
 
 		extern std::vector<std::shared_ptr<UnitDefault>> g_defaultUnitList;
@@ -494,9 +521,6 @@ namespace Base
 		extern bool g_mouseClicked;
 		extern bool g_paintActive;
 		extern bool g_paintEnabled;
-		extern bool g_paintUnitSpawn;
-		extern bool g_paintFacilitySpawn;
-		extern bool g_paintFacilityDestroy;
 		extern bool g_paintHexOwner;
 		extern bool g_paintHexLoyalty;
 		extern bool g_paintHexOnlySelected;
@@ -543,6 +567,7 @@ namespace Base
 		typedef int(__thiscall* _CreateFactoryFunc)(int, __int8, int, int, int, float, int, float, int);
 		typedef int(__thiscall* _DestroyFactoryFunc)(int, int, int);
 		typedef void(__thiscall* _TreatyFunc)(int, int, unsigned int, int, int, int, int, int, int);
+		typedef void(__thiscall* _FacilityStatusFunc)(int, unsigned __int8, int, int, int);
 		
 		extern _DiplFunc diplFunc;
 		extern _UnlockTechFunc unlockTechFunc;
@@ -551,22 +576,29 @@ namespace Base
 		extern _CreateFactoryFunc createFactoryFunc;
 		extern _DestroyFactoryFunc destroyFactoryFunc;
 		extern _TreatyFunc treatyFunc;
+		extern _FacilityStatusFunc facilityStatusFunc;
 
 		void SetupFunctions();
 		void AnnexCountry(int from, int to);
+		void AnnexAllColonies(Base::SRU_Data::Country* cc);
 		void RespawnCountry(int from, int to, int type);
+		void RespawnAllColonies(Base::SRU_Data::Country* cc);
 		void SetCountryAIStance(Base::SRU_Data::Country* cc, int newAIStance);
 		void UnlockDesign(int to, int design, bool lock);
 		void UnlockTech(int to, int tech, bool lock);
 		void CreateTransport(int from, int to, int type, int noConstruction);
 		void CreateTransport(__int16 fromX, __int16 fromY, __int16 toX, __int16 toY, int country, int type, int noConstruction);
 		void CreateFacility(__int16 posX, __int16 posY, int countryOId, int facilityId, float constructionState);
+		uintptr_t* GetTileAddr(uint16_t xPos, uint16_t yPos);
 		uintptr_t* GetFacilityRoot(uint16_t xPos, uint16_t yPos);
 		std::vector<struct Base::SRU_Data::AddressHolder> GetFacilities(uintptr_t* root);
+		void DisableFacility(uintptr_t* tileAddr, uintptr_t* rootAddr, std::vector<Base::SRU_Data::AddressHolder> facilities, int index, int disable);
+		void DisableAllFacilities(uint16_t xPos, uint16_t yPos, int disable);
 		void DestroyFacility(uintptr_t* rootAddr, std::vector<Base::SRU_Data::AddressHolder> facilities, int index);
 		void DestroyAllFacilities(uint16_t xPos, uint16_t yPos);
 		void SetRelations(int relationType, uintptr_t country, uintptr_t oCountry, int add);
 		void SetMapResource(uint8_t* byte, int resource, int level);
+		int GetMapResource(uint8_t* byte, int resource);
 		void SpawnUnit(int unitDesign, int amount, uintptr_t country, int spread = 1, bool reserve = true, uint16_t xPos = 0, uint16_t yPos = 0);
 		void SetCheat(uint8_t cheat);
 		int ExecuteTreaty(int diplTreatyIndex, int set = 1);
