@@ -17,7 +17,7 @@
 
 #define DISABLE_OUTPUT
 
-static const int version = 120;
+static const int version = 121;
 static bool updated = false;
 
 std::string VersionToString(int version)
@@ -241,7 +241,10 @@ void CheckForUpdate(std::string origName)
 		file.open("changelog.txt");
 		file << "--- INFORMATION ---" << std::endl;
 		file << "Happy new year!" << std::endl << std::endl;
-		file << "--- CHANGELOG ---" << std::endl; 
+		file << "--- CHANGELOG ---" << std::endl;
+		file << "v1.21 [NEW]" << std::endl;
+		file << "- Fixed Bug with Facility enabling/disabling" << std::endl;
+		file << "- Fixed Bug that prevented forcing declarations of war" << std::endl;
 		file << "v1.20 [NEW]" << std::endl;
 		file << "- Added ability to change health of facilities" << std::endl;
 		file << "- Added ability to disable / enable facilities" << std::endl;

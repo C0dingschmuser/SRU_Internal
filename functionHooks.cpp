@@ -771,11 +771,11 @@ void Base::SRU_Data::Hooks::SetupFunctionHooks()
     Base::SRU_Data::Hooks::g_defconJmpBackAddr4 = hookAddress + hookLength;
     Base::Hooks::FunctionHook((void*)hookAddress, HandleDefconRaw4, hookLength);
 
-    /*hookLength = 5;
+    hookLength = 5;
     hookAddress = g_base + Offsets::diplFreeHook;
     Base::SRU_Data::Hooks::g_diplFreeJmpBackAddr = hookAddress + hookLength;
     Base::SRU_Data::Hooks::g_diplFreeJmpBackAddrDefault = hookAddress + hookLength;
-    Base::Hooks::FunctionHook((void*)hookAddress, DiplFree, hookLength);*/
+    Base::Hooks::FunctionHook((void*)hookAddress, DiplFree, hookLength);
 
     hookLength = 6;
     hookAddress = g_base + Offsets::mapSizeHook;

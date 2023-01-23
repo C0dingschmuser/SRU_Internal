@@ -102,28 +102,6 @@ void SetupSessionPtr(uintptr_t base = NULL)
     Base::SRU_Data::Asm::g_ownAllocs.clear();
     Base::SRU_Data::g_hexNameList.clear();
 
-    for (int i = 0; i < g_countryList.size(); i++)
-    {
-        uint16_t owner = *(uint16_t*)(g_countryList[i].base + 0x46);
-
-        if (owner > 0)
-        {
-            for (int a = 0; a < g_countryList.size(); a++)
-            {
-                if (a != i)
-                {
-                    uint16_t current = *(uint16_t*)(g_countryList[a].base + 0x8);
-                    
-                    if (owner == current)
-                    {
-                        std::cout << "Owner of " << g_countryList[i].name << " is " << g_countryList[a].name << std::endl;
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
     g_mapSizeLoaded = false;
 
     unitTimer = 0;
@@ -756,10 +734,10 @@ DWORD WINAPI dllThread(HMODULE hModule) {
 
     Base::Init(true);
 
-    AllocConsole();
-    FILE* f;
-	freopen_s(&f, "CONOUT$", "w", stdout);
-    freopen_s(&f, "CONIN$", "r", stdin);
+    //AllocConsole();
+    //FILE* f;
+	//freopen_s(&f, "CONOUT$", "w", stdout);
+    //freopen_s(&f, "CONIN$", "r", stdin);
 
     //Ptr setup
 
