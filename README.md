@@ -23,7 +23,7 @@ __/\\\\\\\\\\\__________________\///////////_____\///________\///_____\/////////
 | [Features](#features) - [Usage](#usage) - [Troubleshooting](#troubleshooting) - [How it works](#how-it-works) - [Releases & Changelogs](#releases--changelogs) - [License](#license)|
 :----------------------------------------------------------: |
 
-<img src="https://bruh.games/internal/sru/github/main.png" width="700" height="545" />
+<img src="https://bruh.games/internal/sru/github/main2.png" width="700" height="545" />
 
 ### Features
 - Modify stats of all countries (treasury, approval ratings, goods, defcon, etc.)
