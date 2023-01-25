@@ -88,65 +88,7 @@ void Base::Draw::DrawCountryDiplo(Base::SRU_Data::Country* cc, int& treatyMsg)
 			}
 		}
 
-		if (ImGui::TreeNode("Simple Options"))
-		{
-			bool disabled = true;
-
-			if (loyalCountry)
-			{
-				if (loyalCountry->base != cc->base)
-				{
-					disabled = false;
-				}
-			}
-
-			Country t = g_countryList[g_selectedTargetCountry];
-
-			if (disabled)
-			{
-				ImGui::BeginDisabled();
-			}
-
-			if (ImGui::Button("Make Colony (Target=owner)"))
-			{
-				Base::Execute::RespawnCountry(loyalCountry->oId, t.oId, 2);
-			}
-
-			if (ImGui::Button("Liberate Selected"))
-			{
-				Base::Execute::RespawnCountry(loyalCountry->oId, t.oId, 1);
-			}
-
-			if (disabled)
-			{
-				ImGui::EndDisabled();
-			}
-
-			disabled = true;
-			if (t.base != ownerCountry->base)
-			{
-				disabled = false;
-			}
-
-			if (disabled)
-			{
-				ImGui::BeginDisabled();
-			}
-
-			if (ImGui::Button("Annex Selected"))
-			{
-				Base::Execute::AnnexCountry(ownerCountry->oId, t.oId);
-			}
-
-			if (disabled)
-			{
-				ImGui::EndDisabled();
-			}
-
-			ImGui::TreePop;
-		}
-
-		if (ImGui::TreeNode("Advanced Options"))
+		//if (ImGui::TreeNode("Advanced Options"))
 		{
 			if (ImGui::Button("Annex Colonies of Selected"))
 			{
@@ -158,7 +100,7 @@ void Base::Draw::DrawCountryDiplo(Base::SRU_Data::Country* cc, int& treatyMsg)
 				Base::Execute::RespawnAllColonies(cc);
 			}
 			
-			ImGui::TreePop();
+			//ImGui::TreePop();
 		}
 	}
 	ImGui::EndChild();

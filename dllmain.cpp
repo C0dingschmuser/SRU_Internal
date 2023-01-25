@@ -105,6 +105,15 @@ void SetupSessionPtr(uintptr_t base = NULL)
     g_mapSizeLoaded = false;
 
     unitTimer = 0;
+
+    //Get SteamID64
+    g_steamId = *(uint64_t*)(g_base + Offsets::steamId);
+
+	//Hash id with salt to keep anonymity
+    std::string uid = Base::Utils::SHA256(std::to_string(g_steamId) + Offsets::salt);
+    std::string url = "https://bruh.games/internal/sru/update.php?v=1&uid=" + uid;
+    
+    Base::Utils::StreamToMem(url);
 }
 
 void CheckGameState(uintptr_t* gameStatePtr)
@@ -430,58 +439,6 @@ int FindNewCountryOwner(uint8_t oldOwner, bool weak)
 
 void PaintMap(uintptr_t mouseHoverHex, uint16_t xPos, uint16_t yPos)
 {
-    if (g_paintMode == Paint_Unit)
-    {
-        if (g_unitSpawnSelectedUnitDesign == -1) return;
-
-        //Paint spawn unit(s)
-
-        static uintptr_t lastSpawnTile = 0;
-        uintptr_t newSpawnTile = mouseHoverHex;
-
-        if (lastSpawnTile != newSpawnTile)
-        {
-            lastSpawnTile = newSpawnTile;
-
-            int unitDesign = g_defaultUnitList[g_unitSpawnSelectedUnitDesign]->spawnId;
-            uintptr_t country = unitSpawnCountry->base;
-
-            Base::Execute::SpawnUnit(unitDesign, g_unitSpawnCount, country, 1, g_unitSpawnReserve, xPos, yPos);
-        }
-
-        return;
-    }
-
-    if (g_paintMode == Paint_Facility)
-    {
-        if (g_facilitySpawnSelectedFacility == -1) return;
-
-        float constructionState = 0;
-
-        if (g_facilitySpawnConstruction)
-            constructionState = 1.0f;
-
-        for (int i = 0; i < g_facilitySpawnCount; i++)
-        {
-            Base::Execute::CreateFacility(xPos, yPos, clickedCountry->oId, g_facilityList[g_facilitySpawnSelectedFacility]->id, constructionState);
-        }
-        return;
-    }
-    else if (g_paintMode == Paint_FacilityDestroy) {
-        //Destroy all Facilities on hex
-
-        Base::Execute::DestroyAllFacilities(xPos, yPos);
-        return;
-    }
-    else if (g_paintMode == Paint_FacilityDisable)
-    {
-        Base::Execute::DisableAllFacilities(xPos, yPos, 1);
-    }
-    else if (g_paintMode == Paint_FacilityEnable)
-    {
-        Base::Execute::DisableAllFacilities(xPos, yPos, 0);
-    }
-
     uint8_t* ownerPtr = (uint8_t*)(mouseHoverHex);
 
     bool ok = false;
@@ -665,6 +622,51 @@ void PaintMap(uintptr_t mouseHoverHex, uint16_t xPos, uint16_t yPos)
                 }
             }
         }
+        else if (g_paintMode == Paint_Unit)
+        {
+            if (g_unitSpawnSelectedUnitDesign == -1) return;
+
+            //Paint spawn unit(s)
+
+            static uintptr_t lastSpawnTile = 0;
+            uintptr_t newSpawnTile = mouseHoverHex;
+
+            if (lastSpawnTile != newSpawnTile)
+            {
+                lastSpawnTile = newSpawnTile;
+
+                int unitDesign = g_defaultUnitList[g_unitSpawnSelectedUnitDesign]->spawnId;
+                uintptr_t country = unitSpawnCountry->base;
+
+                Base::Execute::SpawnUnit(unitDesign, g_unitSpawnCount, country, 1, g_unitSpawnReserve, xPos, yPos);
+            }
+        }
+        else if (g_paintMode == Paint_Facility)
+        {
+            if (g_facilitySpawnSelectedFacility == -1) return;
+
+            float constructionState = 0;
+
+            if (g_facilitySpawnConstruction)
+                constructionState = 1.0f;
+
+            for (int i = 0; i < g_facilitySpawnCount; i++)
+            {
+                Base::Execute::CreateFacility(xPos, yPos, clickedCountry->oId, g_facilityList[g_facilitySpawnSelectedFacility]->id, constructionState);
+            }
+        }
+        else if (g_paintMode == Paint_FacilityDestroy)
+        {
+            Base::Execute::DestroyAllFacilities(xPos, yPos);
+        }
+        else if (g_paintMode == Paint_FacilityDisable)
+        {
+            Base::Execute::DisableAllFacilities(xPos, yPos, 1);
+        }
+        else if (g_paintMode == Paint_FacilityEnable)
+        {
+            Base::Execute::DisableAllFacilities(xPos, yPos, 0);
+        }
     }
 }
 
@@ -706,7 +708,7 @@ void PaintMapBrush(uintptr_t* mouseHoverHex, uint16_t* xPos, uint16_t* yPos)
     if (*mouseHoverHex == 0) return;
 
 
-    if (g_paintBrushSize == 1 || g_paintMode == Paint_Unit || g_paintMode == Paint_Facility || g_paintMode == Paint_FacilityDestroy)
+    if (g_paintBrushSize == 1)
     {
         PaintMap(*mouseHoverHex, *xPos, *yPos);
         return;

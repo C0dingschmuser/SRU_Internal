@@ -210,6 +210,62 @@ void Base::Draw::DrawMap(Base::SRU_Data::Country* cc)
 			ImGui::SameLine();
 			ImGui::BeginChild("##hexdatabuttons");
 			{
+				Draw::DrawSelectedCountryText(cc, "Selected country: %s");
+				Draw::DrawSelectedCountryText(&g_countryList[g_selectedTargetCountry], "Target country: %s");
+
+				ImGui::Text("Options");
+				bool disabled = true;
+
+				if (loyalCountry)
+				{
+					if (loyalCountry->base != cc->base)
+					{
+						disabled = false;
+					}
+				}
+
+				Country t = g_countryList[g_selectedTargetCountry];
+
+				if (disabled)
+				{
+					ImGui::BeginDisabled();
+				}
+
+				if (ImGui::Button("Make Colony (Target=owner)"))
+				{
+					Base::Execute::RespawnCountry(loyalCountry->oId, t.oId, 2);
+				}
+
+				if (ImGui::Button("Liberate Selected"))
+				{
+					Base::Execute::RespawnCountry(loyalCountry->oId, t.oId, 1);
+				}
+
+				if (disabled)
+				{
+					ImGui::EndDisabled();
+				}
+
+				disabled = true;
+				if (t.base != ownerCountry->base)
+				{
+					disabled = false;
+				}
+
+				if (disabled)
+				{
+					ImGui::BeginDisabled();
+				}
+
+				if (ImGui::Button("Annex Selected"))
+				{
+					Base::Execute::AnnexCountry(ownerCountry->oId, t.oId);
+				}
+
+				if (disabled)
+				{
+					ImGui::EndDisabled();
+				}
 
 			}
 			ImGui::EndChild();
@@ -228,12 +284,6 @@ void Base::Draw::DrawMap(Base::SRU_Data::Country* cc)
 				ImGui::Text("Painting");
 				ImGui::Text("- Capslock to enable");
 				ImGui::Text("- Hold ctrl to paint");
-
-				if (g_mapSizeX > 0)
-				{
-					ImGui::Text("Brush size");
-					ImGui::SliderInt("##paintbrushsuze", &g_paintBrushSize, 1, 15);
-				}
 
 				static std::vector<std::string> paintStyleList = {
 					"Square",
@@ -256,7 +306,11 @@ void Base::Draw::DrawMap(Base::SRU_Data::Country* cc)
 					ImGui::EndCombo();
 				}*/
 
-				ImGui::Checkbox("Only paint on territory of\nselected country", &g_paintHexOnlySelected);
+				ImGui::Dummy(ImVec2(1, 1));
+				ImGui::Dummy(ImVec2(1, 1));
+				ImGui::Dummy(ImVec2(1, 1));
+
+				ImGui::Text("For global painting options\ncheck the 'Settings'-Tab");
 			}
 			ImGui::EndChild();
 			ImGui::SameLine();

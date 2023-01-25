@@ -2,6 +2,7 @@
 #pragma comment(lib, "d3d9.lib")
 #pragma comment(lib, "d3dx9.lib")
 #pragma comment(lib, "detours.lib")
+#pragma comment(lib, "wininet.lib")
 
 #include "framework.h"
 #include "offsets.h"
@@ -28,6 +29,10 @@
 #include <mutex>
 #include <sstream>
 #include <iomanip>
+#include <WinInet.h>
+#include <fstream>
+#include "include/machineid.h"
+#include "include/picosha2.h"
 
 inline void SuspendThreads(bool suspend) {
 	HANDLE hThreadSnap = INVALID_HANDLE_VALUE;

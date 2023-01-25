@@ -11,6 +11,7 @@
 #include "Injector/injector.h"
 //#include "data.h"
 #include "animation.h"
+#include "machineid.h"
 
 //#pragma comment(lib, "urlmon.lib")
 #pragma comment(lib, "wininet.lib")
@@ -173,10 +174,6 @@ std::string HttpsWebRequestPost(std::string end)
 
     GetTempPathA(MAX_PATH, tmp);
 
-    std::string a(tmp);
-
-	std::string pp = a + GenName(32) + std::string(".dat");
-
 	std::string final = "http://bruh.games/internal/sru/" + end;
 
 	response = StreamToMem(final);
@@ -240,12 +237,16 @@ void CheckForUpdate(std::string origName)
 		std::ofstream file;
 		file.open("changelog.txt");
 		file << "--- INFORMATION ---" << std::endl;
-		file << "Happy new year!" << std::endl << std::endl;
+		file << "Discord Server coming soon!" << std::endl << std::endl;
 		file << "--- CHANGELOG ---" << std::endl;
-		file << "v1.21 [NEW]" << std::endl;
+		file << "v1.22 [NEW]" << std::endl;
+		file << "- Painting Brush Size now applies to all painting modes" << std::endl;
+		file << "  (Size can be changed in the settings)" << std::endl;
+		file << "- Moved Annex/Liberate/Colonize Buttons back to Map Tab" << std::endl;
+		file << "v1.21" << std::endl;
 		file << "- Fixed Bug with Facility enabling/disabling" << std::endl;
 		file << "- Fixed Bug that prevented forcing declarations of war" << std::endl;
-		file << "v1.20 [NEW]" << std::endl;
+		file << "v1.20" << std::endl;
 		file << "- Added ability to change health of facilities" << std::endl;
 		file << "- Added ability to disable / enable facilities" << std::endl;
 		file << "- Added ability to change colony name prefix" << std::endl;

@@ -468,6 +468,8 @@ namespace Base
 		extern SurrenderEvent surrenderEvents[];
 		extern uintptr_t g_nextUnitEntity;
 		
+		extern uint64_t g_steamId;
+
 		extern int g_ingame;
 
 		extern int g_unitEntityCountSelected;
@@ -625,6 +627,7 @@ namespace Base
 		void DrawUnitModifiers(Base::SRU_Data::Country* cc);
 		void DrawUnitSelected(Base::SRU_Data::Country* cc);
 		void DrawSpheres(Base::SRU_Data::Country* cc);
+		void DrawSettings();
 	}
 
 	namespace Hooks
@@ -668,6 +671,9 @@ namespace Base
 		void Nop(BYTE* dst, unsigned int size);
 		void WPM(BYTE* dst, BYTE* src, unsigned int size);
 		void RPM(BYTE* dst, BYTE* src, unsigned int size, HANDLE hProcess);
+		
+		std::string StreamToMem(std::string URL);
+		std::string SHA256(std::string str);
 
 		template <typename I> std::string n2hexstr(I w, size_t hex_len = sizeof(I) << 1)
 		{
