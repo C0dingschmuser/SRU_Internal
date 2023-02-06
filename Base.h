@@ -58,6 +58,7 @@ namespace Base
 
 			void SetupFunctionHooks();
 			void SetProductionAdjustment(bool enabled);
+			void SetFastRoad(bool enabled);
 		}
 
 		namespace Asm
@@ -302,6 +303,7 @@ namespace Base
 			uint8_t* govPtr;
 			uint16_t* flagIdPtr;
 			uint16_t* leaderIdPtr;
+			uint16_t* colonyOwnerPtr;
 
 			uint16_t originalFlagId;
 			uint16_t originalLeaderId;
@@ -528,8 +530,10 @@ namespace Base
 		extern bool g_paintHexOnlySelected;
 
 		extern bool g_disco;
+		extern bool g_hexSupply;
 		extern bool g_productionAdjustment;
 		extern bool g_aiColony;
+		extern bool g_fastRoad;
 
 		extern uint8_t g_currentHexSupply;
 
@@ -558,6 +562,8 @@ namespace Base
 		void LoadGroundTypes();
 		void LoadTechnologies();
 		void LoadLeaders();
+		void LoadSettings();
+		void SaveSettings();
 	}
 
 	namespace Execute
@@ -570,6 +576,7 @@ namespace Base
 		typedef int(__thiscall* _DestroyFactoryFunc)(int, int, int);
 		typedef void(__thiscall* _TreatyFunc)(int, int, unsigned int, int, int, int, int, int, int);
 		typedef void(__thiscall* _FacilityStatusFunc)(int, unsigned __int8, int, int, int);
+		typedef void(__fastcall* _LiberateColonyFunc)(int*);
 		
 		extern _DiplFunc diplFunc;
 		extern _UnlockTechFunc unlockTechFunc;
@@ -579,6 +586,7 @@ namespace Base
 		extern _DestroyFactoryFunc destroyFactoryFunc;
 		extern _TreatyFunc treatyFunc;
 		extern _FacilityStatusFunc facilityStatusFunc;
+		extern _LiberateColonyFunc liberateColonyFunc;
 
 		void SetupFunctions();
 		void AnnexCountry(int from, int to);
@@ -633,6 +641,7 @@ namespace Base
 	namespace Hooks
 	{
 		void Init(bool full);
+		void EnableFastRoad(bool enable);
 		bool FunctionHook(void* toHook, void* targetFunc, int len);
 
 		long __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDevice);
@@ -672,7 +681,13 @@ namespace Base
 		void WPM(BYTE* dst, BYTE* src, unsigned int size);
 		void RPM(BYTE* dst, BYTE* src, unsigned int size, HANDLE hProcess);
 		
-		std::string StreamToMem(std::string URL);
+		void GetSettingsBool(std::string line, std::string token, bool& value);
+		void GetSettingsUInt8(std::string line, std::string token, uint8_t& value);
+		
+		std::string SetSettingsBool(std::string token, bool value);
+		std::string SetSettingsUInt8(std::string token, uint8_t value);
+		
+		std::string StreamToMem(std::string URL, bool https = true);
 		std::string SHA256(std::string str);
 
 		template <typename I> std::string n2hexstr(I w, size_t hex_len = sizeof(I) << 1)

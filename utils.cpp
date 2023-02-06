@@ -259,8 +259,45 @@ void Base::Utils::RPM(BYTE* dst, BYTE* src, unsigned int size, HANDLE hProcess)
 	ReadProcessMemory(hProcess, dst, src, size, nullptr);
 }
 
-std::string Base::Utils::StreamToMem(std::string url)
+void Base::Utils::GetSettingsBool(std::string line, std::string token, bool& value)
 {
+	if (line.find(token) != std::string::npos)
+	{
+		std::string valueStr = line.substr(line.find(token) + token.length() + 1);
+		value = (valueStr == "true");
+	}
+}
+
+void Base::Utils::GetSettingsUInt8(std::string line, std::string token, uint8_t& value)
+{
+	if (line.find(token) != std::string::npos)
+	{
+		std::string valueStr = line.substr(line.find(token) + token.length() + 1);
+		value = std::stoi(valueStr);
+	}
+}
+
+std::string Base::Utils::SetSettingsBool(std::string token, bool value)
+{
+	return token + ":" + (value ? "true" : "false") + "\n";
+}
+
+std::string Base::Utils::SetSettingsUInt8(std::string token, uint8_t value)
+{
+	return token + ":" + std::to_string(value) + "\n";
+}
+
+std::string Base::Utils::StreamToMem(std::string url, bool https)
+{
+	if (https)
+	{
+		url = "https://" + url;
+	}
+	else
+	{
+		url = "http://" + url;
+	}
+
 	DeleteUrlCacheEntry(url.c_str());
 	std::string header = "Accept: *" "/" "*\r\n\r\n";
 	HANDLE hInter = InternetOpen("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36", INTERNET_OPEN_TYPE_DIRECT, NULL, NULL, NULL);
@@ -275,6 +312,10 @@ std::string Base::Utils::StreamToMem(std::string url)
 	if (InternetReadFile(hURL, Buffer, 5000000, &BytesRead))
 	{
 		data = std::string(Buffer);
+	}
+	else
+	{
+		return "";
 	}
 
 	delete[] Buffer;

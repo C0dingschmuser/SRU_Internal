@@ -18,7 +18,7 @@
 
 #define DISABLE_OUTPUT
 
-static const int version = 121;
+static const int version = 123;
 static bool updated = false;
 
 std::string VersionToString(int version)
@@ -239,7 +239,13 @@ void CheckForUpdate(std::string origName)
 		file << "--- INFORMATION ---" << std::endl;
 		file << "Discord Server coming soon!" << std::endl << std::endl;
 		file << "--- CHANGELOG ---" << std::endl;
-		file << "v1.22 [NEW]" << std::endl;
+		file << "v1.23 [NEW]" << std::endl;
+		file << "- Improved Annex / Liberate / Colonize functions" << std::endl;
+		file << "  (You can now liberate colonies directly etc.)" << std::endl;
+		file << "- Added ability to toggle features like instant road building etc." << std::endl;
+		file << "  (Now disabled by default)" << std::endl;
+		file << "- Added Settings saving and loading" << std::endl;
+		file << "v1.22" << std::endl;
 		file << "- Painting Brush Size now applies to all painting modes" << std::endl;
 		file << "  (Size can be changed in the settings)" << std::endl;
 		file << "- Moved Annex/Liberate/Colonize Buttons back to Map Tab" << std::endl;

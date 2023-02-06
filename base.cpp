@@ -222,8 +222,10 @@ bool Base::SRU_Data::g_paintHexLoyalty = true;
 bool Base::SRU_Data::g_paintHexOnlySelected = false;
 
 bool Base::SRU_Data::g_disco = false;
+bool Base::SRU_Data::g_hexSupply = false;
 bool Base::SRU_Data::g_productionAdjustment = false;
-bool Base::SRU_Data::g_aiColony = true;
+bool Base::SRU_Data::g_aiColony = false;
+bool Base::SRU_Data::g_fastRoad = false;
 
 bool Base::Draw::g_countryColorLoaded = false;
 
@@ -915,6 +917,40 @@ void Base::SRU_Data::LoadLeaders()
 
 	for (int i = 0; i < g_countryList.size(); i++) {
 		g_countryList[i].RefreshLeader();
+	}
+}
+
+void Base::SRU_Data::LoadSettings()
+{
+	if (!std::filesystem::exists("sru_internal_config.ini"))
+	{
+		return;
+	}
+
+	std::ifstream file("sru_internal_config.ini");
+
+	for (std::string line; getline(file, line); )
+	{
+		Base::Utils::GetSettingsBool(line, "fastroad", g_fastRoad);
+		Base::Utils::GetSettingsBool(line, "hexsupply", g_hexSupply);
+		Base::Utils::GetSettingsUInt8(line, "hsupplyval", Asm::g_lowestHexSupply);
+		Base::Utils::GetSettingsBool(line, "aicolony", g_aiColony);
+		Base::Utils::GetSettingsBool(line, "prodadjustment", g_productionAdjustment);
+	}
+}
+
+void Base::SRU_Data::SaveSettings()
+{
+	std::ofstream file("sru_internal_config.ini", std::ios::trunc);
+
+	if (file.is_open())
+	{
+		file << Base::Utils::SetSettingsBool("fastroad", g_fastRoad);
+		file << Base::Utils::SetSettingsBool("hexsupply", g_hexSupply);
+		file << Base::Utils::SetSettingsUInt8("hsupplyval", Asm::g_lowestHexSupply);
+		file << Base::Utils::SetSettingsBool("aicolony", g_aiColony);
+		file << Base::Utils::SetSettingsBool("prodadjustment", g_productionAdjustment);
+		file.close();
 	}
 }
 

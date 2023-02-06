@@ -8,6 +8,7 @@ Base::Execute::_CreateFactoryFunc Base::Execute::createFactoryFunc = 0;
 Base::Execute::_DestroyFactoryFunc Base::Execute::destroyFactoryFunc = 0;
 Base::Execute::_TreatyFunc Base::Execute::treatyFunc = 0;
 Base::Execute::_FacilityStatusFunc Base::Execute::facilityStatusFunc = 0;
+Base::Execute::_LiberateColonyFunc Base::Execute::liberateColonyFunc = 0;
 
 void Base::Execute::SetupFunctions()
 {
@@ -21,6 +22,7 @@ void Base::Execute::SetupFunctions()
 	destroyFactoryFunc = (_DestroyFactoryFunc)(Base::SRU_Data::g_base + Offsets::destroyFactoryFunc);
 	treatyFunc = (_TreatyFunc)(Base::SRU_Data::g_base + Offsets::treatyFunc);
 	facilityStatusFunc = (_FacilityStatusFunc)(Base::SRU_Data::g_base + Offsets::facilityStatusFunc);
+	liberateColonyFunc = (_LiberateColonyFunc)(Base::SRU_Data::g_base + Offsets::liberateColonyFunc);
 }
 
 void Base::Execute::CreateFacility(__int16 posX, __int16 posY, int countryOId, int facilityId, float constructionState)
@@ -392,6 +394,11 @@ void Base::Execute::AnnexAllColonies(Base::SRU_Data::Country* cc)
 
 void Base::Execute::RespawnCountry(int from, int to, int type)
 {
+	if (type == 9)
+	{
+		liberateColonyFunc((int*)from);
+	}
+
 	int* buffer = Offsets::CreateAdvancedDiplOffer(Base::SRU_Data::g_base, Offsets::respawnCountry, to, 0, 0, 0, type, from, 0, 0, 0, 0);
 	ExecDipl((DWORD*)buffer, '\x01');
 }

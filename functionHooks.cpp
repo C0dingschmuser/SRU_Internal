@@ -178,12 +178,14 @@ void CreateUnit(uintptr_t base)
 
 void CheckHexSupply()
 {
-    if (Asm::g_currentHexSupply < g_lowestHexSupply ||
-        Asm::g_hexReg0 == 0xFFFFFFFF)
+    if (g_hexSupply)
     {
-        Asm::g_currentHexSupply = g_lowestHexSupply;
+        if (Asm::g_currentHexSupply < g_lowestHexSupply ||
+            Asm::g_hexReg0 == 0xFFFFFFFF)
+        {
+            Asm::g_currentHexSupply = g_lowestHexSupply;
+        }
     }
-
 }
 
 void __declspec(naked) SetHexSupply()
@@ -359,7 +361,7 @@ void __declspec(naked) GetMapSize()
 
 void CheckBuildOwner()
 {
-    if (g_buildCheckReg6 == g_ownOtherCountryId)
+    if (g_buildCheckReg6 == g_ownOtherCountryId && g_fastRoad)
     {
         int type = *(int*)(g_buildCheckReg7 + 0x90);
 
@@ -787,29 +789,7 @@ void Base::SRU_Data::Hooks::SetupFunctionHooks()
     Base::SRU_Data::Hooks::g_buildCheckJumpBackAddr = hookAddress + hookLength;
     Base::Hooks::FunctionHook((void*)hookAddress, BuildCheckOwner, hookLength);
 
-    //nop transport build check
-
-    uintptr_t addr = g_base + Offsets::buildTransportHook;
-    Utils::Nop((BYTE*)addr, 6);
-
-    //nop cmp in sub transport event function
-
-    addr = g_base + Offsets::buildTransportHookSub;
-    Utils::Nop((BYTE*)addr, 2);
-
-    //override transport build colony check
-
-    addr = g_base + Offsets::buildTransportHookColony;
-    DWORD curProtection;
-    VirtualProtect((void*)addr, 2, PAGE_EXECUTE_READWRITE, &curProtection);
-
-    for (int i = 0; i < Offsets::buildTransportColonyNew.size(); i++)
-    {
-		*(BYTE*)(addr + i) = Offsets::buildTransportColonyNew[i];
-    }
-
-    DWORD temp;
-    VirtualProtect((void*)addr, 2, curProtection, &temp);
+    SetFastRoad(g_fastRoad);
 
     //hex name hook
 
@@ -853,4 +833,74 @@ void Base::SRU_Data::Hooks::SetProductionAdjustment(bool enabled)
 
     DWORD temp;
     VirtualProtect((void*)addr, 7, curProtection, &temp);
+}
+
+void Base::SRU_Data::Hooks::SetFastRoad(bool enabled)
+{
+	static std::vector<unsigned char> defaultBuildTransport = { 0x0F, 0x85, 0x1B, 0x03, 0x00, 0x00 };
+    static std::vector<unsigned char> defaultBuildTransportSub = { 0x3B, 0xD1 };
+    static std::vector<unsigned char> defaultBuildTransportColony = { 0x74, 0x0F };
+
+    uintptr_t addr = g_base + Offsets::buildTransportHook;
+
+    if (enabled)
+    {
+        Utils::Nop((BYTE*)addr, 6);
+    }
+    else
+    {
+        DWORD curProtection;
+        VirtualProtect((void*)addr, 6, PAGE_EXECUTE_READWRITE, &curProtection);
+
+        for (int i = 0; i < defaultBuildTransport.size(); i++)
+        {
+            *(BYTE*)(addr + i) = defaultBuildTransport[i];
+        }
+
+        DWORD temp;
+        VirtualProtect((void*)addr, 2, curProtection, &temp);
+    }
+
+	addr = g_base + Offsets::buildTransportHookSub;
+
+    if (enabled)
+    {
+		Utils::Nop((BYTE*)addr, 2);
+	}
+    else
+    {
+		DWORD curProtection;
+		VirtualProtect((void*)addr, 2, PAGE_EXECUTE_READWRITE, &curProtection);
+
+		for (int i = 0; i < defaultBuildTransportSub.size(); i++)
+		{
+			*(BYTE*)(addr + i) = defaultBuildTransportSub[i];
+		}
+
+		DWORD temp;
+		VirtualProtect((void*)addr, 2, curProtection, &temp);
+    }
+
+	addr = g_base + Offsets::buildTransportHookColony;
+
+    DWORD curProtection;
+    VirtualProtect((void*)addr, 2, PAGE_EXECUTE_READWRITE, &curProtection);
+
+	if (enabled)
+	{
+		for (int i = 0; i < Offsets::buildTransportColonyNew.size(); i++)
+		{
+			*(BYTE*)(addr + i) = Offsets::buildTransportColonyNew[i];
+		}
+	}
+	else
+	{
+		for (int i = 0; i < defaultBuildTransportColony.size(); i++)
+		{
+			*(BYTE*)(addr + i) = defaultBuildTransportColony[i];
+		}
+	}
+
+    DWORD temp;
+    VirtualProtect((void*)addr, 2, curProtection, &temp);
 }

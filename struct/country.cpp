@@ -35,6 +35,7 @@ void Base::SRU_Data::Country::Init(uintptr_t base)
 	this->colorPtr = (uintptr_t*)(base + Offsets::countryColor);
 	this->flagIdPtr = (uint16_t*)(base + Offsets::countryFlagId);
 	this->leaderIdPtr = (uint16_t*)(base + Offsets::countryLeader);
+	this->colonyOwnerPtr = (uint16_t*)(base + Offsets::countryColonyOwner);
 
 	this->originalFlagId = *this->flagIdPtr;
 	this->originalLeaderId = *this->leaderIdPtr;

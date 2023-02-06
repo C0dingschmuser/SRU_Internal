@@ -14,6 +14,8 @@ void Base::Draw::DrawMap(Base::SRU_Data::Country* cc)
 	uint8_t hexLoyalty = *(uintptr_t*)(hexBase + Offsets::hexLoyalty);
 	uint8_t* hexSupply = (uint8_t*)(hexBase + Offsets::hexSupply);
 	uint8_t* hexGround = (uint8_t*)(hexBase + Offsets::hexGround);
+	uint8_t loyalAliveState = 0;
+	uint8_t ownerAliveState = 0;
 
 	ImGui::BeginTabBar("##maptabs");
 	{
@@ -29,6 +31,8 @@ void Base::Draw::DrawMap(Base::SRU_Data::Country* cc)
 				}
 			}
 
+			loyalAliveState = *(uint8_t*)(loyalCountry->base);
+
 			Country* ownerCountry = nullptr;
 			for (int i = 0; i < g_countryList.size(); i++)
 			{
@@ -38,6 +42,8 @@ void Base::Draw::DrawMap(Base::SRU_Data::Country* cc)
 					break;
 				}
 			}
+
+			ownerAliveState = *(uint8_t*)(ownerCountry->base);
 
 			ImGui::BeginChild("##MapHexData", ImVec2(225, 240));
 			{
@@ -216,29 +222,24 @@ void Base::Draw::DrawMap(Base::SRU_Data::Country* cc)
 				ImGui::Text("Options");
 				bool disabled = true;
 
-				if (loyalCountry)
-				{
-					if (loyalCountry->base != cc->base)
-					{
-						disabled = false;
-					}
-				}
-
 				Country t = g_countryList[g_selectedTargetCountry];
 
-				if (disabled)
+				if (*ownerCountry->colonyOwnerPtr > 0)
 				{
 					ImGui::BeginDisabled();
+					disabled = true;
 				}
 
 				if (ImGui::Button("Make Colony (Target=owner)"))
 				{
-					Base::Execute::RespawnCountry(loyalCountry->oId, t.oId, 2);
-				}
+					int id = loyalCountry->oId;
 
-				if (ImGui::Button("Liberate Selected"))
-				{
-					Base::Execute::RespawnCountry(loyalCountry->oId, t.oId, 1);
+					if (loyalAliveState != 3)
+					{
+						id = ownerCountry->id;
+					}
+
+					Base::Execute::RespawnCountry(id, t.oId, 2);
 				}
 
 				if (disabled)
@@ -247,7 +248,56 @@ void Base::Draw::DrawMap(Base::SRU_Data::Country* cc)
 				}
 
 				disabled = true;
-				if (t.base != ownerCountry->base)
+				if (loyalAliveState == 5 || *ownerCountry->colonyOwnerPtr > 0)
+				{
+					disabled = false;
+				}
+
+				if (disabled)
+				{
+					ImGui::BeginDisabled();
+				}
+
+				if (ImGui::Button("Respawn/Liberate Country"))
+				{
+					int id2 = t.oId;
+					bool colony = false;
+
+					if (*ownerCountry->colonyOwnerPtr > 0)
+					{
+						colony = true;
+
+						for (int i = 0; i < g_countryList.size(); i++)
+						{
+							uint16_t current = *(uint16_t*)(g_countryList[i].base + 0x8);
+
+							if (current == *ownerCountry->colonyOwnerPtr)
+							{
+								id2 = g_countryList[i].oId;
+								break;
+							}
+						}
+					}
+
+					if (colony)
+					{
+						//Base::Execute::RespawnCountry(ownerCountry->base, id2, 9);
+						Base::Execute::liberateColonyFunc((int*)ownerCountry->base);
+					}
+					else
+					{
+						Base::Execute::RespawnCountry(loyalCountry->oId, id2, 1);
+					}
+
+				}
+
+				if (disabled)
+				{
+					ImGui::EndDisabled();
+				}
+
+				disabled = true;
+				if (loyalAliveState != 5 || ownerAliveState != 5)
 				{
 					disabled = false;
 				}

@@ -85,16 +85,38 @@ void Base::Draw::DrawSettings()
 	ImGui::BeginChild("##settings");
 	{
 		ImGui::Text("Settings");
-		ImGui::Text("Minimum global hex supply");
 
-		std::string str = Base::Utils::FloatToPercent((float)Asm::g_lowestHexSupply, 255.0f);
+		if (ImGui::Checkbox("Instant road/rail/bridge building\neverywhere", &g_fastRoad))
+		{
+			Base::SRU_Data::Hooks::SetFastRoad(g_fastRoad);
+			Base::SRU_Data::SaveSettings();
+		}
 
-		ImGui::SliderByte("##hexsupplyslider", &Asm::g_lowestHexSupply, 0, 255, str.c_str());
-		ImGui::Checkbox("Let AI create colonies", &g_aiColony);
-		if (ImGui::Checkbox("[EXPERIMENTAL]\nNo automatic production adjustment", &g_productionAdjustment))
+		if (ImGui::Checkbox("Minimum global hex supply", &g_hexSupply))
+		{
+			Base::SRU_Data::SaveSettings();
+		}
+		
+		if (g_hexSupply)
+		{
+			std::string str = Base::Utils::FloatToPercent((float)Asm::g_lowestHexSupply, 255.0f);
+			if (ImGui::SliderByte("##hexsupplyslider", &Asm::g_lowestHexSupply, 0, 255, str.c_str()))
+			{
+				Base::SRU_Data::SaveSettings();
+			}
+		}
+
+		if (ImGui::Checkbox("Let AI create colonies", &g_aiColony))
+		{
+			Base::SRU_Data::SaveSettings();
+		}
+		
+		if (ImGui::Checkbox("No automatic production adjustment", &g_productionAdjustment))
 		{
 			Base::SRU_Data::Hooks::SetProductionAdjustment(g_productionAdjustment);
+			Base::SRU_Data::SaveSettings();
 		}
+		
 		if (ImGui::Checkbox("Disco Mode\n(Epilepsy warning)", &g_disco))
 		{
 			if (g_disco)

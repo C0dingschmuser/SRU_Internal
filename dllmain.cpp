@@ -111,9 +111,13 @@ void SetupSessionPtr(uintptr_t base = NULL)
 
 	//Hash id with salt to keep anonymity
     std::string uid = Base::Utils::SHA256(std::to_string(g_steamId) + Offsets::salt);
-    std::string url = "https://bruh.games/internal/sru/update.php?v=1&uid=" + uid;
+    std::string url = "bruh.games/internal/sru/update.php?v=1&uid=" + uid;
     
-    Base::Utils::StreamToMem(url);
+    std::string response = Base::Utils::StreamToMem(url);
+    if (response.length() == 0)
+    {
+        Base::Utils::StreamToMem(url, false);
+    }
 }
 
 void CheckGameState(uintptr_t* gameStatePtr)
@@ -738,8 +742,10 @@ DWORD WINAPI dllThread(HMODULE hModule) {
 
     //AllocConsole();
     //FILE* f;
-	//freopen_s(&f, "CONOUT$", "w", stdout);
+    //freopen_s(&f, "CONOUT$", "w", stdout);
     //freopen_s(&f, "CONIN$", "r", stdin);
+
+    Base::SRU_Data::LoadSettings();
 
     //Ptr setup
 

@@ -31,6 +31,7 @@
 #include <iomanip>
 #include <WinInet.h>
 #include <fstream>
+#include <filesystem>
 #include "include/machineid.h"
 #include "include/picosha2.h"
 
