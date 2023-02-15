@@ -118,6 +118,51 @@ unsigned int Base::SRU_Data::Asm::g_sphereNameReg5;
 unsigned int Base::SRU_Data::Asm::g_sphereNameReg6;
 unsigned int Base::SRU_Data::Asm::g_sphereNameReg7;
 
+unsigned int Base::SRU_Data::Asm::g_openSettingsReg0;
+unsigned int Base::SRU_Data::Asm::g_openSettingsReg1;
+unsigned int Base::SRU_Data::Asm::g_openSettingsReg2;
+unsigned int Base::SRU_Data::Asm::g_openSettingsReg3;
+unsigned int Base::SRU_Data::Asm::g_openSettingsReg4;
+unsigned int Base::SRU_Data::Asm::g_openSettingsReg5;
+unsigned int Base::SRU_Data::Asm::g_openSettingsReg6;
+unsigned int Base::SRU_Data::Asm::g_openSettingsReg7;
+
+unsigned int Base::SRU_Data::Asm::g_closeSettingsReg0;
+unsigned int Base::SRU_Data::Asm::g_closeSettingsReg1;
+unsigned int Base::SRU_Data::Asm::g_closeSettingsReg2;
+unsigned int Base::SRU_Data::Asm::g_closeSettingsReg3;
+unsigned int Base::SRU_Data::Asm::g_closeSettingsReg4;
+unsigned int Base::SRU_Data::Asm::g_closeSettingsReg5;
+unsigned int Base::SRU_Data::Asm::g_closeSettingsReg6;
+unsigned int Base::SRU_Data::Asm::g_closeSettingsReg7;
+
+unsigned int Base::SRU_Data::Asm::g_autosaveBeginReg0;
+unsigned int Base::SRU_Data::Asm::g_autosaveBeginReg1;
+unsigned int Base::SRU_Data::Asm::g_autosaveBeginReg2;
+unsigned int Base::SRU_Data::Asm::g_autosaveBeginReg3;
+unsigned int Base::SRU_Data::Asm::g_autosaveBeginReg4;
+unsigned int Base::SRU_Data::Asm::g_autosaveBeginReg5;
+unsigned int Base::SRU_Data::Asm::g_autosaveBeginReg6;
+unsigned int Base::SRU_Data::Asm::g_autosaveBeginReg7;
+
+unsigned int Base::SRU_Data::Asm::g_autosaveEndReg0;
+unsigned int Base::SRU_Data::Asm::g_autosaveEndReg1;
+unsigned int Base::SRU_Data::Asm::g_autosaveEndReg2;
+unsigned int Base::SRU_Data::Asm::g_autosaveEndReg3;
+unsigned int Base::SRU_Data::Asm::g_autosaveEndReg4;
+unsigned int Base::SRU_Data::Asm::g_autosaveEndReg5;
+unsigned int Base::SRU_Data::Asm::g_autosaveEndReg6;
+unsigned int Base::SRU_Data::Asm::g_autosaveEndReg7;
+
+unsigned int Base::SRU_Data::Asm::g_quitGameReg0;
+unsigned int Base::SRU_Data::Asm::g_quitGameReg1;
+unsigned int Base::SRU_Data::Asm::g_quitGameReg2;
+unsigned int Base::SRU_Data::Asm::g_quitGameReg3;
+unsigned int Base::SRU_Data::Asm::g_quitGameReg4;
+unsigned int Base::SRU_Data::Asm::g_quitGameReg5;
+unsigned int Base::SRU_Data::Asm::g_quitGameReg6;
+unsigned int Base::SRU_Data::Asm::g_quitGameReg7;
+
 std::vector<uintptr_t> Base::SRU_Data::Asm::g_ownAllocs;
 
 uintptr_t Base::SRU_Data::Asm::g_aiSurrBase;
@@ -136,6 +181,10 @@ std::vector<Base::SRU_Data::DiplTreaty> Base::SRU_Data::g_diplTreatyList;
 std::vector<Base::SRU_Data::GroundType> Base::SRU_Data::g_groundTypeList;
 
 Base::SRU_Data::SurrenderEvent Base::SRU_Data::surrenderEvents[32] = { };
+
+std::vector<Base::SRU_Data::HookHolder> Base::SRU_Data::Hooks::g_hookList;
+
+int Base::SRU_Data::Hooks::g_lastFunctionHookState = 0;
 
 uintptr_t Base::SRU_Data::Hooks::g_selectedJmpBackAddr = 0;
 uintptr_t Base::SRU_Data::Hooks::g_hexSupplyJmpBackAddr = 0;
@@ -159,6 +208,14 @@ uintptr_t Base::SRU_Data::Hooks::g_hexNameBigJumpBackAddrNone = 0;
 uintptr_t Base::SRU_Data::Hooks::g_hexNameBigJumpBackAddrData = 0;
 
 uintptr_t Base::SRU_Data::Hooks::g_sphereNameJumpBackAddr = 0;
+
+uintptr_t Base::SRU_Data::Hooks::g_openSettingsJumpBackAddr = 0;
+uintptr_t Base::SRU_Data::Hooks::g_closeSettingsJumpBackAddr = 0;
+
+uintptr_t Base::SRU_Data::Hooks::g_autosaveBeginJumpBackAddr = 0;
+uintptr_t Base::SRU_Data::Hooks::g_autosaveEndJumpBackAddr = 0;
+
+uintptr_t Base::SRU_Data::Hooks::g_quitGameJumpBackAddr = 0;
 
 uintptr_t Base::SRU_Data::g_nextUnitEntity = 0;
 
@@ -243,6 +300,8 @@ uint16_t* Base::SRU_Data::g_clickedYPtr = nullptr;
 
 //SRU Game Vars
 int Base::SRU_Data::g_ingame = 0;
+bool Base::SRU_Data::g_autosaving = false;
+bool Base::SRU_Data::g_quitting = false;
 uintptr_t Base::SRU_Data::g_base = 0;
 uintptr_t Base::SRU_Data::g_ownCountryBase = 0;
 uintptr_t g_currentCountryBase = 0;
@@ -447,6 +506,11 @@ std::vector<uintptr_t> LoadUnitsIntern(bool refresh, bool dir, uintptr_t start, 
 void Base::SRU_Data::LoadUnits(bool refresh)
 {
 	//std::cout << "begin load units: " << refresh << std::endl;
+
+	if (g_ingame != 2 || g_autosaving)
+	{
+		return;
+	}
 
 	if (!refresh)
 	{ //Complete reload

@@ -82,6 +82,25 @@ std::string Base::Utils::FloatToPercent3(float f, float max, bool simple)
 	return str.str();
 }
 
+std::string Base::Utils::FloatToPercentCustom(float f, float max, float minClamp, float maxClamp, bool simple)
+{
+	float p;
+	if (!simple)
+	{
+		p = (f / max) * 100;
+	}
+	else
+	{
+		p = f * 100;
+	}
+
+	p = std::clamp(p, minClamp, maxClamp);
+
+	std::stringstream str;
+	str << std::fixed << std::setprecision(2) << p << "%%";
+	return str.str();
+}
+
 bool Base::Utils::CMPF(float A, float B, float E)
 {
 	return (std::fabs(A - B) < E);

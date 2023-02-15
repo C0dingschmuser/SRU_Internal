@@ -94,8 +94,8 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 	ImGui::SameLine();
 	ImGui::PushItemWidth(inputWidth);
 	
-	std::string data = Base::Utils::FloatToPercent3(*cc->domApproval->valPtr, 1, true);
-	if (ImGui::SliderFloat("Domenstic Approval", cc->domApproval->valPtr, -3, 3, data.c_str()))
+	std::string data = Base::Utils::FloatToPercent(*cc->domApproval->valPtr, 1, true);
+	if (ImGui::SliderFloat("Domenstic Approval", cc->domApproval->valPtr, 0.01f, 1.01f, data.c_str()))
 	{
 		cc->domApproval->freezeVal = *cc->domApproval->valPtr;
 	}
@@ -110,8 +110,8 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 	ImGui::SameLine();
 	ImGui::PushItemWidth(inputWidth);
 
-	data = Base::Utils::FloatToPercent3(*cc->milApproval->valPtr, 1, true);
-	if (ImGui::SliderFloat("Military Approval", cc->milApproval->valPtr, -3, 3, data.c_str()))
+	data = Base::Utils::FloatToPercent(*cc->milApproval->valPtr, 1, true);
+	if (ImGui::SliderFloat("Military Approval", cc->milApproval->valPtr, 0.01f, 1.01f, data.c_str()))
 	{
 		cc->milApproval->freezeVal = *cc->milApproval->valPtr;
 	}
@@ -676,6 +676,12 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 	//--- State -------------------------------------------------------------------------
 	//-----------------------------------------------------------------------------------
 
+	float stateMin = 0.01f;
+	float stateMax = 2.01f;
+
+	float pMin = 0;
+	float pMax = 200;
+
 	ImGui::Separator();
 	ImGui::Text("Social spending states");
 
@@ -687,10 +693,10 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 	}
 	ImGui::SameLine();
 
-	data = Base::Utils::FloatToPercent3(*cc->healthcareState->valPtr, 1, true);
+	data = Base::Utils::FloatToPercentCustom(*cc->healthcareState->valPtr, 1, pMin, pMax, true);
 	
 	ImGui::PushItemWidth(inputWidth);
-	if (ImGui::SliderFloat("Healthcare", cc->healthcareState->valPtr, -3, 3, data.c_str()))
+	if (ImGui::SliderFloat("Healthcare", cc->healthcareState->valPtr, stateMin, stateMax, data.c_str()))
 	{
 		cc->healthcareState->freezeVal = *cc->healthcareState->valPtr;
 	}
@@ -704,10 +710,10 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 	}
 	ImGui::SameLine();
 
-	data = Base::Utils::FloatToPercent3(*cc->educationState->valPtr, 1, true);
+	data = Base::Utils::FloatToPercentCustom(*cc->educationState->valPtr, 1, pMin, pMax, true);
 	
 	ImGui::PushItemWidth(inputWidth);
-	if (ImGui::SliderFloat("Education", cc->educationState->valPtr, -3, 3, data.c_str()))
+	if (ImGui::SliderFloat("Education", cc->educationState->valPtr, stateMin, stateMax, data.c_str()))
 	{
 		cc->educationState->freezeVal = *cc->educationState->valPtr;
 	}
@@ -721,10 +727,10 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 	}
 	ImGui::SameLine();
 
-	data = Base::Utils::FloatToPercent3(*cc->infrastructureState->valPtr, 1, true);
+	data = Base::Utils::FloatToPercentCustom(*cc->infrastructureState->valPtr, 1, pMin, pMax, true);
 	
 	ImGui::PushItemWidth(inputWidth);
-	if (ImGui::SliderFloat("Infrastructure", cc->infrastructureState->valPtr, -3, 3, data.c_str()))
+	if (ImGui::SliderFloat("Infrastructure", cc->infrastructureState->valPtr, stateMin, stateMax, data.c_str()))
 	{
 		cc->infrastructureState->freezeVal = *cc->infrastructureState->valPtr;
 	}
@@ -738,10 +744,10 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 	}
 	ImGui::SameLine();
 
-	data = Base::Utils::FloatToPercent3(*cc->environmentState->valPtr, 1, true);
+	data = Base::Utils::FloatToPercentCustom(*cc->environmentState->valPtr, 1, pMin, pMax, true);
 	
 	ImGui::PushItemWidth(inputWidth);
-	if (ImGui::SliderFloat("Environment", cc->environmentState->valPtr, -3, 3, data.c_str()))
+	if (ImGui::SliderFloat("Environment", cc->environmentState->valPtr, stateMin, stateMax, data.c_str()))
 	{
 		cc->environmentState->freezeVal = *cc->environmentState->valPtr;
 	}
@@ -755,10 +761,10 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 	}
 	ImGui::SameLine();
 
-	data = Base::Utils::FloatToPercent3(*cc->familyState->valPtr, 1, true);
+	data = Base::Utils::FloatToPercentCustom(*cc->familyState->valPtr, 1, pMin, pMax, true);
 	
 	ImGui::PushItemWidth(inputWidth);
-	if (ImGui::SliderFloat("Family", cc->familyState->valPtr, -3, 3, data.c_str()))
+	if (ImGui::SliderFloat("Family", cc->familyState->valPtr, stateMin, stateMax, data.c_str()))
 	{
 		cc->familyState->freezeVal = *cc->familyState->valPtr;
 	}
@@ -772,10 +778,10 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 	}
 	ImGui::SameLine();
 
-	data = Base::Utils::FloatToPercent3(*cc->lawEnforcementState->valPtr, 1, true);
+	data = Base::Utils::FloatToPercentCustom(*cc->lawEnforcementState->valPtr, 1, pMin, pMax, true);
 	
 	ImGui::PushItemWidth(inputWidth);
-	if (ImGui::SliderFloat("Law enforcement", cc->lawEnforcementState->valPtr, -3, 3, data.c_str()))
+	if (ImGui::SliderFloat("Law enforcement", cc->lawEnforcementState->valPtr, stateMin, stateMax, data.c_str()))
 	{
 		cc->lawEnforcementState->freezeVal = *cc->lawEnforcementState->valPtr;
 	}
@@ -789,10 +795,10 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 	}
 	ImGui::SameLine();
 
-	data = Base::Utils::FloatToPercent3(*cc->culturalSubState->valPtr, 1, true);
+	data = Base::Utils::FloatToPercentCustom(*cc->culturalSubState->valPtr, 1, pMin, pMax, true);
 	
 	ImGui::PushItemWidth(inputWidth);
-	if (ImGui::SliderFloat("Cultural subsidies", cc->culturalSubState->valPtr, -3, 3, data.c_str()))
+	if (ImGui::SliderFloat("Cultural subsidies", cc->culturalSubState->valPtr, stateMin, stateMax, data.c_str()))
 	{
 		cc->culturalSubState->freezeVal = *cc->culturalSubState->valPtr;
 	}
@@ -806,10 +812,10 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 	}
 	ImGui::SameLine();
 	
-	data = Base::Utils::FloatToPercent3(*cc->socialAssistanceState->valPtr, 1, true);
+	data = Base::Utils::FloatToPercentCustom(*cc->socialAssistanceState->valPtr, 1, pMin, pMax, true);
 	
 	ImGui::PushItemWidth(inputWidth);
-	if (ImGui::SliderFloat("Social assistance", cc->socialAssistanceState->valPtr, -3, 3, data.c_str()))
+	if (ImGui::SliderFloat("Social assistance", cc->socialAssistanceState->valPtr, stateMin, stateMax, data.c_str()))
 	{
 		cc->socialAssistanceState->freezeVal = *cc->socialAssistanceState->valPtr;
 	}

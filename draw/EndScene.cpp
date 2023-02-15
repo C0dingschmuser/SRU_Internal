@@ -27,11 +27,18 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 	if (Data::ShowMenu)
 	{
 		static std::string id = "###titletext";
-		static std::string titleText = "SRU Internal" + id;
+		static std::string titleText = "";
 		std::string brushSize = "Brush size: " + std::to_string(g_paintBrushSize);
-
-		bool titleSet = false;
 		
+		if (g_autosaving)
+		{
+			titleText = "SRU Internal | Autosaving...";
+		}
+		else
+		{
+			titleText = "SRU Internal";
+		}
+
 		if (g_paintEnabled && !g_paintActive)
 		{
 			//Yellow
@@ -41,8 +48,7 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 			ImGui::PushStyleColor(ImGuiCol_TitleBgCollapsed, IM_COL32(255, 255, 0, 255));
 			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 0, 255));
 
-			titleText = "SRU Internal | " + brushSize + id;
-			titleSet = true;
+			titleText = "SRU Internal | " + brushSize;
 		}
 		
 		if (g_paintActive)
@@ -54,14 +60,10 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 			ImGui::PushStyleColor(ImGuiCol_TitleBgCollapsed, IM_COL32(0, 255, 0, 255));
 			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 0, 255));
 
-			titleText = "SRU Internal | " + brushSize + " | Painting" + id;
-			titleSet = true;
+			titleText = "SRU Internal | " + brushSize + " | Painting";
 		}
-		
-		if(!titleSet)
-		{
-			titleText = "SRU Internal" + id;
-		}
+
+		titleText += id;
 
 		ImGui::Begin(titleText.c_str(), 0, ImGuiWindowFlags_NoResize);
 
@@ -84,6 +86,13 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 
 		if (g_ingame == 2 && clickedCountry)
 		{
+			bool disabled = g_autosaving;
+
+			if (disabled)
+			{
+				ImGui::BeginDisabled();
+			}
+
 			ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
 			if (ImGui::BeginTabBar("##tabs", tab_bar_flags))
 			{
@@ -219,6 +228,11 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 
 				ImGui::EndTabBar();
 			}
+
+			if (disabled)
+			{
+				ImGui::EndDisabled();
+			}
 		}
 		else
 		{
@@ -231,6 +245,10 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 			else if (g_ingame == 2)
 			{
 				text = "Click on Map to initialize...";
+			}
+			else if (g_ingame == 3)
+			{
+				text = "Disabled in Settings";
 			}
 
 			ImGui::Text(text.c_str());

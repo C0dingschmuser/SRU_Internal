@@ -18,7 +18,7 @@
 
 #define DISABLE_OUTPUT
 
-static const int version = 123;
+static const int version = 124;
 static bool updated = false;
 
 std::string VersionToString(int version)
@@ -26,6 +26,15 @@ std::string VersionToString(int version)
 	std::string raw = std::to_string(version);
 
 	return "Version: " + raw.substr(0, 1) + "." + raw.substr(1, 1) + raw.substr(2, 1);
+}
+
+std::string GetExecutableDirectory()
+{
+	char buffer[MAX_PATH];
+	GetModuleFileNameA(NULL, buffer, MAX_PATH);
+	std::string::size_type pos = std::string(buffer).find_last_of("\\/");
+
+	return std::string(buffer).substr(0, pos);
 }
 
 DWORD GetProcId(const char* procName)
@@ -239,7 +248,12 @@ void CheckForUpdate(std::string origName)
 		file << "--- INFORMATION ---" << std::endl;
 		file << "Discord Server coming soon!" << std::endl << std::endl;
 		file << "--- CHANGELOG ---" << std::endl;
-		file << "v1.23 [NEW]" << std::endl;
+		file << "v1.24 [NEW]" << std::endl;
+		file << "- Fixed several possible crashes" << std::endl;
+		file << "- Fixed bug with approval ratings being too low and causing data corruption" << std::endl;
+		file << "- Stability improvements" << std::endl;
+		file << "- Fixed 'Dll not found' launcher bug" << std::endl;
+		file << "v1.23" << std::endl;
 		file << "- Improved Annex / Liberate / Colonize functions" << std::endl;
 		file << "  (You can now liberate colonies directly etc.)" << std::endl;
 		file << "- Added ability to toggle features like instant road building etc." << std::endl;
@@ -376,9 +390,10 @@ void CheckForUpdate(std::string origName)
 		{
 			if (file_exists(std::string(exePath)))
 			{
-				if (file_exists("SRU_Internal.dll"))
+				std::string fullPath = GetExecutableDirectory() + "\\SRU_Internal.dll";
+				if (file_exists(fullPath))
 				{
-					remove("SRU_Internal.dll");
+					remove(fullPath.c_str());
 				}
 
 				std::ofstream file;
@@ -402,7 +417,8 @@ void CheckForUpdate(std::string origName)
 
 void CheckDLL()
 {
-	if (!file_exists("SRU_Internal.dll"))
+	std::string fullPath = GetExecutableDirectory() + "\\SRU_Internal.dll";
+	if (!file_exists(fullPath))
 	{
 		std::cout << "DLL not found, downloading..." << std::endl;
 
@@ -411,7 +427,7 @@ void CheckDLL()
 		std::vector<unsigned char> response = StreamToMemBinary(final);
 		size_t strSize = response.size();
 
-		std::ofstream loaderFile("SRU_Internal.dll", std::ios::out | std::ios::binary);
+		std::ofstream loaderFile(fullPath, std::ios::out | std::ios::binary);
 		loaderFile.write((char*)&response[0], strSize);
 		loaderFile.close();
 
@@ -447,14 +463,14 @@ int main(int argc, char** argv)
 	printf(vstr.c_str());
 	printf("\x1B[93mWaiting for SRU to open...\033[0m\t\t");
 
-	std::string tmp_prefix;
+	/*std::string tmp_prefix;
 	char char_path[MAX_PATH];
 	
 	auto s = GetTempPathA(MAX_PATH, char_path);
 	tmp_prefix = std::string(char_path, std::size_t(s));	
 	std::string dPath = tmp_prefix + "SRUI.dll";
 
-	remove(dPath.c_str());
+	remove(dPath.c_str());*/
 
 	const char* procName = "SupremeRulerUltimate.exe";
 	DWORD procId = 0;
@@ -468,11 +484,13 @@ int main(int argc, char** argv)
 	Sleep(250);
 
 	//DumpBinary(dPath.c_str(), (void*)dllData, sizeof(dllData));
-	dPath = "SRU_Internal.dll";
+
+	std::string dPath = GetExecutableDirectory() + "\\SRU_Internal.dll";
 
 	if (!file_exists(dPath.c_str()))
 	{
-		std::cout << "ERROR: Dll is missing, please restart Loader";
+		std::cout << "ERROR: Dll is missing, please restart Loader!" << std::endl;
+		std::cout << "Tried Path: " << dPath << std::endl;
 		system("pause");
 		exit(0);
 	}

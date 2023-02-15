@@ -59,6 +59,198 @@ void __declspec(naked) GetSelectedUnits()
     }
 }
 
+void HandleGameQuit()
+{
+    g_quitting = true;
+    g_ingame = 0;
+}
+
+void __declspec(naked) GameQuit()
+{
+    __asm {
+        mov[g_quitGameReg0], eax
+		mov[g_quitGameReg1], ecx
+		mov[g_quitGameReg2], edx
+		mov[g_quitGameReg3], ebp
+		mov[g_quitGameReg4], edi
+		mov[g_quitGameReg5], esi
+		mov[g_quitGameReg6], ebx
+		mov[g_quitGameReg7], esp
+    }
+
+    HandleGameQuit();
+
+    __asm {
+        mov eax, g_quitGameReg0
+        mov ecx, g_quitGameReg1
+        mov edx, g_quitGameReg2
+        mov ebp, g_quitGameReg3
+        mov edi, g_quitGameReg4
+        mov esi, g_quitGameReg5
+        mov ebx, g_quitGameReg6
+        mov esp, g_quitGameReg7
+        mov ebp, DWORD PTR ds : 0xdc35f4
+        jmp [g_quitGameJumpBackAddr]
+    }
+}
+
+void HandleAutosaveEnd()
+{
+    g_autosaving = false;
+
+    if (g_ingame != 3)
+    {
+        SetupFunctionHooks(1);
+    }
+}
+
+void __declspec(naked) AutosaveEnd()
+{
+    __asm {
+        push 0x00000100
+        mov[g_autosaveEndReg0], eax
+        mov[g_autosaveEndReg1], ecx
+        mov[g_autosaveEndReg2], edx
+        mov[g_autosaveEndReg3], ebp
+        mov[g_autosaveEndReg4], edi
+        mov[g_autosaveEndReg5], esi
+        mov[g_autosaveEndReg6], ebx
+        mov[g_autosaveEndReg7], esp
+    }
+
+    HandleAutosaveEnd();
+
+    __asm {
+        mov eax, g_autosaveEndReg0
+        mov ecx, g_autosaveEndReg1
+        mov edx, g_autosaveEndReg2
+        mov ebp, g_autosaveEndReg3
+        mov edi, g_autosaveEndReg4
+        mov esi, g_autosaveEndReg5
+        mov ebx, g_autosaveEndReg6
+        mov esp, g_autosaveEndReg7
+        jmp[g_autosaveEndJumpBackAddr]
+    }
+}
+
+void HandleAutosaveBegin()
+{
+    g_autosaving = true;
+
+    if (g_ingame == 2)
+    {
+        SetupFunctionHooks(0);
+    }
+}
+
+void __declspec(naked) AutosaveBegin()
+{
+    __asm {
+        mov[g_autosaveBeginReg0], eax
+        mov[g_autosaveBeginReg1], ecx
+        mov[g_autosaveBeginReg2], edx
+        mov[g_autosaveBeginReg3], ebp
+        mov[g_autosaveBeginReg4], edi
+        mov[g_autosaveBeginReg5], esi
+        mov[g_autosaveBeginReg6], ebx
+        mov[g_autosaveBeginReg7], esp
+    }
+
+    HandleAutosaveBegin();
+
+    __asm {
+        mov eax, g_autosaveBeginReg0
+        mov ecx, g_autosaveBeginReg1
+        mov edx, g_autosaveBeginReg2
+        mov ebp, g_autosaveBeginReg3
+        mov edi, g_autosaveBeginReg4
+        mov esi, g_autosaveBeginReg5
+        mov ebx, g_autosaveBeginReg6
+        mov esp, g_autosaveBeginReg7
+        sub esp, 0x00000084
+        jmp [g_autosaveBeginJumpBackAddr]
+    }
+}
+
+void HandleOpenSettings()
+{
+    if (g_ingame == 2)
+    {
+        if (g_ingame != 3)
+        {
+            g_ingame = 3;
+            SetupFunctionHooks(0);
+        }
+    }
+}
+
+void __declspec(naked) OpenSettings()
+{
+    __asm {
+        mov edi, [esp + 0x00000100]
+        mov[g_openSettingsReg0], eax
+        mov[g_openSettingsReg1], ecx
+        mov[g_openSettingsReg2], edx
+        mov[g_openSettingsReg3], ebp
+        mov[g_openSettingsReg4], edi
+        mov[g_openSettingsReg5], esi
+        mov[g_openSettingsReg6], ebx
+        mov[g_openSettingsReg7], esp
+    }
+
+    HandleOpenSettings();
+
+    __asm {
+        mov eax, g_openSettingsReg0
+        mov ecx, g_openSettingsReg1
+        mov edx, g_openSettingsReg2
+        mov ebp, g_openSettingsReg3
+        mov edi, g_openSettingsReg4
+        mov esi, g_openSettingsReg5
+        mov ebx, g_openSettingsReg6
+        mov esp, g_openSettingsReg7
+        jmp [g_openSettingsJumpBackAddr]
+    }
+}
+
+void HandleCloseSettings()
+{
+    if (g_ingame == 3)
+    {
+        SetupFunctionHooks(1);
+		g_ingame = 2;
+	}
+}
+
+void __declspec(naked) CloseSettings()
+{
+    __asm {
+        mov[g_closeSettingsReg0], eax
+        mov[g_closeSettingsReg1], ecx
+        mov[g_closeSettingsReg2], edx
+        mov[g_closeSettingsReg3], ebp
+        mov[g_closeSettingsReg4], edi
+        mov[g_closeSettingsReg5], esi
+        mov[g_closeSettingsReg6], ebx
+        mov[g_closeSettingsReg7], esp
+    }
+
+    HandleCloseSettings();
+
+    __asm {
+        mov eax, g_closeSettingsReg0
+        mov ecx, g_closeSettingsReg1
+        mov edx, g_closeSettingsReg2
+        mov ebp, g_closeSettingsReg3
+        mov edi, g_closeSettingsReg4
+        mov esi, g_closeSettingsReg5
+        mov ebx, g_closeSettingsReg6
+        mov esp, g_closeSettingsReg7
+        mov eax, [edi + 0x00009D08]
+        jmp [g_closeSettingsJumpBackAddr]
+    }
+}
+
 void CheckSphereNameIntern()
 {
     int* sphereTypeAddr = (int*)(g_sphereNameReg7 + 0x18);
@@ -722,74 +914,130 @@ void __declspec(naked) HandleDefconRaw4()
 
 #pragma endregion DEFCON
 
-void Base::SRU_Data::Hooks::SetupFunctionHooks()
+void Base::SRU_Data::Hooks::SetupFunctionHooks(int enabled)
 {
+    if (g_lastFunctionHookState == enabled)
+    {
+        //No changes needed
+        return;
+    }
+
+    g_lastFunctionHookState = enabled;
+
+    if (enabled)
+    {
+        g_hookList.clear(); 
+    }
+
     //Hook selected units
 
     int hookLength = 6;
     uintptr_t hookAddress = g_base + Offsets::selectedUnitsHook;
     Base::SRU_Data::Hooks::g_selectedJmpBackAddr = hookAddress + hookLength;
-    Base::Hooks::FunctionHook((void*)hookAddress, GetSelectedUnits, hookLength);
+    Base::Hooks::FunctionHook((void*)hookAddress, GetSelectedUnits, hookLength, enabled);
 
     //Hook hex supply
 
     hookAddress = g_base + Offsets::hexSupplyNop;
-    Base::Utils::Nop((BYTE*)hookAddress, 2);
+
+    if (enabled)
+    {
+        HookHolder holder;
+        holder.addr = hookAddress;
+
+        std::vector<BYTE> origData = Base::Hooks::GetOrigBytes((BYTE*)hookAddress, 2);
+        holder.origBytes = origData;
+
+        Hooks::g_hookList.push_back(holder);
+
+        Base::Utils::Nop((BYTE*)hookAddress, 2);
+    }
+    else
+    {
+        HookHolder holder;
+
+        for (int i = 0; i < Base::SRU_Data::Hooks::g_hookList.size(); i++)
+        {
+            if (Base::SRU_Data::Hooks::g_hookList[i].addr == (uintptr_t)hookAddress)
+            {
+                holder = Base::SRU_Data::Hooks::g_hookList[i];
+                break;
+            }
+        }
+
+        DWORD curProtection;
+        VirtualProtect((void*)hookAddress, 2, PAGE_EXECUTE_READWRITE, &curProtection);
+
+        for (int i = 0; i < holder.origBytes.size(); i++)
+        {
+            *((BYTE*)hookAddress + i) = holder.origBytes[i];
+        }
+
+        DWORD temp;
+        VirtualProtect((void*)hookAddress, 2, curProtection, &temp);
+    }
 
     hookAddress = g_base + Offsets::hexSupplyHook;
     Base::SRU_Data::Hooks::g_hexSupplyJmpBackAddr = hookAddress + hookLength;
-    Base::Hooks::FunctionHook((void*)hookAddress, SetHexSupply, hookLength);
+    Base::Hooks::FunctionHook((void*)hookAddress, SetHexSupply, hookLength, enabled);
 
     //Hook ai surrender
     hookAddress = g_base + Offsets::aiSurrenderHook;
     Base::SRU_Data::Hooks::g_aiSurrenderJmpBackAddr = hookAddress + hookLength;
-    Base::Hooks::FunctionHook((void*)hookAddress, HandleAISurrender, hookLength);
+    Base::Hooks::FunctionHook((void*)hookAddress, HandleAISurrender, hookLength, enabled);
 
     //Hook mouse click
     hookLength = 5;
     hookAddress = g_base + Offsets::mouseClickHook;
     Base::SRU_Data::Hooks::g_mouseClickedJmpBackAddr = hookAddress + hookLength;
-    Base::Hooks::FunctionHook((void*)hookAddress, HandleMouseClick, hookLength);
+    Base::Hooks::FunctionHook((void*)hookAddress, HandleMouseClick, hookLength, enabled);
 
     //Hook defcon
 
     hookLength = 6;
     hookAddress = g_base + Offsets::defconHook;
     Base::SRU_Data::Hooks::g_defconJmpBackAddr = hookAddress + hookLength;
-    Base::Hooks::FunctionHook((void*)hookAddress, HandleDefconRaw, hookLength);
+    Base::Hooks::FunctionHook((void*)hookAddress, HandleDefconRaw, hookLength, enabled);
 
     hookLength = 6;
     hookAddress = g_base + Offsets::defconHook2;
     Base::SRU_Data::Hooks::g_defconJmpBackAddr2 = hookAddress + hookLength;
-    Base::Hooks::FunctionHook((void*)hookAddress, HandleDefconRaw2, hookLength);
+    Base::Hooks::FunctionHook((void*)hookAddress, HandleDefconRaw2, hookLength, enabled);
 
     hookLength = 8;
     hookAddress = g_base + Offsets::defconHook3;
     Base::SRU_Data::Hooks::g_defconJmpBackAddr3 = hookAddress + hookLength;
-    Base::Hooks::FunctionHook((void*)hookAddress, HandleDefconRaw3, hookLength);
+    Base::Hooks::FunctionHook((void*)hookAddress, HandleDefconRaw3, hookLength, enabled);
 
     hookLength = 7;
     hookAddress = g_base + Offsets::defconHook4;
     Base::SRU_Data::Hooks::g_defconJmpBackAddr4 = hookAddress + hookLength;
-    Base::Hooks::FunctionHook((void*)hookAddress, HandleDefconRaw4, hookLength);
+    Base::Hooks::FunctionHook((void*)hookAddress, HandleDefconRaw4, hookLength, enabled);
 
     hookLength = 5;
     hookAddress = g_base + Offsets::diplFreeHook;
     Base::SRU_Data::Hooks::g_diplFreeJmpBackAddr = hookAddress + hookLength;
     Base::SRU_Data::Hooks::g_diplFreeJmpBackAddrDefault = hookAddress + hookLength;
-    Base::Hooks::FunctionHook((void*)hookAddress, DiplFree, hookLength);
+    Base::Hooks::FunctionHook((void*)hookAddress, DiplFree, hookLength, enabled);
 
     hookLength = 6;
     hookAddress = g_base + Offsets::mapSizeHook;
     Base::SRU_Data::Hooks::g_mapSizeJumpBackAddr = hookAddress + hookLength;
-    Base::Hooks::FunctionHook((void*)hookAddress, GetMapSize, hookLength);
+    Base::Hooks::FunctionHook((void*)hookAddress, GetMapSize, hookLength, enabled);
 
     hookLength = 5;
     hookAddress = g_base + Offsets::buildCheckHook;
     Base::SRU_Data::Hooks::g_buildCheckJumpBackAddr = hookAddress + hookLength;
-    Base::Hooks::FunctionHook((void*)hookAddress, BuildCheckOwner, hookLength);
+    Base::Hooks::FunctionHook((void*)hookAddress, BuildCheckOwner, hookLength, enabled);
 
-    SetFastRoad(g_fastRoad);
+    if (enabled)
+    {
+        SetFastRoad(g_fastRoad);
+    }
+    else
+    {
+        SetFastRoad(false);
+    }
 
     //hex name hook
 
@@ -797,14 +1045,54 @@ void Base::SRU_Data::Hooks::SetupFunctionHooks()
 	hookAddress = g_base + Offsets::hexNameHookBig;
     Base::SRU_Data::Hooks::g_hexNameBigJumpBackAddrNone = hookAddress + hookLength; //jump here if no custom name
     Base::SRU_Data::Hooks::g_hexNameBigJumpBackAddrData = g_base + 0xC8E25; //jump here if custom name
-	Base::Hooks::FunctionHook((void*)hookAddress, CheckHexNameBig, hookLength);
+	Base::Hooks::FunctionHook((void*)hookAddress, CheckHexNameBig, hookLength, enabled);
 
     //sphere name hook
 
     hookLength = 7;
     hookAddress = g_base + Offsets::sphereNameHook;
     Base::SRU_Data::Hooks::g_sphereNameJumpBackAddr = hookAddress + hookLength;
-	Base::Hooks::FunctionHook((void*)hookAddress, CheckSphereName, hookLength);
+	Base::Hooks::FunctionHook((void*)hookAddress, CheckSphereName, hookLength, enabled);
+
+    if (enabled == 2)
+    {
+        //first setup
+
+        //open settings hook
+
+        hookLength = 7;
+        hookAddress = g_base + Offsets::settingsOpenHook;
+        Base::SRU_Data::Hooks::g_openSettingsJumpBackAddr = hookAddress + hookLength;
+        Base::Hooks::FunctionHook((void*)hookAddress, OpenSettings, hookLength, 2);
+
+        //close settings hook
+
+        hookLength = 6;
+        hookAddress = g_base + Offsets::settingsQuitHook;
+        Base::SRU_Data::Hooks::g_closeSettingsJumpBackAddr = hookAddress + hookLength;
+        Base::Hooks::FunctionHook((void*)hookAddress, CloseSettings, hookLength, 2);
+
+        //begin autosave hook
+
+        hookLength = 6;
+        hookAddress = g_base + Offsets::autosaveEnter;
+        Base::SRU_Data::Hooks::g_autosaveBeginJumpBackAddr = hookAddress + hookLength;
+        Base::Hooks::FunctionHook((void*)hookAddress, AutosaveBegin, hookLength, 2);
+
+        //end autosave hook
+
+        hookLength = 5;
+        hookAddress = g_base + Offsets::autosaveExit;
+        Base::SRU_Data::Hooks::g_autosaveEndJumpBackAddr = hookAddress + hookLength;
+        Base::Hooks::FunctionHook((void*)hookAddress, AutosaveEnd, hookLength, 2);
+
+        //quit game hook
+
+        hookLength = 6;
+        hookAddress = g_base + Offsets::gameQuit;
+        Base::SRU_Data::Hooks::g_quitGameJumpBackAddr = hookAddress + hookLength;
+        Base::Hooks::FunctionHook((void*)hookAddress, GameQuit, hookLength, 2);
+    }
 }
 
 void Base::SRU_Data::Hooks::SetProductionAdjustment(bool enabled)

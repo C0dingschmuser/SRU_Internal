@@ -42,20 +42,69 @@ HWND GetProcessWindow()
     return Base::Data::window;
 }
 
-bool Base::Hooks::FunctionHook(void* toHook, void* targetFunc, int len)
+std::vector<BYTE> Base::Hooks::GetOrigBytes(void* toHook, int len)
+{
+    std::vector<BYTE> origInstructions;
+
+    for (int i = 0; i < len; i++)
+    {
+        BYTE data = *((BYTE*)toHook + i);
+        origInstructions.push_back(data);
+    }
+
+    return origInstructions;
+}
+
+void Base::Hooks::FunctionHook(void* toHook, void* targetFunc, int len, int enable)
 {
 	DWORD curProtection;
 	VirtualProtect(toHook, len, PAGE_EXECUTE_READWRITE, &curProtection);
 
-	memset(toHook, 0x90, len);
+    if (enable > 0)
+    {
+        //Setup hook
 
-	uintptr_t relativeAddress = (uintptr_t)targetFunc - (uintptr_t)toHook - 5;
+        if (enable == 1)
+        {
+            //Save hook backup
 
-	*(BYTE*)toHook = 0xE9;
-	*(DWORD*)((DWORD)toHook + 0x1) = relativeAddress;
+            std::vector<BYTE> origInstructions = GetOrigBytes(toHook, len);
+
+            Base::SRU_Data::HookHolder newHook;
+            newHook.addr = (uintptr_t)toHook;
+            newHook.origBytes = origInstructions;
+
+            Base::SRU_Data::Hooks::g_hookList.push_back(newHook);
+        }
+
+        memset(toHook, 0x90, len);
+
+        uintptr_t relativeAddress = (uintptr_t)targetFunc - (uintptr_t)toHook - 5;
+
+        *(BYTE*)toHook = 0xE9;
+        *(DWORD*)((DWORD)toHook + 0x1) = relativeAddress;
+    }
+    else
+    {
+        //Restore backup
+
+        Base::SRU_Data::HookHolder holder;
+
+        for (int i = 0; i < Base::SRU_Data::Hooks::g_hookList.size(); i++)
+        {
+            if (Base::SRU_Data::Hooks::g_hookList[i].addr == (uintptr_t)toHook)
+            {
+                holder = Base::SRU_Data::Hooks::g_hookList[i];
+                break;
+            }
+        }
+
+        for (int i = 0; i < holder.origBytes.size(); i++)
+        {
+            *((BYTE*)toHook + i) = holder.origBytes[i];
+        }
+    }
 
 	DWORD temp;
 	VirtualProtect(toHook, len, curProtection, &temp);
-
-	return true;
 }

@@ -104,6 +104,11 @@ void SetupSessionPtr(uintptr_t base = NULL)
 
     g_mapSizeLoaded = false;
 
+    if (g_lastFunctionHookState == 0)
+    {
+        Base::SRU_Data::Hooks::SetupFunctionHooks(1);
+    }
+
     unitTimer = 0;
 
     //Get SteamID64
@@ -126,7 +131,7 @@ void CheckGameState(uintptr_t* gameStatePtr)
     {
         if (*gameStatePtr == 2)
         {
-            if (!g_ingame)
+            if (!g_ingame && !g_quitting)
             {
                 g_ingame = 1;
                 SetupSessionPtr();
@@ -136,6 +141,7 @@ void CheckGameState(uintptr_t* gameStatePtr)
         else
         {
             g_ingame = 0;
+            g_quitting = false;
         }
     }
 }
@@ -144,7 +150,7 @@ void CheckCurrentCountry(uintptr_t* clickedCountryPtr)
 {
     //std::cout << g_mouseClicked << " " << g_ingame << g_countryList.size() << std::endl; 
 
-    if (g_mouseClicked && g_ingame == 2 && g_countryList.size() > 0)
+    if (g_mouseClicked && g_ingame == 2 && g_countryList.size() > 0 && !g_autosaving)
     {
         g_mouseClicked = false;
         g_newClick = true;
@@ -767,7 +773,7 @@ DWORD WINAPI dllThread(HMODULE hModule) {
     //Main loop
 
     Base::Execute::SetupFunctions();
-    Base::SRU_Data::Hooks::SetupFunctionHooks();
+    Base::SRU_Data::Hooks::SetupFunctionHooks(2);
 
     int mainTimer = 0;
     int discoTimer = 0;
@@ -788,7 +794,7 @@ DWORD WINAPI dllThread(HMODULE hModule) {
 
             CheckGameState(gameStatePtr);
 
-            if (g_ingame == 2)
+            if (g_ingame == 2 && !g_autosaving)
             {
                 if (GetAsyncKeyState(VK_LSHIFT) & 0x8000)
                 {
@@ -864,7 +870,7 @@ DWORD WINAPI dllThread(HMODULE hModule) {
             }
         }
         
-        if (g_ingame == 2)
+        if (g_ingame == 2 && !g_autosaving)
         {
             Base::SRU_Data::HandleFreezes();
         }

@@ -31,8 +31,18 @@ namespace Base
 
 	namespace SRU_Data
 	{
+		struct HookHolder
+		{
+			uintptr_t addr;
+			std::vector<BYTE> origBytes;
+		};
+
 		namespace Hooks
 		{
+			extern std::vector<HookHolder> g_hookList;
+
+			extern int g_lastFunctionHookState;
+
 			extern uintptr_t g_selectedJmpBackAddr;
 			extern uintptr_t g_hexSupplyJmpBackAddr;
 			extern uintptr_t g_aiSurrenderJmpBackAddr;
@@ -56,7 +66,15 @@ namespace Base
 
 			extern uintptr_t g_sphereNameJumpBackAddr;
 
-			void SetupFunctionHooks();
+			extern uintptr_t g_openSettingsJumpBackAddr;
+			extern uintptr_t g_closeSettingsJumpBackAddr;
+
+			extern uintptr_t g_autosaveBeginJumpBackAddr;
+			extern uintptr_t g_autosaveEndJumpBackAddr;
+
+			extern uintptr_t g_quitGameJumpBackAddr;
+
+			void SetupFunctionHooks(int enabled = 1);
 			void SetProductionAdjustment(bool enabled);
 			void SetFastRoad(bool enabled);
 		}
@@ -78,7 +96,12 @@ namespace Base
 			extern unsigned int g_buildCheckReg0, g_buildCheckReg1, g_buildCheckReg2, g_buildCheckReg3, g_buildCheckReg4, g_buildCheckReg5, g_buildCheckReg6, g_buildCheckReg7;
 			extern unsigned int g_hexNameReg0, g_hexNameReg1, g_hexNameReg2, g_hexNameReg3, g_hexNameReg4, g_hexNameReg5, g_hexNameReg6, g_hexNameReg7;
 			extern unsigned int g_sphereNameReg0, g_sphereNameReg1, g_sphereNameReg2, g_sphereNameReg3, g_sphereNameReg4, g_sphereNameReg5, g_sphereNameReg6, g_sphereNameReg7;
-
+			extern unsigned int g_openSettingsReg0, g_openSettingsReg1, g_openSettingsReg2, g_openSettingsReg3, g_openSettingsReg4, g_openSettingsReg5, g_openSettingsReg6, g_openSettingsReg7;
+			extern unsigned int g_closeSettingsReg0, g_closeSettingsReg1, g_closeSettingsReg2, g_closeSettingsReg3, g_closeSettingsReg4, g_closeSettingsReg5, g_closeSettingsReg6, g_closeSettingsReg7;
+			extern unsigned int g_autosaveBeginReg0, g_autosaveBeginReg1, g_autosaveBeginReg2, g_autosaveBeginReg3, g_autosaveBeginReg4, g_autosaveBeginReg5, g_autosaveBeginReg6, g_autosaveBeginReg7;
+			extern unsigned int g_autosaveEndReg0, g_autosaveEndReg1, g_autosaveEndReg2, g_autosaveEndReg3, g_autosaveEndReg4, g_autosaveEndReg5, g_autosaveEndReg6, g_autosaveEndReg7;
+			extern unsigned int g_quitGameReg0, g_quitGameReg1, g_quitGameReg2, g_quitGameReg3, g_quitGameReg4, g_quitGameReg5, g_quitGameReg6, g_quitGameReg7;
+			
 			extern uintptr_t g_aiSurrBase;
 
 			extern std::vector<uintptr_t> g_ownAllocs;
@@ -473,6 +496,8 @@ namespace Base
 		extern uint64_t g_steamId;
 
 		extern int g_ingame;
+		extern bool g_autosaving;
+		extern bool g_quitting;
 
 		extern int g_unitEntityCountSelected;
 		extern int g_clickedCountry;
@@ -642,7 +667,8 @@ namespace Base
 	{
 		void Init(bool full);
 		void EnableFastRoad(bool enable);
-		bool FunctionHook(void* toHook, void* targetFunc, int len);
+		std::vector<BYTE> GetOrigBytes(void* toHook, int len);
+		void FunctionHook(void* toHook, void* targetFunc, int len, int enable);
 
 		long __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDevice);
 		long __stdcall hkDrawIndexedPrimitive(LPDIRECT3DDEVICE9 pDevice, D3DPRIMITIVETYPE Type, INT BaseVertexIndex, UINT MinVertexIndex, UINT NumVertices, UINT startIndex, UINT primCount);
@@ -672,6 +698,7 @@ namespace Base
 		std::string FloatToPercent(float f, float max, bool simple = false);
 		std::string FloatToPercent2(float f, float max, bool simple = false);
 		std::string FloatToPercent3(float f, float max, bool simple = false);
+		std::string FloatToPercentCustom(float f, float max, float minClamp, float maxClamp, bool simple = false);
 		bool MemCompare(const BYTE* bData, const BYTE* bMask, const char* szMask);
 		bool CanReadPtr(void* ptr);
 		uintptr_t PointerChain(uintptr_t ptr, std::vector<unsigned int> offsets);
