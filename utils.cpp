@@ -296,6 +296,15 @@ void Base::Utils::GetSettingsUInt8(std::string line, std::string token, uint8_t&
 	}
 }
 
+void Base::Utils::GetSettingsInt(std::string line, std::string token, int& value)
+{
+	if (line.find(token) != std::string::npos)
+	{
+		std::string valueStr = line.substr(line.find(token) + token.length() + 1);
+		value = std::stoi(valueStr);
+	}
+}
+
 std::string Base::Utils::SetSettingsBool(std::string token, bool value)
 {
 	return token + ":" + (value ? "true" : "false") + "\n";
@@ -306,42 +315,9 @@ std::string Base::Utils::SetSettingsUInt8(std::string token, uint8_t value)
 	return token + ":" + std::to_string(value) + "\n";
 }
 
-std::string Base::Utils::StreamToMem(std::string url, bool https)
+std::string Base::Utils::SetSettingsInt(std::string token, int value)
 {
-	if (https)
-	{
-		url = "https://" + url;
-	}
-	else
-	{
-		url = "http://" + url;
-	}
-
-	DeleteUrlCacheEntry(url.c_str());
-	std::string header = "Accept: *" "/" "*\r\n\r\n";
-	HANDLE hInter = InternetOpen("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36", INTERNET_OPEN_TYPE_DIRECT, NULL, NULL, NULL);
-	HANDLE hURL = InternetOpenUrl(hInter, url.c_str(), header.c_str(), strlen(header.c_str()), INTERNET_FLAG_DONT_CACHE, 0);
-
-	char* Buffer = new char[5000000]; //100mb
-	memset(Buffer, 0, 5000000);
-	DWORD BytesRead = 1;
-
-	std::string data;
-
-	if (InternetReadFile(hURL, Buffer, 5000000, &BytesRead))
-	{
-		data = std::string(Buffer);
-	}
-	else
-	{
-		return "";
-	}
-
-	delete[] Buffer;
-	InternetCloseHandle(hInter);
-	InternetCloseHandle(hURL);
-
-	return data;
+	return token + ":" + std::to_string(value) + "\n";
 }
 
 std::string Base::Utils::SHA256(std::string str)

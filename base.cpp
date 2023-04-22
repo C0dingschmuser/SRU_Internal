@@ -264,7 +264,7 @@ int Base::SRU_Data::g_facilitySpawnCount = 1;
 bool Base::SRU_Data::g_facilitySpawnConstruction = true;
 
 byte Base::SRU_Data::Asm::g_currentHexSupply = 0;
-byte Base::SRU_Data::Asm::g_lowestHexSupply = 0x1A;
+byte Base::SRU_Data::Asm::g_lowestHexSupply = 0x0;
 
 bool Base::SRU_Data::g_newClick = false;
 bool Base::SRU_Data::g_addOk = false;
@@ -986,20 +986,35 @@ void Base::SRU_Data::LoadLeaders()
 
 void Base::SRU_Data::LoadSettings()
 {
-	if (!std::filesystem::exists("sru_internal_config.ini"))
-	{
-		return;
-	}
+	bool openChangelog = false;
 
-	std::ifstream file("sru_internal_config.ini");
-
-	for (std::string line; getline(file, line); )
+	if (std::filesystem::exists("sru_internal_config.ini"))
 	{
-		Base::Utils::GetSettingsBool(line, "fastroad", g_fastRoad);
-		Base::Utils::GetSettingsBool(line, "hexsupply", g_hexSupply);
-		Base::Utils::GetSettingsUInt8(line, "hsupplyval", Asm::g_lowestHexSupply);
-		Base::Utils::GetSettingsBool(line, "aicolony", g_aiColony);
-		Base::Utils::GetSettingsBool(line, "prodadjustment", g_productionAdjustment);
+		int configVersion = 0;
+
+		std::ifstream file("sru_internal_config.ini");
+
+		for (std::string line; getline(file, line); )
+		{
+			Base::Utils::GetSettingsInt(line, "version", configVersion);
+			Base::Utils::GetSettingsBool(line, "fastroad", g_fastRoad);
+			//Base::Utils::GetSettingsBool(line, "hexsupply", g_hexSupply);
+			g_hexSupply = true;
+			Base::Utils::GetSettingsUInt8(line, "hsupplyval", Asm::g_lowestHexSupply);
+			Base::Utils::GetSettingsBool(line, "aicolony", g_aiColony);
+			Base::Utils::GetSettingsBool(line, "prodadjustment", g_productionAdjustment);
+		}
+
+		if (g_version > configVersion)
+		{
+			openChangelog = true;
+		}
+	} else openChangelog = true;
+
+	if (openChangelog)
+	{
+		Offsets::Changelog();
+		SaveSettings();
 	}
 }
 
@@ -1009,11 +1024,13 @@ void Base::SRU_Data::SaveSettings()
 
 	if (file.is_open())
 	{
+		file << Base::Utils::SetSettingsInt("version", g_version);
 		file << Base::Utils::SetSettingsBool("fastroad", g_fastRoad);
 		file << Base::Utils::SetSettingsBool("hexsupply", g_hexSupply);
 		file << Base::Utils::SetSettingsUInt8("hsupplyval", Asm::g_lowestHexSupply);
 		file << Base::Utils::SetSettingsBool("aicolony", g_aiColony);
 		file << Base::Utils::SetSettingsBool("prodadjustment", g_productionAdjustment);
+		file << Base::Utils::SetSettingsBool("modenabled", true);
 		file.close();
 	}
 }

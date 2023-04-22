@@ -162,6 +162,7 @@ void Base::Draw::DrawMap(Base::SRU_Data::Country* cc)
 						}
 					}
 				}
+				ImGui::PopItemWidth();
 
 				ImGui::Text("Set Hex Population (0-250M)");
 
@@ -239,7 +240,7 @@ void Base::Draw::DrawMap(Base::SRU_Data::Country* cc)
 						id = ownerCountry->id;
 					}
 
-					Base::Execute::RespawnCountry(id, t.oId, 2);
+					Base::Execute::RespawnCountry(t.base, id, 2);
 				}
 
 				if (disabled)
@@ -286,7 +287,7 @@ void Base::Draw::DrawMap(Base::SRU_Data::Country* cc)
 					}
 					else
 					{
-						Base::Execute::RespawnCountry(loyalCountry->oId, id2, 1);
+						Base::Execute::RespawnCountryNew(loyalCountry->base, ownerCountry->oId, 1);
 					}
 
 				}
@@ -309,7 +310,9 @@ void Base::Draw::DrawMap(Base::SRU_Data::Country* cc)
 
 				if (ImGui::Button("Annex Selected"))
 				{
-					Base::Execute::AnnexCountry(ownerCountry->oId, t.oId);
+					//Base::Execute::AnnexCountry(ownerCountry->oId, t.oId);
+
+					Base::Execute::AnnexCountry2(ownerCountry->base, t.oId);
 				}
 
 				if (disabled)

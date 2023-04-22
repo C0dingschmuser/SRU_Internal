@@ -26,6 +26,8 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 
 	float inputWidth = 300;
 
+	ImGui::BeginChild("##countrymainchild", ImVec2(510, 0));
+
 	//Name
 
 	static char* buffer = (char*)calloc(1024, sizeof(char));
@@ -82,6 +84,19 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 	if (ImGui::InputFloat("Treasury", cc->treasury->valPtr, 1000000000, 0.0f, "%.0f"))
 	{
 		cc->treasury->freezeVal = *cc->treasury->valPtr;
+	}
+	ImGui::PopItemWidth();
+
+	//Population
+	if (ImGui::Checkbox("###cb_cpopulation", &cc->population->freeze))
+	{
+		cc->population->freezeVal = *cc->population->valPtr;
+	}
+	ImGui::SameLine();
+	ImGui::PushItemWidth(inputWidth);
+	if (ImGui::InputFloat("Population", cc->population->valPtr, 5000000, 0.0f, "%.0f"))
+	{
+		cc->population->freezeVal = *cc->population->valPtr;
 	}
 	ImGui::PopItemWidth();
 
@@ -820,4 +835,6 @@ void Base::Draw::DrawCountry(Base::SRU_Data::Country* cc)
 		cc->socialAssistanceState->freezeVal = *cc->socialAssistanceState->valPtr;
 	}
 	ImGui::PopItemWidth();
+
+	ImGui::EndChild();
 }

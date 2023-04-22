@@ -9,6 +9,12 @@ Base::Execute::_DestroyFactoryFunc Base::Execute::destroyFactoryFunc = 0;
 Base::Execute::_TreatyFunc Base::Execute::treatyFunc = 0;
 Base::Execute::_FacilityStatusFunc Base::Execute::facilityStatusFunc = 0;
 Base::Execute::_LiberateColonyFunc Base::Execute::liberateColonyFunc = 0;
+Base::Execute::_LiberateCountryFunc Base::Execute::liberateCountryFunc = 0;
+Base::Execute::_CreateColonyFunc Base::Execute::createColonyFunc = 0;
+Base::Execute::_CreateWarEventFunc Base::Execute::createWarEventFunc = 0;
+
+Base::Execute::_KillCountryFunc Base::Execute::killCountryFunc = 0;
+Base::Execute::_KillCountryFunc Base::Execute::killCountryFuncTarget = 0;
 
 void Base::Execute::SetupFunctions()
 {
@@ -23,7 +29,28 @@ void Base::Execute::SetupFunctions()
 	treatyFunc = (_TreatyFunc)(Base::SRU_Data::g_base + Offsets::treatyFunc);
 	facilityStatusFunc = (_FacilityStatusFunc)(Base::SRU_Data::g_base + Offsets::facilityStatusFunc);
 	liberateColonyFunc = (_LiberateColonyFunc)(Base::SRU_Data::g_base + Offsets::liberateColonyFunc);
+	liberateCountryFunc = (_LiberateCountryFunc)(Base::SRU_Data::g_base + Offsets::liberateCountryFunc);
+	createColonyFunc = (_CreateColonyFunc)(Base::SRU_Data::g_base + Offsets::createColonyFunc);
+	createWarEventFunc = (_CreateWarEventFunc)(Base::SRU_Data::g_base + Offsets::createWarEvent);
+
+	//doesnt make sense to use minhook here since country deaths are handled in multiple different functions
+	//killCountryFunc = nullptr; //pointer after hook
+	//killCountryFuncTarget = (_KillCountryFunc)(Base::SRU_Data::g_base + Offsets::killCountryFunc); //pointer before hook
+
+	killCountryFunc = (_KillCountryFunc)(Base::SRU_Data::g_base + Offsets::killCountryFunc);
+
+	//MH_Initialize(); //already called in kiero
+	//MH_CreateHook(killCountryFuncTarget, &KillCountryFuncDetour, (LPVOID*)&killCountryFunc);
+	//MH_EnableHook(killCountryFuncTarget);
 }
+
+/*int __fastcall Base::Execute::KillCountryFuncDetour(void* pThis, int i1, int i2, int i3)
+{
+	std::cout << "call" << std::endl;
+
+	return Base::Execute::killCountryFunc(pThis, i1, i2, i3);
+}*/
+
 
 void Base::Execute::CreateFacility(__int16 posX, __int16 posY, int countryOId, int facilityId, float constructionState)
 {
@@ -365,11 +392,17 @@ void Base::Execute::ExecDipl(DWORD* buffer, char c)
 	diplFunc(buffer, c);
 }
 
+void Base::Execute::AnnexCountry2(uintptr_t targetAddr, int newOwnerId)
+{
+	killCountryFunc((int*)targetAddr, '\x01', newOwnerId, 0, 0, 0, 0); //0
+	//killCountryFunc2((WORD*)targetAddr, newOwnerId, 0x91A90, 5, 0);
+}
+
 void Base::Execute::AnnexCountry(int from, int to)
 {
-	int* surrender = Offsets::CreateSimpleDiplOffer(Base::SRU_Data::g_base, Offsets::surrenderDiplo, 0, from, to, 0, 0, 0);
+	//int* surrender = Offsets::CreateSimpleDiplOffer(Base::SRU_Data::g_base, Offsets::surrenderDiplo, 0, from, to, 0, 0, 0);
 
-	Base::Execute::ExecDipl((DWORD*)surrender, '\x01');
+	//Base::Execute::ExecDipl((DWORD*)surrender, '\x01');
 }
 
 void Base::Execute::AnnexAllColonies(Base::SRU_Data::Country* cc)
@@ -386,7 +419,8 @@ void Base::Execute::AnnexAllColonies(Base::SRU_Data::Country* cc)
 		{
 			if (owner == current)
 			{
-				AnnexCountry(g_countryList[i].oId, cc->oId);
+				AnnexCountry2(g_countryList[i].base, cc->oId);
+				//AnnexCountry(g_countryList[i].oId, cc->oId);
 			}
 		}
 	}
@@ -397,10 +431,24 @@ void Base::Execute::RespawnCountry(int from, int to, int type)
 	if (type == 9)
 	{
 		liberateColonyFunc((int*)from);
+		return;
 	}
 
-	int* buffer = Offsets::CreateAdvancedDiplOffer(Base::SRU_Data::g_base, Offsets::respawnCountry, to, 0, 0, 0, type, from, 0, 0, 0, 0);
-	ExecDipl((DWORD*)buffer, '\x01');
+	if (type == 2)
+	{
+		//colony
+
+		createColonyFunc((int*)from, to, 0, 0, 0);
+		return;
+	}
+
+	//int* buffer = Offsets::CreateAdvancedDiplOffer(Base::SRU_Data::g_base, Offsets::respawnCountry, to, 0, 0, 0, type, from, 0, 0, 0, 0);
+	//ExecDipl((DWORD*)buffer, '\x01');
+}
+
+void Base::Execute::RespawnCountryNew(uintptr_t addr, int id, int type)
+{
+	liberateCountryFunc((int*)addr, id, 0, 0xFFFFFFFF, 0xFFFFFFFF);
 }
 
 void Base::Execute::RespawnAllColonies(Base::SRU_Data::Country* cc)
@@ -417,7 +465,8 @@ void Base::Execute::RespawnAllColonies(Base::SRU_Data::Country* cc)
 		{
 			if (owner == current)
 			{
-				RespawnCountry(g_countryList[i].oId, cc->oId, 1);
+				RespawnCountryNew(g_countryList[i].base, cc->oId, 1);
+				//RespawnCountry(g_countryList[i].oId, cc->oId, 1);
 			}
 		}
 	}
@@ -776,6 +825,13 @@ int Base::Execute::ExecuteTreaty(int diplTreatyIndex, int set)
 		//War
 
 		diplType = Offsets::warDiplo;
+
+		int* buffer = (int*)calloc(0x40, sizeof(int));
+		buffer = createWarEventFunc(buffer, 177, clickedCountry->id);
+		*(buffer + 7) = g_countryList[g_selectedTargetCountry].id;
+		ExecDipl((DWORD*)buffer, 1);
+
+		return 1;
 	}
 	else {
 		//if (set == 0) {

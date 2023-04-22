@@ -29,11 +29,10 @@
 #include <mutex>
 #include <sstream>
 #include <iomanip>
-#include <WinInet.h>
 #include <fstream>
 #include <filesystem>
-#include "include/machineid.h"
 #include "include/picosha2.h"
+#include "MinHook_133_lib/include/MinHook.h"
 
 inline void SuspendThreads(bool suspend) {
 	HANDLE hThreadSnap = INVALID_HANDLE_VALUE;

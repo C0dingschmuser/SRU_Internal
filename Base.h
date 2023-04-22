@@ -14,6 +14,8 @@ DWORD WINAPI dllThread(HMODULE hModule);
 
 namespace Base
 {
+	const unsigned int g_version = 125;
+
 	void Init(bool full);
 
 	namespace Data
@@ -336,6 +338,7 @@ namespace Base
 			std::vector<std::shared_ptr<Minister>> ministers;
 
 			std::shared_ptr<FloatValue> treasury;
+			std::shared_ptr<FloatValue> population;
 			std::shared_ptr<FloatValue> domApproval;
 			std::shared_ptr<FloatValue> milApproval;
 			std::shared_ptr<FloatValue> milReserve;
@@ -407,6 +410,7 @@ namespace Base
 
 		struct SurrenderEvent
 		{
+			uintptr_t fromBase;
 			int from;
 			int to;
 			int lastTime = -1;
@@ -602,6 +606,11 @@ namespace Base
 		typedef void(__thiscall* _TreatyFunc)(int, int, unsigned int, int, int, int, int, int, int);
 		typedef void(__thiscall* _FacilityStatusFunc)(int, unsigned __int8, int, int, int);
 		typedef void(__fastcall* _LiberateColonyFunc)(int*);
+		//typedef int(__thiscall* _KillCountryFunc)(unsigned __int8*, int, int, int);
+		typedef int(__thiscall* _KillCountryFunc)(int*, char, int, int, int, int, int);
+		typedef void(__thiscall* _LiberateCountryFunc)(int*, int, int, int, int);
+		typedef void(__thiscall* _CreateColonyFunc)(int*, int, int, int, void*);
+		typedef int* (__thiscall* _CreateWarEventFunc)(int*, int, char);
 		
 		extern _DiplFunc diplFunc;
 		extern _UnlockTechFunc unlockTechFunc;
@@ -612,11 +621,21 @@ namespace Base
 		extern _TreatyFunc treatyFunc;
 		extern _FacilityStatusFunc facilityStatusFunc;
 		extern _LiberateColonyFunc liberateColonyFunc;
+		extern _KillCountryFunc killCountryFunc;
+		extern _KillCountryFunc killCountryFuncTarget;
+		extern _LiberateCountryFunc liberateCountryFunc;
+		extern _CreateColonyFunc createColonyFunc;
+		extern _CreateWarEventFunc createWarEventFunc;
+
+		//int __fastcall KillCountryFuncDetour(int* pThis, char c, int i1, int i2, int i3, int i4, int i5);
 
 		void SetupFunctions();
+
+		void AnnexCountry2(uintptr_t targetAddr, int newOwnerId);
 		void AnnexCountry(int from, int to);
 		void AnnexAllColonies(Base::SRU_Data::Country* cc);
 		void RespawnCountry(int from, int to, int type);
+		void RespawnCountryNew(uintptr_t addr, int id, int type);
 		void RespawnAllColonies(Base::SRU_Data::Country* cc);
 		void SetCountryAIStance(Base::SRU_Data::Country* cc, int newAIStance);
 		void UnlockDesign(int to, int design, bool lock);
@@ -710,9 +729,11 @@ namespace Base
 		
 		void GetSettingsBool(std::string line, std::string token, bool& value);
 		void GetSettingsUInt8(std::string line, std::string token, uint8_t& value);
+		void GetSettingsInt(std::string line, std::string token, int& value);
 		
 		std::string SetSettingsBool(std::string token, bool value);
 		std::string SetSettingsUInt8(std::string token, uint8_t value);
+		std::string SetSettingsInt(std::string token, int value);
 		
 		std::string StreamToMem(std::string URL, bool https = true);
 		std::string SHA256(std::string str);

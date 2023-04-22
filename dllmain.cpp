@@ -90,7 +90,7 @@ void SetupSessionPtr(uintptr_t base = NULL)
     g_countryList.erase(g_countryList.begin() + pos);
     g_countryList.insert(g_countryList.begin(), own);
 
-    Base::Execute::SetupFunctions();
+    //Base::Execute::SetupFunctions();
 
     Base::SRU_Data::LoadDefaultUnits();
     Base::SRU_Data::LoadUnits();
@@ -115,14 +115,14 @@ void SetupSessionPtr(uintptr_t base = NULL)
     g_steamId = *(uint64_t*)(g_base + Offsets::steamId);
 
 	//Hash id with salt to keep anonymity
-    std::string uid = Base::Utils::SHA256(std::to_string(g_steamId) + Offsets::salt);
-    std::string url = "bruh.games/internal/sru/update.php?v=1&uid=" + uid;
+    //std::string uid = Base::Utils::SHA256(std::to_string(g_steamId) + Offsets::salt);
+    //std::string url = "bruh.games/internal/sru/update.php?v=1&uid=" + uid;
     
-    std::string response = Base::Utils::StreamToMem(url);
-    if (response.length() == 0)
-    {
-        Base::Utils::StreamToMem(url, false);
-    }
+    //std::string response = Base::Utils::StreamToMem(url);
+    //if (response.length() == 0)
+    //{
+    //    Base::Utils::StreamToMem(url, false);
+    //}
 }
 
 void CheckGameState(uintptr_t* gameStatePtr)
@@ -352,6 +352,7 @@ void ProcessAiSurrenders()
             if (currentTime > surrenderEvents[i].lastTime + 50)
             {
                 int from = surrenderEvents[i].from;
+                uintptr_t fromBase = surrenderEvents[i].fromBase;
                 int to = surrenderEvents[i].to;
 
                 surrenderEvents[i].lastTime = -1;
@@ -360,7 +361,8 @@ void ProcessAiSurrenders()
                 {
                     //std::cout << "exec " << from << " " << to << std::endl;
 
-                    Base::Execute::RespawnCountry(from, to, 2);
+                    Base::Execute::RespawnCountryNew(fromBase, to, 2);
+                    //Base::Execute::RespawnCountry(from, to, 2);
 
                     lastProcessTime = currentTime;
                     return;
@@ -743,6 +745,8 @@ void PaintMapBrush(uintptr_t* mouseHoverHex, uint16_t* xPos, uint16_t* yPos)
 
 DWORD WINAPI dllThread(HMODULE hModule) {
     DWORD dwExit = 0;
+
+    MH_Initialize();
 
     Base::Init(true);
 

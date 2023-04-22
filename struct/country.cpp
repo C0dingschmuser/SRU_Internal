@@ -57,6 +57,11 @@ void Base::SRU_Data::Country::Init(uintptr_t base)
 	this->treasury = treasury;
 	this->allFloatValues.push_back(treasury);
 
+	std::shared_ptr<FloatValue> population(new FloatValue);
+	population->valPtr = (float*)(base + Offsets::countryPopulation);
+	this->population = population;
+	this->allFloatValues.push_back(population);
+
 	std::shared_ptr<FloatValue> domApproval(new FloatValue);
 	domApproval->valPtr = (float*)(base + Offsets::countryDomApproval);
 	this->domApproval = domApproval;

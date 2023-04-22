@@ -92,11 +92,12 @@ void Base::Draw::DrawSettings()
 			Base::SRU_Data::SaveSettings();
 		}
 
-		if (ImGui::Checkbox("Minimum global hex supply", &g_hexSupply))
+		/*if (ImGui::Checkbox("Minimum global hex supply", &g_hexSupply))
 		{
 			Base::SRU_Data::SaveSettings();
-		}
+		}*/
 		
+		ImGui::Text("Minimum global hex supply");
 		if (g_hexSupply)
 		{
 			std::string str = Base::Utils::FloatToPercent((float)Asm::g_lowestHexSupply, 255.0f);

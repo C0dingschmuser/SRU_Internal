@@ -77,7 +77,7 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 
 		if (g_ingame == 2)
 		{
-			ImGui::SetWindowSize(ImVec2(525, 350));
+			ImGui::SetWindowSize(ImVec2(525, 387));
 		}
 		else
 		{
@@ -92,6 +92,8 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 			{
 				ImGui::BeginDisabled();
 			}
+
+			ImGui::BeginChild("##mainwindow", ImVec2(525, 327), false);
 
 			ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
 			if (ImGui::BeginTabBar("##tabs", tab_bar_flags))
@@ -229,9 +231,19 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 				ImGui::EndTabBar();
 			}
 
+			ImGui::EndChild();
+
 			if (disabled)
 			{
 				ImGui::EndDisabled();
+			}
+
+			ImGui::Separator();
+			ImGui::Text("Need help? Found a bug? Have an idea or wish? Join my");
+			ImGui::SameLine();
+			if (ImGui::Button("Discord", ImVec2(100, 17)))
+			{
+				ShellExecuteA(NULL, "open", "https://discord.gg/dAvpvRGS8d", NULL, NULL, SW_SHOWNORMAL);
 			}
 		}
 		else

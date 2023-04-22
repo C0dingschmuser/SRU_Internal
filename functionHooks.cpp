@@ -370,6 +370,8 @@ void CreateUnit(uintptr_t base)
 
 void CheckHexSupply()
 {
+    Asm::g_currentHexSupply = Asm::g_hexReg0 & 0xFF;
+
     if (g_hexSupply)
     {
         if (Asm::g_currentHexSupply < g_lowestHexSupply ||
@@ -378,6 +380,8 @@ void CheckHexSupply()
             Asm::g_currentHexSupply = g_lowestHexSupply;
         }
     }
+
+    Asm::g_hexReg0 = (Asm::g_hexReg0 & 0xFFFFFF00) | Asm::g_currentHexSupply;
 }
 
 void __declspec(naked) SetHexSupply()
@@ -392,7 +396,6 @@ void __declspec(naked) SetHexSupply()
         mov[g_hexReg5], esi
         mov[g_hexReg6], ebp
         mov[g_hexReg7], esp
-        mov[Asm::g_currentHexSupply], al
     }
 
     CheckHexSupply();
@@ -406,7 +409,6 @@ void __declspec(naked) SetHexSupply()
 		mov esi, g_hexReg5
 		mov ebp, g_hexReg6
 		mov esp, g_hexReg7
-        mov al, Asm::g_currentHexSupply
         mov[edx + 04], al
         jmp[g_hexSupplyJmpBackAddr]
     }
@@ -732,8 +734,21 @@ void AddSurrenderEvent(int from, int to)
     if (exists) return;
     //std::cout << std::dec << " " << from << " " << to << std::endl;
 
+    uintptr_t base = 0;
+
+    for (int i = 0; i < g_countryList.size(); i++)
+    {
+        if (g_countryList[i].oId == from)
+        {
+            base = g_countryList[i].base;
+        }
+    }
+
+    if (base == 0) return;
+
     SurrenderEvent* s = &surrenderEvents[g_surrenderEventCount];
     s->lastTime = *(uintptr_t*)(g_base + Offsets::currentDayTime) + 500;
+    s->fromBase = base;
     s->from = from;
     s->to = to;
 
@@ -984,7 +999,7 @@ void Base::SRU_Data::Hooks::SetupFunctionHooks(int enabled)
     //Hook ai surrender
     hookAddress = g_base + Offsets::aiSurrenderHook;
     Base::SRU_Data::Hooks::g_aiSurrenderJmpBackAddr = hookAddress + hookLength;
-    Base::Hooks::FunctionHook((void*)hookAddress, HandleAISurrender, hookLength, enabled);
+    //Base::Hooks::FunctionHook((void*)hookAddress, HandleAISurrender, hookLength, enabled);
 
     //Hook mouse click
     hookLength = 5;

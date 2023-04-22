@@ -18,7 +18,7 @@
 
 #define DISABLE_OUTPUT
 
-static const int version = 124;
+static const int version = 125;
 static bool updated = false;
 
 std::string VersionToString(int version)
@@ -242,113 +242,6 @@ void CheckForUpdate(std::string origName)
 		{
 			remove("changelog.txt");
 		}
-
-		std::ofstream file;
-		file.open("changelog.txt");
-		file << "--- INFORMATION ---" << std::endl;
-		file << "Discord Server coming soon!" << std::endl << std::endl;
-		file << "--- CHANGELOG ---" << std::endl;
-		file << "v1.24 [NEW]" << std::endl;
-		file << "- Fixed several possible crashes" << std::endl;
-		file << "- Fixed bug with approval ratings being too low and causing data corruption" << std::endl;
-		file << "- Stability improvements" << std::endl;
-		file << "- Fixed 'Dll not found' launcher bug" << std::endl;
-		file << "v1.23" << std::endl;
-		file << "- Improved Annex / Liberate / Colonize functions" << std::endl;
-		file << "  (You can now liberate colonies directly etc.)" << std::endl;
-		file << "- Added ability to toggle features like instant road building etc." << std::endl;
-		file << "  (Now disabled by default)" << std::endl;
-		file << "- Added Settings saving and loading" << std::endl;
-		file << "v1.22" << std::endl;
-		file << "- Painting Brush Size now applies to all painting modes" << std::endl;
-		file << "  (Size can be changed in the settings)" << std::endl;
-		file << "- Moved Annex/Liberate/Colonize Buttons back to Map Tab" << std::endl;
-		file << "v1.21" << std::endl;
-		file << "- Fixed Bug with Facility enabling/disabling" << std::endl;
-		file << "- Fixed Bug that prevented forcing declarations of war" << std::endl;
-		file << "v1.20" << std::endl;
-		file << "- Added ability to change health of facilities" << std::endl;
-		file << "- Added ability to disable / enable facilities" << std::endl;
-		file << "- Added ability to change colony name prefix" << std::endl;
-		file << "- Added ability to liberate or annex all colonies of a country" << std::endl;
-		file << "- Treaties will now be executed instantly" << std::endl;
-		file << "- Facilities that require a resource will now only spawn if that resource is present" << std::endl;
-		file << "- Fixed a bug that sometimes did not display all facilities on a hex" << std::endl;
-		file << "- Improved stability" << std::endl;
-		file << "v1.19" << std::endl;
-		file << "- Fixed building infrastructure not working in colonies" << std::endl;
-		file << "v1.18" << std::endl;
-		file << "- Fixed several possible crashes" << std::endl;
-		file << "v1.17" << std::endl;
-		file << "- Added Sphere of influence changing" << std::endl;
-		file << "- Added Sphere of influence renaming" << std::endl;
-		file << "- Added Unit Design sorting by country" << std::endl;
-		file << "- Infrastructure remover will now also remove bridges" << std::endl;
-		file << "v1.16" << std::endl;
-		file << "- Added Hex/City renaming" << std::endl;
-		file << "- Added Infrastructure remover" << std::endl;
-		file << "- Improved map painting: " << std::endl;
-		file << "  - You can limit all painting to a single country" << std::endl;
-		file << "  - You can choose whether to paint only ownership/loyalty/etc." << std::endl;
-		file << "  - Increased brush size to 15" << std::endl;
-		file << "v1.15" << std::endl;
-		file << "- Fixed treaties being one way only" << std::endl;
-		file << "v1.14" << std::endl;
-		file << "- Added ability to cancel treaties" << std::endl;
-		file << "- Added country leader change" << std::endl;
-		file << "- Added country origin filter for unit spawn" << std::endl;
-		file << "- Improved lock / unlock Algorithm" << std::endl;
-		file << "- Fixed painting bug" << std::endl;
-		file << "v1.13" << std::endl;
-		file << "- Added Hex Population edit" << std::endl;
-		file << "- Added Hex Facility deletion (Individually or all at once)" << std::endl;
-		file << "- Increased % limits (Approval ratings etc.)" << std::endl;
-		file << "v1.12" << std::endl;
-		file << "- Added Resource spawning (Petroleum etc.)" << std::endl;
-		file << "- Added Government type change" << std::endl;
-		file << "- Added Facility painting" << std::endl;
-		file << "v1.11" << std::endl;
-		file << "- Added Facility spawning" << std::endl;
-		file << "  Info: If a facility does not spawn, there's probably a prerequisite missing." << std::endl;
-		file << "  For Example to spawn a business sector there needs to be a town on the same tile first." << std::endl;
-		file << "v1.10" << std::endl;
-		file << "- Added unlimited Road/Rail/Bridge building (everywhere!)" << std::endl;
-		file << "- Added Country Minister Control" << std::endl;
-		file << "- Added Country Unit Rules of Engagement" << std::endl;
-		file << "- Added Country AI Stance" << std::endl;
-		file << "v1.09" << std::endl;
-		file << "- Fixed bug with country relations (thx Asdred)" << std::endl;
-		file << "v1.08" << std::endl;
-		file << "- Fixed wrong order in air unit design screen (thx Demonius)" << std::endl;
-		file << "- Fixed wrong owner countries for unit designs (thx Demonius)" << std::endl;
-		file << "- Added auto refresh of current country tech and unit designs" << std::endl;
-		file << "v1.07" << std::endl;
-		file << "- Added Technology (Un)Locking per country" << std::endl;
-		file << "- Added Unit Design (Un)Locking per country" << std::endl;
-		file << "- Improved Unit Spawn UI" << std::endl;
-		file << "v1.06" << std::endl;
-		file << "- Fixed Unit reserve spawning (thx @Demonius)" << std::endl;
-		file << "- Added Country Inflation" << std::endl;
-		file << "- Added Country Unemployment" << std::endl;
-		file << "- Added Country GDP" << std::endl;
-		file << "v1.05" << std::endl;
-		file << "- Improved Transparency" << std::endl;
-		file << "v1.04" << std::endl;
-		file << "- Improved Land painting(you can now create islands and land connections)" << std::endl;
-		file << "- Added Unit painting(change stats of unit(s) by hovering over them / spawn paint units)" << std::endl;
-		file << "- Added paint brush size" << std::endl;
-		file << "- Added Country flag change" << std::endl;
-		file << "- Improved ui" << std::endl;
-		file << "v1.03" << std::endl;
-		file << "- Added Country color changer" << std::endl;
-		file << "- Added Country name changer" << std::endl;
-		file << "- Added Disco Mode" << std::endl;
-		file << "v1.02" << std::endl;
-		file << "- Fixed crash on 2020 - Shattered World (thx @fatherpickle)" << std::endl;
-		file << "- Fixed autoupdater" << std::endl;
-		file.close();
-
-		system("start changelog.txt");
 
 		return;
 	}
