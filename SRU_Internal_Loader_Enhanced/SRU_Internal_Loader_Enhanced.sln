@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33213.308
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SRU_Internal_Loader_Enhanced", "SRU_Internal_Loader_Enhanced.vcxproj", "{4870ABD7-2954-417C-BD8D-E86AD7EBAE7A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4870ABD7-2954-417C-BD8D-E86AD7EBAE7A}.Debug|x64.ActiveCfg = Debug|x64
+		{4870ABD7-2954-417C-BD8D-E86AD7EBAE7A}.Debug|x64.Build.0 = Debug|x64
+		{4870ABD7-2954-417C-BD8D-E86AD7EBAE7A}.Debug|x86.ActiveCfg = Debug|Win32
+		{4870ABD7-2954-417C-BD8D-E86AD7EBAE7A}.Debug|x86.Build.0 = Debug|Win32
+		{4870ABD7-2954-417C-BD8D-E86AD7EBAE7A}.Release|x64.ActiveCfg = Release|x64
+		{4870ABD7-2954-417C-BD8D-E86AD7EBAE7A}.Release|x64.Build.0 = Release|x64
+		{4870ABD7-2954-417C-BD8D-E86AD7EBAE7A}.Release|x86.ActiveCfg = Release|Win32
+		{4870ABD7-2954-417C-BD8D-E86AD7EBAE7A}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7E1529C6-3EF5-45D1-8E97-4F18673BDCC4}
+	EndGlobalSection
+EndGlobal
