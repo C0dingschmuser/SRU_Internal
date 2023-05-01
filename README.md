@@ -47,8 +47,9 @@ __/\\\\\\\\\\\__________________\///////////_____\///________\///_____\/////////
 - Much more!
 
 ### Usage
-Simply download the latest Release from [here](https://github.com/C0dingschmuser/SRU_Internal/releases) or from the [Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=2874935554)
-Extract the zip file to a place of your choice and simply run the executable. The trainer will launch as soon as the game is running.
+Easiest is using the [Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=2874935554). Follow Install instructions there.
+Alternatively download the Old launcher from [here](https://github.com/C0dingschmuser/SRU_Internal/releases), extract the zip and run loader executable and then the game.
+
 If evereything worked, you'll see the SRU_Internal window open. Once you enter a game you'll see all available options. Have fun!
 
 ### How it works
