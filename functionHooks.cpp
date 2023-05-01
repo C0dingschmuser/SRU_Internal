@@ -1048,10 +1048,14 @@ void Base::SRU_Data::Hooks::SetupFunctionHooks(int enabled)
     if (enabled)
     {
         SetFastRoad(g_fastRoad);
+        SetProductionAdjustment(g_productionAdjustment);
+        SetUnitSelect(g_unitSelect);
     }
     else
     {
         SetFastRoad(false);
+        SetProductionAdjustment(false);
+        SetUnitSelect(false);
     }
 
     //hex name hook
@@ -1108,6 +1112,51 @@ void Base::SRU_Data::Hooks::SetupFunctionHooks(int enabled)
         Base::SRU_Data::Hooks::g_quitGameJumpBackAddr = hookAddress + hookLength;
         Base::Hooks::FunctionHook((void*)hookAddress, GameQuit, hookLength, 2);
     }
+}
+
+void PatchCustom(uintptr_t addr, std::vector<unsigned char> buffer, unsigned char oId)
+{
+    DWORD curProtection;
+    VirtualProtect((void*)addr, buffer.size(), PAGE_EXECUTE_READWRITE, &curProtection);
+
+    for (int i = 0; i < buffer.size(); i++)
+    {
+        unsigned char newVal = buffer[i];
+
+        if (newVal == 0xFF)
+        {
+            newVal = oId;
+        }
+
+        *(BYTE*)(addr + i) = newVal;
+    }
+
+    DWORD temp;
+    VirtualProtect((void*)addr, buffer.size(), curProtection, &temp);
+}
+
+void Base::SRU_Data::Hooks::SetUnitSelect(bool enabled)
+{
+    std::vector<unsigned char> buffer1;
+    std::vector<unsigned char> buffer2;
+    std::vector<unsigned char> buffer3;
+
+    if (enabled)
+    {
+        std::copy(Offsets::selectUnit1_New.begin(), Offsets::selectUnit1_New.end(), std::back_inserter(buffer1));
+        std::copy(Offsets::selectUnit2_New.begin(), Offsets::selectUnit2_New.end(), std::back_inserter(buffer2));
+        std::copy(Offsets::selectUnit3_New.begin(), Offsets::selectUnit3_New.end(), std::back_inserter(buffer3));
+    }
+    else
+    {
+        std::copy(Offsets::selectUnit1_Default.begin(), Offsets::selectUnit1_Default.end(), std::back_inserter(buffer1));
+        std::copy(Offsets::selectUnit2_Default.begin(), Offsets::selectUnit2_Default.end(), std::back_inserter(buffer2));
+        std::copy(Offsets::selectUnit3_Default.begin(), Offsets::selectUnit3_Default.end(), std::back_inserter(buffer3));
+    }
+
+    PatchCustom(g_base + Offsets::selectUnitHook1, buffer1, g_ownOtherCountryId);
+    PatchCustom(g_base + Offsets::selectUnitHook2, buffer2, g_ownOtherCountryId);
+    PatchCustom(g_base + Offsets::selectUnitHook3, buffer3, g_ownOtherCountryId);
 }
 
 void Base::SRU_Data::Hooks::SetProductionAdjustment(bool enabled)

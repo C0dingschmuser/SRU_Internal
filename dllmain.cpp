@@ -806,9 +806,29 @@ DWORD WINAPI dllThread(HMODULE hModule) {
                 }
                 else g_shift = false;
 
+                bool old = g_unitSelect;
+
+                if ((GetAsyncKeyState(0x58) & 0x0001) != 0) //X Key
+                {
+                    if (!g_paintEnabled)
+                    {
+                        g_unitSelect = !g_unitSelect;
+                    }
+                }
+
+                if (old != g_unitSelect)
+                {
+                    //change
+                    Base::SRU_Data::Hooks::SetUnitSelect(g_unitSelect);
+                    Base::SRU_Data::SaveSettings();
+                }
+
                 if ((GetKeyState(VK_CAPITAL) & 0x0001) != 0)
                 {
-                    g_paintEnabled = true;
+                    if (!g_unitSelect)
+                    {
+                        g_paintEnabled = true;
+                    }
                 }
                 else g_paintEnabled = false;
 

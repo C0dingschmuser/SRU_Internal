@@ -283,6 +283,7 @@ bool Base::SRU_Data::g_hexSupply = false;
 bool Base::SRU_Data::g_productionAdjustment = false;
 bool Base::SRU_Data::g_aiColony = false;
 bool Base::SRU_Data::g_fastRoad = false;
+bool Base::SRU_Data::g_unitSelect = false;
 
 bool Base::Draw::g_countryColorLoaded = false;
 
@@ -998,6 +999,7 @@ void Base::SRU_Data::LoadSettings()
 		{
 			Base::Utils::GetSettingsInt(line, "version", configVersion);
 			Base::Utils::GetSettingsBool(line, "fastroad", g_fastRoad);
+			//Base::Utils::GetSettingsBool(line, "unitselect", g_unitSelect);
 			//Base::Utils::GetSettingsBool(line, "hexsupply", g_hexSupply);
 			g_hexSupply = true;
 			Base::Utils::GetSettingsUInt8(line, "hsupplyval", Asm::g_lowestHexSupply);
@@ -1026,7 +1028,7 @@ void Base::SRU_Data::SaveSettings()
 	{
 		file << Base::Utils::SetSettingsInt("version", g_version);
 		file << Base::Utils::SetSettingsBool("fastroad", g_fastRoad);
-		file << Base::Utils::SetSettingsBool("hexsupply", g_hexSupply);
+		//file << Base::Utils::SetSettingsBool("unitselect", g_unitSelect);
 		file << Base::Utils::SetSettingsUInt8("hsupplyval", Asm::g_lowestHexSupply);
 		file << Base::Utils::SetSettingsBool("aicolony", g_aiColony);
 		file << Base::Utils::SetSettingsBool("prodadjustment", g_productionAdjustment);

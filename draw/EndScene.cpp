@@ -30,13 +30,23 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 		static std::string titleText = "";
 		std::string brushSize = "Brush size: " + std::to_string(g_paintBrushSize);
 		
+		titleText = "SRU_Internal ";
+
+		if (g_unitSelect)
+		{
+			//Blue
+
+			ImGui::PushStyleColor(ImGuiCol_TitleBg, IM_COL32(0, 0, 255, 255));
+			ImGui::PushStyleColor(ImGuiCol_TitleBgActive, IM_COL32(0, 0, 255, 255));
+			ImGui::PushStyleColor(ImGuiCol_TitleBgCollapsed, IM_COL32(0, 0, 255, 255));
+			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 255, 255, 255));
+
+			titleText += "| Unit select ";
+		}
+
 		if (g_autosaving)
 		{
-			titleText = "SRU Internal | Autosaving...";
-		}
-		else
-		{
-			titleText = "SRU Internal";
+			titleText += "| Autosaving...";
 		}
 
 		if (g_paintEnabled && !g_paintActive)
@@ -48,7 +58,7 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 			ImGui::PushStyleColor(ImGuiCol_TitleBgCollapsed, IM_COL32(255, 255, 0, 255));
 			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 0, 255));
 
-			titleText = "SRU Internal | " + brushSize;
+			titleText += "| " + brushSize;
 		}
 		
 		if (g_paintActive)
@@ -60,14 +70,14 @@ long __stdcall Base::Hooks::hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 			ImGui::PushStyleColor(ImGuiCol_TitleBgCollapsed, IM_COL32(0, 255, 0, 255));
 			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 0, 255));
 
-			titleText = "SRU Internal | " + brushSize + " | Painting";
+			titleText += "| " + brushSize + " | Painting";
 		}
 
 		titleText += id;
 
 		ImGui::Begin(titleText.c_str(), 0, ImGuiWindowFlags_NoResize);
 
-		if (g_paintActive || g_paintEnabled)
+		if (g_paintActive || g_paintEnabled || g_unitSelect)
 		{
 			ImGui::PopStyleColor();
 			ImGui::PopStyleColor();

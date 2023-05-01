@@ -14,7 +14,7 @@ DWORD WINAPI dllThread(HMODULE hModule);
 
 namespace Base
 {
-	const unsigned int g_version = 125;
+	const unsigned int g_version = 126;
 
 	void Init(bool full);
 
@@ -37,6 +37,7 @@ namespace Base
 		{
 			uintptr_t addr;
 			std::vector<BYTE> origBytes;
+			std::vector<BYTE> newBytes;
 		};
 
 		namespace Hooks
@@ -79,6 +80,7 @@ namespace Base
 			void SetupFunctionHooks(int enabled = 1);
 			void SetProductionAdjustment(bool enabled);
 			void SetFastRoad(bool enabled);
+			void SetUnitSelect(bool enabled);
 		}
 
 		namespace Asm
@@ -563,6 +565,7 @@ namespace Base
 		extern bool g_productionAdjustment;
 		extern bool g_aiColony;
 		extern bool g_fastRoad;
+		extern bool g_unitSelect;
 
 		extern uint8_t g_currentHexSupply;
 

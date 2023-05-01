@@ -92,6 +92,12 @@ void Base::Draw::DrawSettings()
 			Base::SRU_Data::SaveSettings();
 		}
 
+		if (ImGui::Checkbox("Enable ability to control units from\nother countries (X Key for toggle)", &g_unitSelect))
+		{
+			Base::SRU_Data::Hooks::SetUnitSelect(g_unitSelect);
+			//Base::SRU_Data::SaveSettings();
+		}
+
 		/*if (ImGui::Checkbox("Minimum global hex supply", &g_hexSupply))
 		{
 			Base::SRU_Data::SaveSettings();
